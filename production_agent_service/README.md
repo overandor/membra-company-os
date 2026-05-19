@@ -53,6 +53,39 @@ api.py          →  FastAPI service layer
 dashboard/      →  Static HTML dashboard
 ```
 
+## Deployment
+
+### Render (Recommended)
+1. Push this repo to GitHub
+2. Create a new Web Service on [Render](https://render.com)
+3. Connect your GitHub repo
+4. Set environment variables:
+   - `STRIPE_SECRET_KEY`
+   - `STRIPE_WEBHOOK_SECRET`
+5. Deploy — Render will use `render.yaml` automatically
+
+### Docker
+```bash
+docker build -t production-agent .
+docker run -p 8000:8000 -e STRIPE_SECRET_KEY=sk_... production-agent
+```
+
+### Fly.io
+```bash
+fly launch --dockerfile Dockerfile
+fly secrets set STRIPE_SECRET_KEY=sk_...
+```
+
+## Machine Scan Results
+
+A full scan of `/Users/alep/Downloads` has already been completed:
+- **347 projects** detected and appraised
+- **Total estimated value: $2,272,600**
+- **Average readiness: 37.7 / 100**
+- **Grade distribution:** 275 F, 55 D, 17 C
+
+The full report is saved at `/Users/alep/Downloads/PRODUCTION_AGENT_REPORT.json`.
+
 ## License
 
 MIT
