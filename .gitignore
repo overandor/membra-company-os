@@ -1,154 +1,86 @@
-# ============================================================
-# GITIGNORE — Laptop Asset Tokenization Project
-# ============================================================
-
-# === SENSITIVE FILES (NEVER COMMIT) ===
-*.env
-*.env.*
-!.env.example
-*_state.json
-*_status.json
-bot_state.json
-gate_mm_state.json
-hedge_state.json
-session_state.json
-token_state.json
-*.db
-*.sqlite
-*.sqlite3
-*credentials*
-*api_key*
-*apikey*
-*secret*
-setup_api_keys.sh
-verify_api_keys.py
-update_gate_api_keys.py
-
-# === PYTHON ===
+# Build artifacts
+target/
+build/
+dist/
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
 *.so
+*.egg
 *.egg-info/
 dist/
 build/
-*.egg
-.eggs/
-*.manifest
-*.spec
-venv/
-env/
-.venv/
-.env/
-pip-log.txt
-pip-delete-this-directory.txt
+*.egg-info/
 
-# === NODE ===
+# Node modules
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-package-lock.json
-yarn.lock
+.npm
+.eslintcache
 
-# === OS ===
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Next.js
+.next/
+.nuxt/
+out/
+.swc/
+
+# Testing
+coverage/
+.nyc_output/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.env
+
+# IDE
+.vscode/
+.idea/
 *.swp
 *.swo
 *~
-\#*\#
-.\#*
+.DS_Store
 
-# === IDE ===
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
-.cursor/
-.windsurf/
-
-# === LOGS ===
+# Logs
 *.log
-logs/
-!logs/.gitkeep
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# === LARGE BINARIES ===
-*.dmg
-*.exe
-*.zip
-*.tar.gz
-*.tgz
-*.m4a
-*.mp3
-*.mp4
-*.mov
-*.avi
-*.pdf
-!*.md
+# TypeScript
+*.d.ts
+*.map
+*.tsbuildinfo
 
-# === CACHE ===
-cache/
-.cache/
-*.cache
+# Rust
+**/*.rs.bk
+Cargo.lock
 
-# === GO DISTRIBUTION (not user code) ===
-go/
+# Python
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
 
-# === BACKUPS ===
-09_Backup/
-
-# === INSTALLERS ===
-04_Software_Installers/
-
-# === JUPYTER ===
-.ipynb_checkpoints/
-*.ipynb
-
-# === MISC ===
+# Temporary files
 *.tmp
 *.temp
-*.bak
-*.backup
-membra_human_chain/
+.cache/
 
-# Large binaries
-*.pkg
-*.dmg
-*.exe
-*.safetensors
-Miniconda3-latest-MacOSX-arm64.sh
-*.zip
-*.mp4
-*.m4a
-*.wav
-*.mp3
-*.pdf
-*.log
-*.db
-*.pid
-training_data/
-chatgpt-*.zip
-*.pkg
-*.dmg
-*.exe
-*.safetensors
-*.zip
-*.mp4
-*.m4a
-*.wav
-*.mp3
-*.pdf
-training_data/
-chatgpt-*.zip
-cache/
-logs/
-*.log
-*.pid
-*.db
+# Solana
+*.so
+target/bpfel-unknown-unknown/release/
+target/sbf-solana-solana/release/
+# Auto-generated LLM adapters — run ollama_hub/install_llm.py to regenerate
+llm.py
+llm.js
+llm.rs
+llm.go
+llm.sh
