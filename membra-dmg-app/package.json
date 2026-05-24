@@ -1,0 +1,63 @@
+{
+  "name": "membra-dmg-app",
+  "version": "1.0.0",
+  "description": "MEMBRA LLM Software Developer — Desktop application for autonomous AI-driven software development",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "lint": "eslint src/",
+    "build": "electron-builder --mac dmg",
+    "build:win": "electron-builder --win nsis",
+    "build:linux": "electron-builder --linux AppImage",
+    "pack": "electron-builder --dir"
+  },
+  "author": "MEMBRA Labs",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
+    "eslint": "^8.57.0"
+  },
+  "dependencies": {
+    "marked": "^12.0.0",
+    "highlight.js": "^11.9.0"
+  },
+  "build": {
+    "appId": "com.membra.llm-developer",
+    "productName": "MEMBRA LLM Developer",
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "icon": "assets/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ]
+    },
+    "dmg": {
+      "title": "MEMBRA LLM Developer",
+      "backgroundColor": "#0d0d0d",
+      "contents": [
+        { "x": 130, "y": 220 },
+        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+      ]
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Development"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "node_modules/**/*"
+    ]
+  }
+}
