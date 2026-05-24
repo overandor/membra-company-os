@@ -64,9 +64,10 @@ class EconomicEngine:
     """Manages all revenue-generating activities for the LLM OS."""
 
     def __init__(self, governance: Governance, treasury: Treasury,
-                 storage_path: str = None):
+                 storage_path: str = None, zk_popc=None):
         self.governance = governance
         self.treasury = treasury
+        self.zk_popc = zk_popc
         self.storage_path = storage_path or "/tmp/llm_os_econ.json"
         self.opportunities: List[Opportunity] = []
         self.active_activities: Dict[str, dict] = {}
@@ -271,6 +272,17 @@ class EconomicEngine:
         if revenue > 0:
             self.treasury.record_revenue("economic_engine", opp.activity.value, revenue,
                                          opp.description, result)
+
+        # Submit ZK-PoPC proof for successful productive work
+        if self.zk_popc and result.get("success"):
+            self.zk_popc.submit_proof_from_activity(
+                activity_id=opp.opportunity_id,
+                prover="economic_engine",
+                circuit_identifier=opp.activity.value,
+                estimated_cost_usd=actual_cost,
+                revenue_usd=revenue,
+                compute_units=result.get("compute_units", 0),
+            )
 
         self.active_activities[opp.opportunity_id] = {
             "opportunity": opp,

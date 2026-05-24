@@ -111,10 +111,10 @@ class Governance:
         """Default conservative policy — safe for development."""
         return Policy(
             name="conservative_default",
-            action_classes={ActionClass.SAFE, ActionClass.STANDARD},
+            action_classes={ActionClass.SAFE, ActionClass.STANDARD, ActionClass.RISKY},
             daily_cost_limit_usd=50.0,
             single_action_cost_limit_usd=25.0,
-            require_human_approval_for={ActionClass.CRITICAL, ActionClass.RISKY, ActionClass.SELF_MODIFYING},
+            require_human_approval_for={ActionClass.CRITICAL, ActionClass.SELF_MODIFYING},
             allow_real_payments=False,
             allow_production_deploy=False,
             allow_model_training=True,

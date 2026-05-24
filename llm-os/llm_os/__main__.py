@@ -14,6 +14,7 @@ Usage:
     python -m llm_os train <name>    Train a new LLM
     python -m llm_os treasury        Show treasury status
     python -m llm_os history        Show decision history
+    python -m llm_os serve          Start VM LLM OS Online web server
 """
 
 import json
@@ -123,6 +124,19 @@ def main():
             print(f"[CLI] Approved {req_id}")
         else:
             print("[CLI] Usage: approve <request_id>")
+
+    elif command == "serve":
+        port = 8080
+        host = "0.0.0.0"
+        for i, arg in enumerate(args):
+            if arg == "--port" and i + 1 < len(args):
+                port = int(args[i + 1])
+            if arg == "--host" and i + 1 < len(args):
+                host = args[i + 1]
+        print(f"[CLI] Starting VM LLM OS Online on http://{host}:{port}")
+        from llm_os.server import app
+        import uvicorn
+        uvicorn.run(app, host=host, port=port)
 
     else:
         print(f"[CLI] Unknown command: {command}")

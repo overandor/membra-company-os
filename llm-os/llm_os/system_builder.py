@@ -25,6 +25,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
 from llm_os.governance import ActionClass, Governance
+from llm_os.inference import generate_code_with_llm, get_inference_bridge
 from llm_os.treasury import Treasury
 
 
@@ -109,24 +110,53 @@ class SystemBuilder:
         self.treasury.record_estimate("system_builder", "code_generation",
                                        plan.estimated_cost_usd, plan.description)
 
-        # Generate files based on target type
+        # Try LLM-powered generation first
         generated_files = {}
         actual_cost = 0.5  # Base compute cost
+        llm_used = False
 
-        if plan.target_type == "web_app":
-            generated_files = self._generate_web_app(plan)
-        elif plan.target_type == "api_service":
-            generated_files = self._generate_api_service(plan)
-        elif plan.target_type == "trading_bot":
-            generated_files = self._generate_trading_bot(plan)
-        elif plan.target_type == "dashboard":
-            generated_files = self._generate_dashboard(plan)
-        elif plan.target_type == "data_pipeline":
-            generated_files = self._generate_data_pipeline(plan)
-        elif plan.target_type == "llm_training":
-            generated_files = self._generate_llm_training(plan)
-        else:
-            generated_files = self._generate_generic_python(plan)
+        bridge = get_inference_bridge()
+        if bridge.is_available() and bridge.__class__.__name__ != "StubBridge":
+            # Request additional approval for API cost (max $0.05 for code gen)
+            llm_req = self.governance.request_action(
+                action_type="llm_api_call",
+                action_class=ActionClass.STANDARD,
+                description=f"LLM code generation for {plan.target_type}",
+                estimated_cost_usd=0.05,
+                actor="system_builder",
+                payload={"plan_id": plan.plan_id},
+            )
+            if llm_req.approval_state.value in ("approved", "bypassed_simulation"):
+                llm_result = generate_code_with_llm(
+                    prompt=f"Build a {plan.target_type}: {plan.description}. Requirements: {', '.join(plan.requirements)}",
+                    target_type=plan.target_type,
+                )
+                if llm_result["success"] and llm_result["files"]:
+                    generated_files = llm_result["files"]
+                    actual_cost += llm_result.get("cost_usd", 0.0)
+                    llm_used = True
+                    # Record LLM API cost
+                    self.treasury.record_cost(
+                        "system_builder", "llm_api", llm_result.get("cost_usd", 0.0),
+                        f"LLM generation for {plan.plan_id}", llm_result,
+                    )
+
+        # Fallback to stub generation if LLM failed or was unavailable
+        if not generated_files:
+            if plan.target_type == "web_app":
+                generated_files = self._generate_web_app(plan)
+            elif plan.target_type == "api_service":
+                generated_files = self._generate_api_service(plan)
+            elif plan.target_type == "trading_bot":
+                generated_files = self._generate_trading_bot(plan)
+            elif plan.target_type == "dashboard":
+                generated_files = self._generate_dashboard(plan)
+            elif plan.target_type == "data_pipeline":
+                generated_files = self._generate_data_pipeline(plan)
+            elif plan.target_type == "llm_training":
+                generated_files = self._generate_llm_training(plan)
+            else:
+                generated_files = self._generate_generic_python(plan)
 
         # Compute artifact hash
         artifact_content = json.dumps(generated_files, sort_keys=True)
@@ -139,6 +169,7 @@ class SystemBuilder:
             "artifact_hash": artifact_hash,
             "actual_cost_usd": actual_cost,
             "files": generated_files,
+            "llm_used": llm_used,
         }
 
         self.governance.record_execution(req.request_id, result, actual_cost)

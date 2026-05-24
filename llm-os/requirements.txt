@@ -11,6 +11,10 @@ psutil>=5.9.8
 # Add path to membra-core for imports
 # -e ../membra-core
 
+# Web server for VM LLM OS Online
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+
 # Optional: for real trading economic adapters
 aiohttp>=3.9.0
 websockets>=12.0
@@ -18,3 +22,8 @@ websockets>=12.0
 # Optional: for LLM inference in factory
 # torch>=2.0.0  # Only if training LLMGPT
 # groq>=0.4.0   # Or use httpx for API calls
+
+# Production dependencies
+prometheus-client>=0.20.0
+prometheus-fastapi-instrumentator>=7.0.0
+python-multipart>=0.0.20

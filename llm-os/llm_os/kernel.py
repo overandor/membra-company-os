@@ -29,6 +29,7 @@ from llm_os.governance import ActionClass, ApprovalState, Governance, Policy
 from llm_os.llm_factory import LLMFactory
 from llm_os.system_builder import SystemBuilder
 from llm_os.treasury import Treasury
+from llm_os.zk_popc_bridge import ZKPoPCBridge
 
 
 @dataclass
@@ -51,8 +52,11 @@ class Kernel:
         self.governance = Governance(policy=policy)
         self.treasury = Treasury(starting_balance_usd=starting_balance_usd)
 
+        # ZK-PoPC bridge (initialize before economic engine so it can be injected)
+        self.zk_popc = ZKPoPCBridge(self.governance, self.treasury)
+
         # Subsystems
-        self.economic_engine = EconomicEngine(self.governance, self.treasury)
+        self.economic_engine = EconomicEngine(self.governance, self.treasury, zk_popc=self.zk_popc)
         self.system_builder = SystemBuilder(self.governance, self.treasury)
         self.llm_factory = LLMFactory(self.governance, self.treasury)
 
@@ -93,6 +97,7 @@ class Kernel:
             self._run_loop(max_loops)
         else:
             self._loop_cycle()
+            self.state.running = False
 
     def stop(self):
         """Stop the kernel gracefully."""
@@ -100,6 +105,19 @@ class Kernel:
         # Stop trading if running
         self.economic_engine.stop_trading()
         print("[KERNEL] Stopped.")
+
+    def _safe_json(self, obj: any) -> str:
+        """Serialize to JSON, falling back to str() for non-serializable objects."""
+        def _default(o):
+            if hasattr(o, "__dataclass_fields__"):
+                return {k: getattr(o, k) for k in o.__dataclass_fields__}
+            if hasattr(o, "value"):
+                return o.value
+            return str(o)
+        try:
+            return json.dumps(obj, indent=2, default=_default)
+        except Exception:
+            return str(obj)
 
     def _run_loop(self, max_loops: int = None):
         """Run the main autonomous loop."""
@@ -125,7 +143,7 @@ class Kernel:
 
         # 1. SENSE — Check system health, governance, treasury
         health = self._sense()
-        print(f"[SENSE] Health: {json.dumps(health, indent=2)}")
+        print(f"[SENSE] Health: {self._safe_json(health)}")
 
         if self.governance.is_halted():
             print("[SENSE] OS is HALTED. Skipping cycle.")
@@ -133,29 +151,35 @@ class Kernel:
 
         # 2. DECIDE — What should we do?
         decision = self._decide()
-        print(f"[DECIDE] Decision: {json.dumps(decision, indent=2)}")
+        print(f"[DECIDE] Decision: {self._safe_json(decision)}")
 
         if decision.get("action") == "wait":
             print("[DECIDE] No profitable action. Waiting.")
+            self._learn(decision, {}, [], {"all_ok": True, "errors": [], "results_checked": 0})
+            self._account()
+            print(f"[KERNEL] Loop {loop_num} complete.")
             return
 
         # 3. PLAN — Break into tasks
         plan = self._plan(decision)
-        print(f"[PLAN] Plan: {json.dumps(plan, indent=2)}")
+        print(f"[PLAN] Plan: {self._safe_json(plan)}")
 
         # 4. EXECUTE — Run tasks
         results = self._execute(plan)
-        print(f"[EXECUTE] Results: {json.dumps(results, indent=2)}")
+        print(f"[EXECUTE] Results: {self._safe_json(results)}")
 
         # 5. VERIFY — Check outputs
         verified = self._verify(results)
-        print(f"[VERIFY] Verified: {json.dumps(verified, indent=2)}")
+        print(f"[VERIFY] Verified: {self._safe_json(verified)}")
 
         # 6. LEARN — Update memory
         self._learn(decision, plan, results, verified)
 
         # 7. ACCOUNT — Final accounting
         self._account()
+
+        # 8. ZK-PoPC — Attest and mint from verified productive work
+        self.run_zk_popc_cycle()
 
         print(f"[KERNEL] Loop {loop_num} complete.")
 
@@ -166,6 +190,7 @@ class Kernel:
         econ_status = self.economic_engine.get_status()
         builder_status = self.system_builder.get_status()
         factory_status = self.llm_factory.get_status()
+        zkpopc_status = self.zk_popc.get_stats()
 
         # System health
         try:
@@ -191,6 +216,7 @@ class Kernel:
             "economic_engine": econ_status,
             "system_builder": builder_status,
             "llm_factory": factory_status,
+            "zk_popc": zkpopc_status,
             "system": sys_health,
             "loop_count": self.state.loop_count,
             "uptime_seconds": time.time() - self.state.uptime_start,
@@ -390,6 +416,26 @@ class Kernel:
         pnl = self.treasury.get_pnl(days=1)
         print(f"[ACCOUNT] Daily P&L: ${pnl['profit_usd']:.2f} (Revenue: ${pnl['revenue_usd']:.2f}, Costs: ${pnl['costs_usd']:.2f})")
 
+    def run_zk_popc_cycle(self) -> dict:
+        """Run the ZK-PoPC attestation and mint cycle."""
+        results = {"attested": 0, "minted": {}}
+
+        # In simulation mode, auto-attest pending proofs from verifier nodes
+        if self.governance.policy.simulation_mode:
+            for proof_id, proof in list(self.zk_popc.proofs.items()):
+                if proof.status.value == "pending" and proof.attestation_count < self.zk_popc.MIN_VERIFIERS_REQUIRED:
+                    # Simulate two independent verifiers
+                    self.zk_popc.attest_proof(proof_id, "simulated_verifier_1", {})
+                    self.zk_popc.attest_proof(proof_id, "simulated_verifier_2", {})
+                    results["attested"] += 1
+
+        # Mint all verified proofs
+        results["minted"] = self.zk_popc.batch_mint_verified_proofs()
+        total_minted = sum(results["minted"].values())
+        if total_minted > 0:
+            print(f"[ZK-PoPC] Minted {len(results['minted'])} proofs, total tokens: {total_minted}")
+        return results
+
     def get_status(self) -> dict:
         """Get full OS status."""
         return {
@@ -406,6 +452,7 @@ class Kernel:
             "economic_engine": self.economic_engine.get_status(),
             "system_builder": self.system_builder.get_status(),
             "llm_factory": self.llm_factory.get_status(),
+            "zk_popc": self.zk_popc.get_stats(),
         }
 
     def approve_pending(self, request_id: str) -> bool:
