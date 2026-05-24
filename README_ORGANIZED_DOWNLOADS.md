@@ -1,121 +1,76 @@
-# 📁 Organized Downloads Folder
+# Organized Downloads Folder
 
-Your Downloads folder has been organized into logical categories for better productivity and easy access.
+All loose files and directories have been organized into 9 category folders.
 
-## 📂 Folder Structure
+## Folder Structure
 
-### 🚀 01_Trading_Systems
-All trading-related projects, bots, and market makers:
-- ENA Hedging Projects
-- Gate.io Market Makers
-- Micro-cap Trading Systems
-- Arbitrage Execution Engines
-- Decentralized Trading Systems
-- And many more trading tools
+### 01_Trading_Systems
+Trading bots, market makers, hedging projects, and financial tools (64 items):
+- ENA / Gate.io / Binance market makers and hedging variants
+- Micro-cap / micro-futures / spot trading bots
+- Arbitrage execution engines, shorting systems
+- MemberMoney protocol, programs, and finance oracle
+- Futures debugging, position inspection, and SDK test scripts
 
-### 🤖 02_AI_Agents  
-AI-powered agents and automation tools:
-- Aider Trading Bot
-- Claude AI Systems
-- Ollama Vision Agents
-- Supervisor AI Systems
-- Terminal Agents
-- And various AI-powered tools
+### 02_AI_Agents
+AI agents, LLM systems, and automation tools (30 items):
+- Membra agent, supervisor, and corpus engine
+- Agent workforce, production agent service
+- Compute mesh and LLM inference nodes
+- Ollama hub, LLM chat app, LLM OS
+- Aider, DeepSeek, Groq, and OpenRouter integrations
+- Jupyter distributed kernel
 
-### 📚 03_Documentation
-All documentation files and guides:
-- Agent Setup Guides
-- API Documentation
-- Trading System Manuals
-- Deployment Guides
-- Technical Documentation
+### 03_Documentation
+All markdown docs, guides, summaries, and diagrams (61 items):
+- Agent setup/migration/comparison guides
+- Trading system portfolios and appraisals
+- Deployment guides (HuggingFace, Vercel, Google Drive)
+- CleanStat, VEIS, and provenance summaries
+- Security warnings, changelogs, known issues
+- Bonding curve chart and flow diagrams
 
-### 💻 04_Software_Installers
-Downloaded software and installers:
-- ChatGPT Desktop App
-- VS Code Installer
-- TeamViewer
-- Go Language
-- And other development tools
+### 04_Software_Installers
+Reserved for downloaded software and installers.
 
-### ⚙️ 05_Config_Files
-Configuration and environment files:
-- Environment variables (.env files)
-- Git configuration
-- Aider configuration
-- API keys and settings
+### 05_Config_Files
+Configuration files:
+- `config.json` - main app configuration
+- Core product notes
 
-### 🎯 06_Projects
-Active and archived projects:
-- CopyThatPay Systems
-- Kamino Flash Executor
-- Marinade Trading Tools
-- Metamask Bridge
-- Solana Staking Tools
-- And various development projects
+### 06_Projects
+Full project directories and codebases (88 items):
+- **Membra ecosystem**: core, SDK, SDK factory, bridge, chat-to-chain, L3, L3 C++, QR gateway, company OS, mobile, UI, hybrid, genesis, human chain, corpus, KPI, operator, ads, ecosystem
+- **Overmanifold**: main, C++, Rust, collateral package, recursive chat capsule
+- **FinTech**: Kamino flash executor, Marinade analyzers, Solana staking, wallet systems
+- **Apps**: CopyThatPay, field triage, roast-my-startup, cigarette-butt-collection, sniffies-rentals, tokenize-camera-app, profit dashboard
+- **Infrastructure**: decloud, mac compute node, adapters, language-fi (3 variants), cleanstat agents, VEIS
+- **Tooling**: MetaMask bridge, Twitter system, voice recorder, subscription systems
 
-### 🔧 07_Scripts
-Standalone scripts and utilities:
-- Shell scripts (.sh)
-- Python scripts (.py)
-- JavaScript files (.js)
-- User scripts
-- Automation scripts
+### 07_Scripts
+Standalone scripts and utilities (11 items):
+- Python: anchor_to_solana, global_machine_appraisal, membra_dashboard, copythatpay_micro, run_network
+- Shell: push_to_github, create_live_flash_arb (v1 & v2), setup_kamino_flash_executor
+- JavaScript: gptbridge, gptbridge-provenance, ChatGPT Exporter userscript
 
-### 📊 08_Data_Files
-Data files and logs:
-- JSON configuration files
-- Database files (.db)
-- Log files
-- Trading data
-- Symbol data
+### 08_Data_Files
+Data files, logs, and ledgers (20 items):
+- JSON: production agent report, file appraisal, symbols, tokenization proofs, users
+- JSONL: events, gate MM events, trades
+- LLM ledgers: overmanifold at-delimited ledger files
+- TXT: overmanifold hashbase64 ledgers, windsurf history
+- CSV: cartman
+- HTML: dashboard
+- Training data directory
 
-### 🗂️ 09_Backup
-System files and backups:
-- Cache directories
-- Log directories
-- Screenshot folders
-- Test files
-- System metadata
+### 09_Backup
+History and backup files:
+- windsurf.history.txt
 
-## 🎯 Benefits of This Organization
-
-1. **Easy Navigation**: Find what you need quickly
-2. **Clean Workspace**: Reduced clutter in main Downloads folder
-3. **Logical Grouping**: Related items are together
-4. **Scalable Structure**: Easy to add new items
-5. **Backup Ready**: Important files are easy to backup
-
-## 📋 Quick Access Commands
-
-```bash
-# Navigate to trading systems
-cd ~/Downloads/01_Trading_Systems
-
-# Navigate to AI agents  
-cd ~/Downloads/02_AI_Agents
-
-# Navigate to documentation
-cd ~/Downloads/03_Documentation
-
-# List all organized folders
-ls -la ~/Downloads/
-```
-
-## 🔄 Maintenance Tips
-
-1. **Weekly Cleanup**: Move new downloads to appropriate folders
-2. **Project Review**: Archive completed projects to backup folder
-3. **Documentation Update**: Keep README files current
-4. **Backup Important Files**: Regular backup of critical projects
-
-## 📝 Notes
-
-- This organization was created on: $(date)
-- Total folders organized: 9 main categories
-- Files moved: Hundreds of files and folders
-- Structure designed for scalability and ease of use
-
----
-
-**Tip**: Use this README as a reference to quickly locate any type of file or project in your Downloads folder!
+## Root-Level Files (kept at root)
+- `README.md` - main project description (LLM 15m Signal Hunter)
+- `README_ORGANIZED_DOWNLOADS.md` - this file
+- `app.py` - main application entry point
+- `requirements.txt` - Python dependencies
+- `Dockerfile` - container configuration
+- `.gitignore` - git ignore rules
