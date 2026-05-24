@@ -234,7 +234,7 @@ class APIEmailDelivery(CustomEmailDeliveryInterface):
                             delivery_method=EmailDeliveryMethod.API,
                             cost=0.0,
                             status="api_error",
-                            error_message f"API returned {response.status}"
+                            error_message=f"API returned {response.status}"
                         )
             
         except Exception as e:

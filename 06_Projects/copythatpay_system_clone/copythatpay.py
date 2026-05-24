@@ -2169,7 +2169,8 @@ Return ONLY a JSON list of symbols in priority order. Example: ["BTC/USDT:USDT",
             if hp:
                 net_contracts = (hp.long_leg.contracts if hp.long_leg.filled else 0) - (hp.short_leg.contracts if hp.short_leg.filled else 0)
                 if abs(net_contracts) > 10:  # Max 10 contracts net exposure
-                    console.print(f'[yellow][{symbol.split('/')[0]}] Inventory limit reached ({net_contracts}ct) → skipping')
+                    sym_base = symbol.split('/')[0]
+                    console.print(f'[yellow][{sym_base}] Inventory limit reached ({net_contracts}ct) -> skipping')
                     return
             
             # Log edge detection when we have it
@@ -2217,11 +2218,13 @@ Return ONLY a JSON list of symbols in priority order. Example: ["BTC/USDT:USDT",
             # ONE-SIDE TRADING: Trade only the side with edge, don't neutralize advantage
             if imbalance > 0.3 and momentum > 0:
                 # Strong bullish signal - trade long only
-                console.print(f'[cyan][{symbol.split('/')[0]}] BULLISH EDGE → long only')
+                sym_base = symbol.split('/')[0]
+                console.print(f'[cyan][{sym_base}] BULLISH EDGE -> long only')
                 await self._manage_side(symbol, 'long', qs, momentum)
             elif imbalance < -0.3 and momentum < 0:
                 # Strong bearish signal - trade short only
-                console.print(f'[cyan][{symbol.split('/')[0]}] BEARISH EDGE → short only')
+                sym_base = symbol.split('/')[0]
+                console.print(f'[cyan][{sym_base}] BEARISH EDGE -> short only')
                 await self._manage_side(symbol, 'short', qs, momentum)
             elif hp:
                 # Existing hedge - manage both to close

@@ -983,7 +983,7 @@ class MarketMakerUI:
         
         # Quick actions
         actions_container = NeomorphicFrame(control_frame, bg=NeomorphicTheme.BG_SECONDARY)
-        actions_container.pack(side='right, padx=(10, 0), fill='y')
+        actions_container.pack(side='right', padx=(10, 0), fill='y')
         
         NeomorphicButton(
             actions_container,
@@ -1530,7 +1530,7 @@ class MarketMakerUI:
         
         # Real-time metrics
         metrics_container = NeomorphicFrame(footer_frame, bg=NeomorphicTheme.BG_TERTIARY)
-        metrics_container.pack(side='right, padx=20, pady=15, fill='both', expand=True)
+        metrics_container.pack(side='right', padx=20, pady=15, fill='both', expand=True)
         
         self.footer_metrics = tk.Label(
             metrics_container,

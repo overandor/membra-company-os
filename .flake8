@@ -1,0 +1,6 @@
+[flake8]
+# Exclude files that are fundamentally broken (code fragments, wrong language/format)
+per-file-ignores =
+    01_Trading_Systems/brutalist_market_maker_variants/brutalist.py:E999
+    01_Trading_Systems/profit_executor_system/profit_only_dca.py:E999
+    06_Projects/twitter_system/twitter.py:E999
