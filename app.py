@@ -1,9 +1,24 @@
 import asyncio
 import json
 import os
+import sys
 import time
 from datetime import datetime, timezone
 from aiohttp import web
+
+# Ensure repo root + llm-os on path for imports
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
+_LLM_OS = os.path.join(_HERE, "llm-os")
+if _LLM_OS not in sys.path:
+    sys.path.insert(0, _LLM_OS)
+
+from llm_signal_hunter import (
+    get_latest_cycle,
+    run_scan_cycle,
+    start_background_scanner,
+)
 
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", os.getenv("SPACE_PORT", "7860")))
@@ -177,6 +192,28 @@ async def api_state(request):
     return web.json_response(build_state(), dumps=lambda x: json.dumps(x, default=str))
 
 
+async def api_signals(request):
+    """Return the latest LLM signal hunter cycle."""
+    cycle = get_latest_cycle()
+    if not cycle:
+        cycle = {"status": "initialising", "message": "First scan cycle has not completed yet"}
+    return web.json_response(cycle, dumps=lambda x: json.dumps(x, default=str))
+
+
+async def api_signals_now(request):
+    """Run one scan cycle immediately and return the result."""
+    result = run_scan_cycle()
+    return web.json_response(result, dumps=lambda x: json.dumps(x, default=str))
+
+
+async def api_profit(request):
+    """Return profit summary from the signal ledger."""
+    from llm_signal_hunter import load_ledger, compute_profit_summary
+    entries = load_ledger()
+    summary = compute_profit_summary(entries)
+    return web.json_response(summary, dumps=lambda x: json.dumps(x, default=str))
+
+
 async def index(request):
     template_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard.html")
     with open(template_path, "r") as f:
@@ -189,11 +226,17 @@ async def main():
     app = web.Application()
     app.router.add_get("/", index)
     app.router.add_get("/state", api_state)
+    app.router.add_get("/signals", api_signals)
+    app.router.add_get("/signals/now", api_signals_now)
+    app.router.add_get("/profit", api_profit)
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, HOST, PORT)
     await site.start()
     print(f"[boot] Dashboard live at http://{HOST}:{PORT}", flush=True)
+    print(f"[boot] LLM Signal Hunter endpoints: /signals, /signals/now, /profit", flush=True)
+    await start_background_scanner()
+    print(f"[boot] Background signal scanner started (every 60s)", flush=True)
     while True:
         await asyncio.sleep(3600)
 
