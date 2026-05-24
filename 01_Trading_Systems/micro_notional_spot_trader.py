@@ -26,8 +26,8 @@ except ImportError:
     GATE_AVAILABLE = True
 
 # API Keys
-API_KEY = "2b29d118d4fe92628f33a8f298416548"
-API_SECRET = "09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35"
+API_KEY = os.environ.get("GATE_API_KEY", "")
+API_SECRET = os.environ.get("GATE_API_SECRET", "")
 
 # Configuration
 MAX_PRICE = 0.10  # Maximum price $0.10 (10 cents)

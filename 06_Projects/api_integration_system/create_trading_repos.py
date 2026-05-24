@@ -397,7 +397,7 @@ def main():
     print("=" * 60)
     
     # Configuration
-    github_token = "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"
+    github_token = os.environ.get("GITHUB_TOKEN", "")
     username = "overandor"
     
     appraiser = TradingSystemAppraiser(github_token, username)

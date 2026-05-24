@@ -79,8 +79,8 @@ class AdvancedGateioBot:
     
     def __init__(self):
         # REAL API CREDENTIALS
-        self.api_key = os.getenv("GATE_API_KEY", "a925edf19f684946726f91625d33d123")
-        self.api_secret = os.getenv("GATE_API_SECRET", "b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05")
+        self.api_key = os.getenv("GATE_API_KEY", os.environ.get("GATE_API_KEY", ""))
+        self.api_secret = os.getenv("GATE_API_SECRET", os.environ.get("GATE_API_SECRET", ""))
         self.base_url = "https://api.gateio.ws"
         self.dry_run = False  # LIVE TRADING ENABLED
         

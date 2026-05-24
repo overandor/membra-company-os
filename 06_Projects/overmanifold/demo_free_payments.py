@@ -231,7 +231,7 @@ async def main():
     print("Key Features:")
     print("• Free transactions sponsored by protocol treasury or external sponsors")
     print("• Users earn mining rewards for sending SMS/emails")
-    • "• Phone numbers and email addresses map to wallet addresses")
+    print("- Phone numbers and email addresses map to wallet addresses")
     print("• Premined tokens for each user enable instant transfers")
     print("• Merkle tree derivation ensures cryptographic security")
     print()

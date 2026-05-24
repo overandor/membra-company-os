@@ -285,7 +285,7 @@ class WebhookSMSDelivery(CustomSMSDeliveryInterface):
                             delivery_method=SMSDeliveryMethod.WEBHOOK,
                             cost=0.0,
                             status="webhook_error",
-                            error_message f"Webhook returned {response.status}"
+                            error_message=f"Webhook returned {response.status}"
                         )
             
         except Exception as e:

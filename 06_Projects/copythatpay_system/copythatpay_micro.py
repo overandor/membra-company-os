@@ -1451,7 +1451,8 @@ class CopyThatPay:
                             profit_est = target_move * cs * cts
                             hp.total_realized_profit += profit_est
                         
-                        console.print(f'[green][{symbol.split('/')[0]}] EXIT FILLED {side}')
+                        sym_base = symbol.split('/')[0]
+                        console.print(f'[green][{sym_base}] EXIT FILLED {side}')
                         if is_long:
                             qs.long_filled = False
                             qs.long_exit_id = ''

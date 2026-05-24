@@ -84,7 +84,20 @@ def generate():
         resp_str = ", ".join([f"'{r}'" for r in responsibilities])
         fname = f"{name}_{dept}_membra.py"
         class_name = f"{name.replace('_', '').title()}{dept.title()}Membra"
-        content = f'"""MEMBRA Agent: {agent_id}\nTitle: {title}\nDepartment: {dept}\n"""\nfrom typing import List\nfrom app.agents.base import BaseAgent\n\n\nclass {class_name}(BaseAgent):\n    AGENT_ID = "{agent_id}"\n    NAME = "{name.replace('_mkt', '').replace('_hr', '')}"\n    DEPARTMENT = "{dept}"\n    TITLE = "{title}"\n    MODEL = "llama3.2"\n    SYSTEM_PROMPT = """{prompt}"""\n    RESPONSIBILITIES: List[str] = [{resp_str}]\n    CAPABILITIES: List[str] = ["llm_reasoning", "rpc_handler", "task_executor", "gossip_peer", "heartbeat_broadcaster"]\n'
+        clean_name = name.replace('_mkt', '').replace('_hr', '')
+        content = (
+            f'"""MEMBRA Agent: {agent_id}\nTitle: {title}\nDepartment: {dept}\n"""\n'
+            f'from typing import List\nfrom app.agents.base import BaseAgent\n\n\n'
+            f'class {class_name}(BaseAgent):\n'
+            f'    AGENT_ID = "{agent_id}"\n'
+            f'    NAME = "{clean_name}"\n'
+            f'    DEPARTMENT = "{dept}"\n'
+            f'    TITLE = "{title}"\n'
+            f'    MODEL = "llama3.2"\n'
+            f'    SYSTEM_PROMPT = """{prompt}"""\n'
+            f'    RESPONSIBILITIES: List[str] = [{resp_str}]\n'
+            f'    CAPABILITIES: List[str] = ["llm_reasoning", "rpc_handler", "task_executor", "gossip_peer", "heartbeat_broadcaster"]\n'
+        )
         with open(fname, "w") as f:
             f.write(content)
         print(f"Created {fname} -> {agent_id}")

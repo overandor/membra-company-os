@@ -9,8 +9,8 @@ import hashlib
 import time
 import os
 
-API_KEY = os.getenv("GATE_API_KEY", "2b29d118d4fe92628f33a8f298416548")
-API_SECRET = os.getenv("GATE_API_SECRET", "09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35")
+API_KEY = os.getenv("GATE_API_KEY", os.environ.get("GATE_API_KEY", ""))
+API_SECRET = os.getenv("GATE_API_SECRET", os.environ.get("GATE_API_SECRET", ""))
 
 def generate_signature(method, url, query_params="", body="", timestamp=None):
     """Generate Gate.io API signature"""

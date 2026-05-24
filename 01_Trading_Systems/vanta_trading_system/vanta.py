@@ -800,4 +800,5 @@ class ContentRevenueEngine:
             'content_by_type': self.content_tracker.content_by_type,
             'revenue_by_source': self.revenue_tracker.revenue_by_source,
             'system_uptime': time.time() - self.start_time,
-            'last_optimization_run': self.last_optimization_run.isoformat() if self.last_optimization_run else None
+            'last_optimization_run': self.last_optimization_run.isoformat() if self.last_optimization_run else None,
+        }

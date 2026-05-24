@@ -5,8 +5,8 @@ Debug futures contracts to see what data is available
 
 import os
 
-GATE_API_KEY = "2b29d118d4fe92628f33a8f298416548"
-GATE_API_SECRET = "09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35"
+GATE_API_KEY = os.environ.get("GATE_API_KEY", "")
+GATE_API_SECRET = os.environ.get("GATE_API_SECRET", "")
 
 try:
     import gate_api

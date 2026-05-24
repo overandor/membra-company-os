@@ -47,8 +47,8 @@ class RiskLimits:
 @dataclass
 class GovernanceConfig:
     """Governance system configuration"""
-    api_key: str = "a925edf19f684946726f91625d33d123"
-    api_secret: str = "b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05"
+    api_key: str = os.environ.get("GATE_API_KEY", "")
+    api_secret: str = os.environ.get("GATE_API_SECRET", "")
     monitoring_interval: int = 60  # seconds
     report_interval: int = 3600  # 1 hour
     emergency_stop: bool = False

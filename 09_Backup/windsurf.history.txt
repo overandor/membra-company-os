@@ -282,8 +282,8 @@ ENA_Hedging_Project/
 📍 Location: /config/ena_config.py
 python
 # API CONFIGURATION - YOUR KEYS ARE SECURELY STORED HERE
-self.api_key = "a925edf19f684946726f91625d33d123"
-self.api_secret = "b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05"
+self.api_key = "REDACTED_GATE_KEY"
+self.api_secret = "REDACTED_GATE_SECRET"
 🪙 MULTI-COIN SUPPORT - 20+ SUB-10-CENT TOKENS:
 📈 Supported Coins:
 Meme Coins: PEPE, SHIB, DOGE, FLOKI, BABYDOGE, BONK, WIF
