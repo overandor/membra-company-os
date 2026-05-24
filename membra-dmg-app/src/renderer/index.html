@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';">
+  <title>MEMBRA LLM Developer</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Title Bar (macOS hidden inset) -->
+    <div class="titlebar" id="titlebar">
+      <div class="titlebar-drag"></div>
+      <div class="titlebar-title">MEMBRA LLM Developer</div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="layout">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">
+            <span class="logo-icon">M</span>
+            <span class="logo-text">MEMBRA</span>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <button class="nav-item active" data-view="chat" title="LLM Chat">
+            <span class="nav-icon">&#x1F4AC;</span>
+            <span class="nav-label">Chat</span>
+          </button>
+          <button class="nav-item" data-view="code" title="Code Editor">
+            <span class="nav-icon">&#x2328;</span>
+            <span class="nav-label">Code</span>
+          </button>
+          <button class="nav-item" data-view="agents" title="Agent Pipeline">
+            <span class="nav-icon">&#x2699;</span>
+            <span class="nav-label">Agents</span>
+          </button>
+          <button class="nav-item" data-view="project" title="Project Explorer">
+            <span class="nav-icon">&#x1F4C1;</span>
+            <span class="nav-label">Project</span>
+          </button>
+          <button class="nav-item" data-view="settings" title="Settings">
+            <span class="nav-icon">&#x2318;</span>
+            <span class="nav-label">Settings</span>
+          </button>
+        </nav>
+
+        <!-- Project Tree (shown when project is open) -->
+        <div class="sidebar-tree" id="project-tree-container" style="display:none">
+          <div class="tree-header">PROJECT FILES</div>
+          <div class="tree-content" id="project-tree"></div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Chat View -->
+        <div class="view active" id="view-chat">
+          <div class="view-header">
+            <h2>LLM Software Developer</h2>
+            <div class="header-actions">
+              <select id="chat-mode" class="select-pill">
+                <option value="chat">General Chat</option>
+                <option value="generate">Generate Code</option>
+                <option value="review">Review Code</option>
+                <option value="explain">Explain Code</option>
+                <option value="refactor">Refactor Code</option>
+                <option value="debug">Debug Code</option>
+              </select>
+              <select id="chat-language" class="select-pill">
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="typescript">TypeScript</option>
+                <option value="rust">Rust</option>
+                <option value="go">Go</option>
+                <option value="solidity">Solidity</option>
+                <option value="c">C</option>
+                <option value="cpp">C++</option>
+                <option value="java">Java</option>
+                <option value="ruby">Ruby</option>
+                <option value="swift">Swift</option>
+                <option value="bash">Bash</option>
+                <option value="sql">SQL</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="chat-messages" id="chat-messages">
+            <div class="welcome-message">
+              <div class="welcome-logo">M</div>
+              <h3>MEMBRA LLM Software Developer</h3>
+              <p>AI-powered software development with autonomous agent pipelines, code generation, review, debugging, and more.</p>
+              <div class="quick-actions">
+                <button class="quick-action" data-prompt="Generate a FastAPI REST endpoint with CRUD operations">Generate API</button>
+                <button class="quick-action" data-prompt="Review my code for bugs and security issues">Review Code</button>
+                <button class="quick-action" data-prompt="Explain this codebase architecture">Explain Code</button>
+                <button class="quick-action" data-prompt="Create a CI/CD pipeline with Docker">Create Pipeline</button>
+                <button class="quick-action" data-prompt="Build a React component with TypeScript">Build Component</button>
+                <button class="quick-action" data-prompt="Write unit tests for this module">Write Tests</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-input-container">
+            <div class="code-input-area" id="code-input-area" style="display:none">
+              <div class="code-input-header">
+                <span>Paste code here:</span>
+                <button class="btn-icon" id="close-code-input" title="Close">&times;</button>
+              </div>
+              <textarea id="code-input" class="code-textarea" placeholder="Paste your code here..." rows="8"></textarea>
+              <div class="code-input-footer" id="error-input-area" style="display:none">
+                <textarea id="error-input" class="code-textarea small" placeholder="Paste error message here (for debug mode)..." rows="3"></textarea>
+              </div>
+              <div class="code-input-footer" id="refactor-input-area" style="display:none">
+                <textarea id="refactor-input" class="code-textarea small" placeholder="Describe the refactoring you want..." rows="2"></textarea>
+              </div>
+            </div>
+            <div class="chat-input-row">
+              <textarea id="chat-input" class="chat-input" placeholder="Describe what you want to build..." rows="1"></textarea>
+              <button id="send-btn" class="send-btn" title="Send">&#x27A4;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code Editor View -->
+        <div class="view" id="view-code">
+          <div class="view-header">
+            <h2>Code Editor</h2>
+            <div class="header-actions">
+              <span id="editor-filename" class="filename-badge">No file open</span>
+              <button class="btn-pill" id="editor-save-btn">Save</button>
+            </div>
+          </div>
+          <div class="editor-container">
+            <textarea id="code-editor" class="code-editor-area" placeholder="Open a file from the project tree or paste code here..." spellcheck="false"></textarea>
+          </div>
+          <div class="editor-toolbar">
+            <button class="toolbar-btn" id="btn-review-editor">Review</button>
+            <button class="toolbar-btn" id="btn-explain-editor">Explain</button>
+            <button class="toolbar-btn" id="btn-refactor-editor">Refactor</button>
+            <button class="toolbar-btn" id="btn-debug-editor">Debug</button>
+            <button class="toolbar-btn" id="btn-generate-editor">Generate</button>
+          </div>
+        </div>
+
+        <!-- Agents View -->
+        <div class="view" id="view-agents">
+          <div class="view-header">
+            <h2>Agent Pipeline</h2>
+            <div class="header-actions">
+              <button class="btn-pill accent" id="run-pipeline-btn">Run Pipeline</button>
+            </div>
+          </div>
+
+          <div class="agents-grid" id="agents-grid"></div>
+
+          <div class="pipeline-section">
+            <div class="pipeline-header">
+              <h3>Pipeline Task</h3>
+            </div>
+            <textarea id="pipeline-task" class="pipeline-input" placeholder="Describe the task for the agent pipeline..." rows="3"></textarea>
+
+            <div class="pipeline-output" id="pipeline-output" style="display:none">
+              <h3>Pipeline Results</h3>
+              <div id="pipeline-steps"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project View -->
+        <div class="view" id="view-project">
+          <div class="view-header">
+            <h2>Project Explorer</h2>
+            <div class="header-actions">
+              <button class="btn-pill" id="open-project-btn">Open Project</button>
+            </div>
+          </div>
+          <div class="project-info" id="project-info">
+            <p class="muted">No project open. Click "Open Project" to browse a directory.</p>
+          </div>
+          <div class="project-tree-full" id="project-tree-full"></div>
+        </div>
+
+        <!-- Settings View -->
+        <div class="view" id="view-settings">
+          <div class="view-header">
+            <h2>Settings</h2>
+          </div>
+          <div class="settings-form">
+            <div class="setting-group">
+              <h3>LLM Provider</h3>
+              <div class="setting-row">
+                <label>Provider</label>
+                <select id="setting-provider" class="setting-input">
+                  <option value="groq">Groq</option>
+                  <option value="openrouter">OpenRouter</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="gemini">Google Gemini</option>
+                  <option value="ollama">Ollama (Local)</option>
+                </select>
+              </div>
+              <div class="setting-row">
+                <label>API Key</label>
+                <input type="password" id="setting-api-key" class="setting-input" placeholder="Enter API key...">
+              </div>
+              <div class="setting-row">
+                <label>Model</label>
+                <input type="text" id="setting-model" class="setting-input" placeholder="e.g. llama-3.3-70b-versatile">
+              </div>
+              <div class="setting-row">
+                <label>Temperature</label>
+                <input type="range" id="setting-temperature" class="setting-range" min="0" max="1" step="0.1" value="0.3">
+                <span id="temp-value">0.3</span>
+              </div>
+              <div class="setting-row">
+                <label>Max Tokens</label>
+                <input type="number" id="setting-max-tokens" class="setting-input" value="4096" min="256" max="32768">
+              </div>
+            </div>
+
+            <div class="setting-group" id="ollama-settings" style="display:none">
+              <h3>Ollama Settings</h3>
+              <div class="setting-row">
+                <label>Ollama URL</label>
+                <input type="text" id="setting-ollama-url" class="setting-input" value="http://localhost:11434">
+              </div>
+              <div class="setting-row">
+                <label>Ollama Model</label>
+                <input type="text" id="setting-ollama-model" class="setting-input" value="codellama">
+              </div>
+            </div>
+
+            <button class="btn-pill accent" id="save-settings-btn">Save Settings</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="components/app.js"></script>
+</body>
+</html>
