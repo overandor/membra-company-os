@@ -1,5 +1,15 @@
 // MEMBRA CompanyOS — Dashboard Frontend
-const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8000/v1' : '/v1';
+function resolveApiBase() {
+  const meta = document.querySelector('meta[name="membra-api-base"]');
+  if (meta?.content) {
+    return meta.content.replace(/\/$/, '');
+  }
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:8000/v1';
+  }
+  return '/v1';
+}
+const API_BASE = resolveApiBase();
 
 const TABS = {
   orchestration: renderOrchestration,

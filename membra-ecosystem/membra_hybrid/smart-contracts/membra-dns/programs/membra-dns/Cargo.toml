@@ -1,0 +1,23 @@
+[package]
+name = "membra-dns"
+version = "0.1.0"
+description = "Membra DNS Registry Smart Contract"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "membra_dns"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "1.0.2"
+solana-security-txt = "1.1.1"
+
+[dev-dependencies]
+anchor-client = "1.0.2"

@@ -2,7 +2,7 @@
 from functools import lru_cache
 from typing import Optional
 from pydantic_settings import BaseSettings
-from pydantic import Field, RedisDsn
+from pydantic import Field
 
 
 class Settings(BaseSettings):
@@ -18,9 +18,12 @@ class Settings(BaseSettings):
     DATABASE_POOL_SIZE: int = 20
     DATABASE_MAX_OVERFLOW: int = 10
 
-    # Redis
-    REDIS_URL: RedisDsn = Field(default="redis://localhost:6379/0")
+    # Redis (optional — reserved for future workers)
+    REDIS_URL: Optional[str] = None
     REDIS_PASSWORD: Optional[str] = None
+
+    # CORS — comma-separated origins, or * for open (dev only)
+    CORS_ORIGINS: str = "*"
 
     # Security
     SECRET_KEY: str = Field(min_length=32)
@@ -63,6 +66,16 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+
+    @property
+    def is_production(self) -> bool:
+        return self.ENVIRONMENT.lower() == "production"
+
+    def cors_origin_list(self) -> list[str]:
+        raw = (self.CORS_ORIGINS or "*").strip()
+        if raw == "*":
+            return ["*"]
+        return [origin.strip() for origin in raw.split(",") if origin.strip()]
 
 
 @lru_cache

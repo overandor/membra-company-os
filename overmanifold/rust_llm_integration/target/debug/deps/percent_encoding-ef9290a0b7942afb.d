@@ -1,0 +1,8 @@
+/Users/alep/Downloads/overmanifold/rust_llm_integration/target/debug/deps/percent_encoding-ef9290a0b7942afb.d: /Users/alep/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/lib.rs /Users/alep/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/ascii_set.rs
+
+/Users/alep/Downloads/overmanifold/rust_llm_integration/target/debug/deps/libpercent_encoding-ef9290a0b7942afb.rlib: /Users/alep/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/lib.rs /Users/alep/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/ascii_set.rs
+
+/Users/alep/Downloads/overmanifold/rust_llm_integration/target/debug/deps/libpercent_encoding-ef9290a0b7942afb.rmeta: /Users/alep/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/lib.rs /Users/alep/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/ascii_set.rs
+
+/Users/alep/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/lib.rs:
+/Users/alep/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/percent-encoding-2.3.2/src/ascii_set.rs:

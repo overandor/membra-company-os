@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Phone - Membra Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .register-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
+        .register-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .register-header h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .register-header p {
+            color: #666;
+            font-size: 1em;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group .hint {
+            color: #999;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #667eea;
+        }
+        
+        .checkbox-group label {
+            color: #666;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+        
+        .btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .verification-section {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .verification-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .wallet-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .wallet-info h4 {
+            color: #004085;
+            margin-bottom: 10px;
+        }
+        
+        .wallet-info p {
+            color: #004085;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .wallet-info .wallet-address {
+            font-family: monospace;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <h1>📱 Register Phone</h1>
+            <p>Create your Membra phone wallet</p>
+        </div>
+        
+        <div id="register-alert" class="alert"></div>
+        
+        <form id="registration-form">
+            <div class="form-group">
+                <label for="phone-number">Phone Number *</label>
+                <input 
+                    type="tel" 
+                    id="phone-number" 
+                    name="phone_number" 
+                    placeholder="+1234567890"
+                    required
+                >
+                <div class="hint">Format: +[country code][number] (e.g., +1234567890)</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address (Optional)</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    placeholder="your@email.com"
+                >
+                <div class="hint">For backup and notifications</div>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="accept-terms" name="accept_terms" required>
+                <label for="accept-terms">
+                    I accept the terms and conditions and privacy policy
+                </label>
+            </div>
+            
+            <button type="submit" class="btn" id="register-btn">Register Phone</button>
+        </form>
+        
+        <div id="verification-section" class="verification-section">
+            <h3>🔐 Verify Your Phone</h3>
+            <div class="wallet-info" id="wallet-info" style="display: none;">
+                <h4>Your Wallet</h4>
+                <p><strong>Address:</strong> <span class="wallet-address" id="wallet-address"></span></p>
+                <p><strong>Premined Tokens:</strong> <span id="premined-tokens"></span></p>
+            </div>
+            
+            <div class="form-group">
+                <label for="verification-code">Verification Code</label>
+                <input 
+                    type="text" 
+                    id="verification-code" 
+                    name="verification_code" 
+                    placeholder="Enter 6-digit code"
+                    maxlength="6"
+                >
+                <div class="hint">Enter the code sent to your phone via SMS</div>
+            </div>
+            
+            <button type="button" class="btn" id="verify-btn">Verify Phone</button>
+        </div>
+        
+        <a href="/" class="back-link">← Back to Dashboard</a>
+    </div>
+    
+    <script>
+        let currentPhoneNumber = '';
+        
+        document.getElementById('registration-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const phone_number = document.getElementById('phone-number').value;
+            const email = document.getElementById('email').value;
+            const accept_terms = document.getElementById('accept-terms').checked;
+            
+            if (!accept_terms) {
+                showAlert('Please accept the terms and conditions', 'error');
+                return;
+            }
+            
+            const registerBtn = document.getElementById('register-btn');
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Registering...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('phone_number', phone_number);
+                formData.append('email', email);
+                formData.append('accept_terms', accept_terms);
+                
+                const response = await fetch('/api/register-phone', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentPhoneNumber = phone_number;
+                    showAlert(data.message, 'success');
+                    
+                    // Show wallet info
+                    document.getElementById('wallet-address').textContent = data.wallet_address;
+                    document.getElementById('premined-tokens').textContent = '1,000 tokens';
+                    document.getElementById('wallet-info').style.display = 'block';
+                    
+                    // Show verification section
+                    document.getElementById('verification-section').style.display = 'block';
+                    document.getElementById('registration-form').style.display = 'none';
+                    
+                } else {
+                    showAlert(data.message || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showAlert('Error registering phone. Please try again.', 'error');
+            }
+            
+            registerBtn.disabled = false;
+            registerBtn.textContent = 'Register Phone';
+        });
+        
+        document.getElementById('verify-btn').addEventListener('click', async function() {
+            const verification_code = document.getElementById('verification-code').value;
+            
+            if (verification_code.length !== 6) {
+                showAlert('Please enter a valid 6-digit code', 'error');
+                return;
+            }
+            
+            const verifyBtn = document.getElementById('verify-btn');
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Verifying...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('phone_number', currentPhoneNumber);
+                formData.append('verification_code', verification_code);
+                
+                const response = await fetch('/api/verify-phone', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('Phone verified successfully! Redirecting to dashboard...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                } else {
+                    showAlert(data.message || 'Verification failed', 'error');
+                }
+            } catch (error) {
+                showAlert('Error verifying phone. Please try again.', 'error');
+            }
+            
+            verifyBtn.disabled = false;
+            verifyBtn.textContent = 'Verify Phone';
+        });
+        
+        function showAlert(message, type) {
+            const alert = document.getElementById('register-alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -7,7 +7,7 @@ import os
 import requests
 from typing import Callable
 
-OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434")
 DEFAULT_MODEL = os.environ.get("MEMBRA_MODEL", "qwen2.5:0.5b")
 FALLBACK_MODEL = "llama3.2:1b"
 
@@ -43,9 +43,26 @@ class LLMBridge:
     def __init__(self, model: str | None = None):
         self.model = model or DEFAULT_MODEL
         self.host = OLLAMA_HOST
+        self._connected = False
+        self._check_health()
         self._ensure_model()
 
+    def _check_health(self) -> bool:
+        try:
+            r = requests.get(f"{self.host}/", timeout=5)
+            self._connected = r.status_code == 200
+            return self._connected
+        except Exception:
+            self._connected = False
+            return False
+
+    @property
+    def connected(self) -> bool:
+        return self._connected
+
     def _ensure_model(self):
+        if not self._connected:
+            return
         try:
             r = requests.post(f"{self.host}/api/pull", json={"name": self.model, "stream": False}, timeout=120)
             if r.status_code != 200:

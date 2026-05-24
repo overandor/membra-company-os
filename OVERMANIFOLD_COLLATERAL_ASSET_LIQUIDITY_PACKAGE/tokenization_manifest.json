@@ -1,0 +1,107 @@
+{
+  "package_name": "OVERMANIFOLD_COLLATERAL_ASSET_LIQUIDITY_PACKAGE",
+  "version": "OM-CALP-v1",
+  "merkle_root": "4febe219f3a783959785c9cfb65610362b4789cee7a37cbb3a672ad7c8d2d583",
+  "total_appraisal_usd": 13037.5,
+  "asset_count": 15,
+  "created_utc": "2026-05-18T19:24:48.194517+00:00",
+  "tokenization_parameters": {
+    "initial_token_supply": 13037500,
+    "tokens_per_usd": 1000,
+    "token_name": "OM-CALP",
+    "token_symbol": "CALP",
+    "decimal_places": 6
+  },
+  "asset_breakdown": [
+    {
+      "filename": "61694407-18F8-45C8-B903-3E876F7653DC.jpeg",
+      "sha256": "a55f8f092f9e3833180bf387bac4edf6d0a6ec6becec14e02e812677444356cc",
+      "appraisal_usd": 112.5,
+      "token_allocation": 112500
+    },
+    {
+      "filename": "A375C5D2-92E5-4383-A16A-DCB9CFBBF8AB.jpeg",
+      "sha256": "8f9ca662bb4117cf53e8a8b0232725d0e38ae071e83f96313c53ee7f102d7c1a",
+      "appraisal_usd": 112.5,
+      "token_allocation": 112500
+    },
+    {
+      "filename": "4A4D3A87-6A8D-4DC0-A4A4-B43C0B944CC8.jpeg",
+      "sha256": "0ca45c818fa6feda41e9bf650cb985b151a5d635399d1c46230de7700cc67e59",
+      "appraisal_usd": 112.5,
+      "token_allocation": 112500
+    },
+    {
+      "filename": "5A8549FE-809C-464E-9F88-331B6DEB4699.jpeg",
+      "sha256": "98d5c5d28fc40d2db11d38f9b19a3eb5860d208aa22d80d879686197ed3305fc",
+      "appraisal_usd": 112.5,
+      "token_allocation": 112500
+    },
+    {
+      "filename": "3384A50E-01B6-48B6-A395-F9AD5D7F4EA1.jpeg",
+      "sha256": "a2a4af308c3dfaf7be5d2b884ac315b146710796d5199e254444f8f9ec95d3e5",
+      "appraisal_usd": 112.5,
+      "token_allocation": 112500
+    },
+    {
+      "filename": "2F962C6C-2B8F-4851-9E18-B2C303D9BD77.jpeg",
+      "sha256": "910b3489164961d68236028b5bdcbf83a4c5451bf6314e0344d0aa2d9271eb15",
+      "appraisal_usd": 112.5,
+      "token_allocation": 112500
+    },
+    {
+      "filename": "218666DA-BDE4-45C5-BE00-56DE8C4F2A8C.jpeg",
+      "sha256": "916f4ed532062999acd7be2620123f486c75a0d09a334c7c1f63fdceeefa9c74",
+      "appraisal_usd": 112.5,
+      "token_allocation": 112500
+    },
+    {
+      "filename": "659E23EB-6381-4388-9007-9AB6CA430B65.jpeg",
+      "sha256": "038e3f02a96bbb73bf3740139348134cab5d18cdc138aa6a4be564331b9fd2ff",
+      "appraisal_usd": 112.5,
+      "token_allocation": 112500
+    },
+    {
+      "filename": "Pasted text(26).txt",
+      "sha256": "6f45f03d84ef675839dc60fd0f92adc2356b508f662a595bfe81e84c32185c92",
+      "appraisal_usd": 1100.0,
+      "token_allocation": 1100000
+    },
+    {
+      "filename": "overmanifold_full_prompt_chain.llm",
+      "sha256": "05c9dc892a9b462c68a8122b95885081927ead65bbd795d9e9802a273fdcc06f",
+      "appraisal_usd": 700.0,
+      "token_allocation": 700000
+    },
+    {
+      "filename": "overmanifold_at_delimited_ledger.llm",
+      "sha256": "b4880791f2f212d61ea515f093cf91f81268f923f99c399e4d3af66ddf1cadba",
+      "appraisal_usd": 400.0,
+      "token_allocation": 400000
+    },
+    {
+      "filename": "chatgpt-20260512T192013Z-3-001.zip",
+      "sha256": "56de3670af43b2365b51352c05d1915a994b190353e7dc7cad2d81437631730c",
+      "appraisal_usd": 3750.0,
+      "token_allocation": 3750000
+    },
+    {
+      "filename": "overmanifold_merkle_report(1).pdf",
+      "sha256": "06eb3f24a0719e5d513109a6d4f8259a3d360e0bab9f72fad1b1b3546185c18c",
+      "appraisal_usd": 487.5,
+      "token_allocation": 487500
+    },
+    {
+      "filename": "gptsmsovermanifold.pdf",
+      "sha256": "4d80d5e45c17c93df17cde3a0bed86dc70b3a3580d587da650c255a9f7d6df78",
+      "appraisal_usd": 1800.0,
+      "token_allocation": 1800000
+    },
+    {
+      "filename": "gptovermanifold.pdf",
+      "sha256": "4d437a83034c898ae9de703f19ad2c56ee6869b6d697e81e31877c3f80eed15b",
+      "appraisal_usd": 3900.0,
+      "token_allocation": 3900000
+    }
+  ]
+}

@@ -50,7 +50,7 @@ MEMBRA CompanyOS is composed of **9 operating-system modules**:
 
 - **Backend**: Python 3.11, FastAPI 0.109, SQLAlchemy 2.0, PostgreSQL 15, Pydantic 2.5
 - **Frontend**: Vanilla HTML/JS, Dark-Gold Neomorphic CSS (no build step)
-- **Infrastructure**: Docker, Docker Compose, Redis, Celery
+- **Infrastructure**: Docker, Docker Compose, Alembic migrations, Render + Vercel
 - **LLM**: Groq (Llama 3.3 70B) or OpenAI (GPT-4o) with deterministic fallback
 - **Auth**: MetaMask wallet signature verification + JWT tokens
 - **Proof**: SHA3-256 hashing with chain linking
@@ -134,32 +134,48 @@ cd membra-companyos/backend
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env   # edit SECRET_KEY and optional LLM keys
 export SECRET_KEY="dev-secret-key-must-be-at-least-32-characters-long"
 export DATABASE_URL="sqlite:///./tmp_companyos.db"
+alembic upgrade head
 python seed.py
 uvicorn app.main:app --reload
 ```
 
-### Docker Compose
+### Docker Compose (production-like)
 
 ```bash
 cd membra-companyos
-docker-compose up --build
+export SECRET_KEY="your-32-char-minimum-secret-key-here"
+docker compose up --build
 ```
 
-### Render (Backend)
+API: `http://localhost:8000` · Health: `http://localhost:8000/v1/health/`
 
-1. Push code to GitHub.
-2. Create a new Web Service on Render, pointing to the `backend` folder.
-3. Add environment variables: `DATABASE_URL`, `SECRET_KEY`, `GROQ_API_KEY`, `OPENAI_API_KEY`.
-4. Deploy. Render auto-detects `render.yaml`.
+### Render (Backend API)
 
-### Vercel (Frontend)
+1. Push this repo to GitHub.
+2. On Render: **New → Blueprint** and point at `membra-companyos/backend/render.yaml` (or create a Web Service with root directory `backend`).
+3. Set sync=false secrets in the dashboard: `GROQ_API_KEY`, `OPENAI_API_KEY`, and `CORS_ORIGINS` to your Vercel dashboard URL (e.g. `https://your-app.vercel.app`).
+4. Deploy. Migrations run via `preDeployCommand`; health check hits `/v1/health/`.
 
-1. Push code to GitHub.
-2. Create a new project on Vercel, pointing to the `frontend` folder.
-3. Set `API_BASE_URL` environment variable to your Render backend URL.
-4. Deploy.
+### Vercel (Dashboard)
+
+1. Create a Vercel project with root directory `membra-companyos/frontend`.
+2. Update `frontend/vercel.json` rewrite destination to your Render API URL (`/v1/:path*` proxy).
+3. Deploy. The dashboard calls `/v1` on the same origin; Vercel proxies to Render (no CORS issues).
+
+Optional: set `<meta name="membra-api-base" content="https://api.example.com/v1">` in `index.html` if not using the Vercel proxy.
+
+### Production checklist
+
+- [ ] `SECRET_KEY` — 32+ chars, unique per environment
+- [ ] `DATABASE_URL` — managed PostgreSQL (Render DB or RDS)
+- [ ] `alembic upgrade head` on deploy (automated in Docker/Render)
+- [ ] `CORS_ORIGINS` — your frontend origin(s), not `*`
+- [ ] `GROQ_API_KEY` or `OPENAI_API_KEY` for Concierge
+- [ ] `SENTRY_DSN` (optional) for error tracking
+- [ ] Update `vercel.json` rewrite URL to match Render service name
 
 ## Environment Variables
 

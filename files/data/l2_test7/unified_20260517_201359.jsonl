@@ -1,0 +1,9 @@
+{"timestamp_ms": 1779048841519, "exchange_ts_ms": 1779048841519, "contract": "BTC_USDT", "message_type": "trade", "side": "unknown", "price": "78313.6", "size": -3684, "local_sequence": 1}
+{"timestamp_ms": 1779048841854, "exchange_ts_ms": 1779048841854, "contract": "BTC_USDT", "message_type": "trade", "side": "unknown", "price": "78313.7", "size": 9, "local_sequence": 2}
+{"timestamp_ms": 1779048841890, "exchange_ts_ms": 1779048841890, "contract": "BTC_USDT", "message_type": "trade", "side": "unknown", "price": "78313.6", "size": -9, "local_sequence": 3}
+{"timestamp_ms": 1779048841893, "exchange_ts_ms": 1779048841893, "contract": "BTC_USDT", "message_type": "trade", "side": "unknown", "price": "78313.6", "size": -14, "local_sequence": 4}
+{"timestamp_ms": 1779048841894, "exchange_ts_ms": 1779048841894, "contract": "BTC_USDT", "message_type": "trade", "side": "unknown", "price": "78312.6", "size": -199, "local_sequence": 5}
+{"timestamp_ms": 1779048841894, "exchange_ts_ms": 1779048841894, "contract": "BTC_USDT", "message_type": "trade", "side": "unknown", "price": "78312.6", "size": -168, "local_sequence": 6}
+{"timestamp_ms": 1779048841900, "exchange_ts_ms": 1779048841900, "contract": "BTC_USDT", "message_type": "trade", "side": "unknown", "price": "78312.2", "size": -3, "local_sequence": 7}
+{"timestamp_ms": 1779048842945, "exchange_ts_ms": 1779048842945, "contract": "BTC_USDT", "message_type": "trade", "side": "unknown", "price": "78305.3", "size": -1, "local_sequence": 8}
+{"timestamp_ms": 1779048843521, "exchange_ts_ms": 1779048843521, "contract": "BTC_USDT", "message_type": "trade", "side": "unknown", "price": "78305.4", "size": 1714, "local_sequence": 9}

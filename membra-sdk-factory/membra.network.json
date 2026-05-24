@@ -1,0 +1,47 @@
+{
+  "network": {
+    "name": "MEMBRA",
+    "layer": "L0",
+    "environment": "devnet",
+    "native_asset": "MEMBRA",
+    "default_rpc": "https://api.devnet.solana.com"
+  },
+  "solana": {
+    "cluster": "devnet",
+    "programs": {
+      "membra_mir": {
+        "program_id": "REPLACE_WITH_MEMBRA_MIR_PROGRAM_ID",
+        "idl_path": "./idl/membra_mir.json"
+      },
+      "membra_gateway": {
+        "program_id": "REPLACE_WITH_GATEWAY_PROGRAM_ID",
+        "idl_path": "./idl/membra_gateway.json"
+      }
+    }
+  },
+  "objects": {
+    "MIR": {
+      "name": "MembraInferenceReceipt",
+      "purpose": "Proof of LLM or agent execution"
+    },
+    "MCR": {
+      "name": "MemoryCollateralReceipt",
+      "purpose": "Proof of repo memory collateral"
+    },
+    "M5": {
+      "name": "M5Node",
+      "purpose": "Staked compute node for inference and transaction confirmation"
+    },
+    "MTP": {
+      "name": "MembraTransactionPass",
+      "purpose": "Proof of sponsored/free user transaction routing"
+    }
+  },
+  "sdk_targets": ["typescript", "python"],
+  "default_policy": {
+    "raw_source_onchain": false,
+    "private_prompts_onchain": false,
+    "chain_of_thought_onchain": false,
+    "devnet_first": true
+  }
+}

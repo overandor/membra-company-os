@@ -1,0 +1,190 @@
+{
+  "capsule_id": "OVERMANIFOLD_RECURSIVE_CHAT_CAPSULE_V2",
+  "created_utc": "2026-05-18T19:54:30Z",
+  "type": "provenance_backed_protocol_ip_capsule",
+  "status": "collateral_asset_liquidity_candidate",
+  "appraisal": {
+    "method": "internal_R&D_IP_appraisal_not_market_value",
+    "prior_calp_usd": 13037.5,
+    "v2_additive_usd": 4712.5,
+    "total_internal_appraisal_usd": 17750.0,
+    "conservative_range_usd": [
+      9500.0,
+      32000.0
+    ],
+    "disclaimer": "Not legal valuation, securities offering, guaranteed market price, or loan eligibility."
+  },
+  "canonical_thesis": "Overmanifold converts semantic artifacts and observed chain events into addressable endpoint-workers whose provenance, finality, timing, liquidity impact, and routing value can be appraised, recorded, and recursively reused as network state.",
+  "core_primitives": [
+    "Transaction-as-Endpoint Worker",
+    "Blockchain-as-Worker-Network",
+    "LLM-governed mempool router",
+    "Endpoint as liquidity-capability surface",
+    "Merkle-provenance collateral package",
+    ".llm semantic ledger"
+  ],
+  "merkle_root": "e4acbf8c29c6cfbb6251ddb8bdba4443b970436f7763d41115290c13a2ac4872",
+  "source_artifacts": [
+    {
+      "name": "Pasted text(26).txt",
+      "path": "/mnt/data/Pasted text(26).txt",
+      "size_bytes": 9261,
+      "sha256": "6f45f03d84ef675839dc60fd0f92adc2356b508f662a595bfe81e84c32185c92",
+      "role": "source_artifact"
+    },
+    {
+      "name": "overmanifold_full_prompt_chain.llm",
+      "path": "/mnt/data/overmanifold_full_prompt_chain.llm",
+      "size_bytes": 10181,
+      "sha256": "05c9dc892a9b462c68a8122b95885081927ead65bbd795d9e9802a273fdcc06f",
+      "role": "source_artifact"
+    },
+    {
+      "name": "overmanifold_at_delimited_ledger.llm",
+      "path": "/mnt/data/overmanifold_at_delimited_ledger.llm",
+      "size_bytes": 2900,
+      "sha256": "b4880791f2f212d61ea515f093cf91f81268f923f99c399e4d3af66ddf1cadba",
+      "role": "source_artifact"
+    },
+    {
+      "name": "overmanifold_merkle_report(1).pdf",
+      "path": "/mnt/data/overmanifold_merkle_report(1).pdf",
+      "size_bytes": 4017,
+      "sha256": "06eb3f24a0719e5d513109a6d4f8259a3d360e0bab9f72fad1b1b3546185c18c",
+      "role": "source_artifact"
+    },
+    {
+      "name": "gptsmsovermanifold.pdf",
+      "path": "/mnt/data/gptsmsovermanifold.pdf",
+      "size_bytes": 197903,
+      "sha256": "4d80d5e45c17c93df17cde3a0bed86dc70b3a3580d587da650c255a9f7d6df78",
+      "role": "source_artifact"
+    },
+    {
+      "name": "gptovermanifold.pdf",
+      "path": "/mnt/data/gptovermanifold.pdf",
+      "size_bytes": 889166,
+      "sha256": "4d437a83034c898ae9de703f19ad2c56ee6869b6d697e81e31877c3f80eed15b",
+      "role": "source_artifact"
+    },
+    {
+      "name": "chatgpt-20260512T192013Z-3-001.zip",
+      "path": "/mnt/data/chatgpt-20260512T192013Z-3-001.zip",
+      "size_bytes": 153964217,
+      "sha256": "56de3670af43b2365b51352c05d1915a994b190353e7dc7cad2d81437631730c",
+      "role": "source_artifact"
+    },
+    {
+      "name": "OVERMANIFOLD_CALP_v1_FULL.zip",
+      "path": "/mnt/data/OVERMANIFOLD_CALP_v1_FULL.zip",
+      "size_bytes": 156154621,
+      "sha256": "519bb6381d37ca29e01e0299fda7b7a736500e20b39ff28d2d39aaa60a0c586e",
+      "role": "source_artifact"
+    },
+    {
+      "name": "OVERMANIFOLD_CALP_v1_LITE.zip",
+      "path": "/mnt/data/OVERMANIFOLD_CALP_v1_LITE.zip",
+      "size_bytes": 17725,
+      "sha256": "2ad47a747c869dfdb750690d27cd46f86a7884916366c2ee8d99fdf8ed80e67d",
+      "role": "source_artifact"
+    },
+    {
+      "name": "218666DA-BDE4-45C5-BE00-56DE8C4F2A8C.jpeg",
+      "path": "/mnt/data/218666DA-BDE4-45C5-BE00-56DE8C4F2A8C.jpeg",
+      "size_bytes": 282566,
+      "sha256": "916f4ed532062999acd7be2620123f486c75a0d09a334c7c1f63fdceeefa9c74",
+      "role": "source_artifact"
+    },
+    {
+      "name": "2F962C6C-2B8F-4851-9E18-B2C303D9BD77.jpeg",
+      "path": "/mnt/data/2F962C6C-2B8F-4851-9E18-B2C303D9BD77.jpeg",
+      "size_bytes": 247247,
+      "sha256": "910b3489164961d68236028b5bdcbf83a4c5451bf6314e0344d0aa2d9271eb15",
+      "role": "source_artifact"
+    },
+    {
+      "name": "3384A50E-01B6-48B6-A395-F9AD5D7F4EA1.jpeg",
+      "path": "/mnt/data/3384A50E-01B6-48B6-A395-F9AD5D7F4EA1.jpeg",
+      "size_bytes": 290454,
+      "sha256": "a2a4af308c3dfaf7be5d2b884ac315b146710796d5199e254444f8f9ec95d3e5",
+      "role": "source_artifact"
+    },
+    {
+      "name": "4A4D3A87-6A8D-4DC0-A4A4-B43C0B944CC8.jpeg",
+      "path": "/mnt/data/4A4D3A87-6A8D-4DC0-A4A4-B43C0B944CC8.jpeg",
+      "size_bytes": 294822,
+      "sha256": "0ca45c818fa6feda41e9bf650cb985b151a5d635399d1c46230de7700cc67e59",
+      "role": "source_artifact"
+    },
+    {
+      "name": "5A8549FE-809C-464E-9F88-331B6DEB4699.jpeg",
+      "path": "/mnt/data/5A8549FE-809C-464E-9F88-331B6DEB4699.jpeg",
+      "size_bytes": 280965,
+      "sha256": "98d5c5d28fc40d2db11d38f9b19a3eb5860d208aa22d80d879686197ed3305fc",
+      "role": "source_artifact"
+    },
+    {
+      "name": "61694407-18F8-45C8-B903-3E876F7653DC.jpeg",
+      "path": "/mnt/data/61694407-18F8-45C8-B903-3E876F7653DC.jpeg",
+      "size_bytes": 444145,
+      "sha256": "a55f8f092f9e3833180bf387bac4edf6d0a6ec6becec14e02e812677444356cc",
+      "role": "source_artifact"
+    },
+    {
+      "name": "659E23EB-6381-4388-9007-9AB6CA430B65.jpeg",
+      "path": "/mnt/data/659E23EB-6381-4388-9007-9AB6CA430B65.jpeg",
+      "size_bytes": 275900,
+      "sha256": "038e3f02a96bbb73bf3740139348134cab5d18cdc138aa6a4be564331b9fd2ff",
+      "role": "source_artifact"
+    },
+    {
+      "name": "A375C5D2-92E5-4383-A16A-DCB9CFBBF8AB.jpeg",
+      "path": "/mnt/data/A375C5D2-92E5-4383-A16A-DCB9CFBBF8AB.jpeg",
+      "size_bytes": 408477,
+      "sha256": "8f9ca662bb4117cf53e8a8b0232725d0e38ae071e83f96313c53ee7f102d7c1a",
+      "role": "source_artifact"
+    }
+  ],
+  "generated_files": [
+    {
+      "name": "COLLATERAL_ASSET_LIQUIDITY_ADDENDUM.md",
+      "path": "/mnt/data/OVERMANIFOLD_RECURSIVE_CHAT_CAPSULE_V2/COLLATERAL_ASSET_LIQUIDITY_ADDENDUM.md",
+      "size_bytes": 1261,
+      "sha256": "9e9af48e4e10f917b6b7f120c90cf1134070a806d451b8389634105407703346",
+      "role": "generated_capsule_file"
+    },
+    {
+      "name": "OVERMANIFOLD_MEMPOOL_LLM_ROUTER_V1.md",
+      "path": "/mnt/data/OVERMANIFOLD_RECURSIVE_CHAT_CAPSULE_V2/OVERMANIFOLD_MEMPOOL_LLM_ROUTER_V1.md",
+      "size_bytes": 1633,
+      "sha256": "b2ee7dec7ca4df98f2a4ca5e7455edf75e66dd2389a0ebee888a1fc8961ebfb9",
+      "role": "generated_capsule_file"
+    },
+    {
+      "name": "OVERMANIFOLD_RECURSIVE_CONTINUATION_V2.llm",
+      "path": "/mnt/data/OVERMANIFOLD_RECURSIVE_CHAT_CAPSULE_V2/OVERMANIFOLD_RECURSIVE_CONTINUATION_V2.llm",
+      "size_bytes": 3223,
+      "sha256": "a87a9890f478258e77d2ce1d384eb3adde9a83d3d007e4139d52cb7c964383b9",
+      "role": "generated_capsule_file"
+    },
+    {
+      "name": "README.md",
+      "path": "/mnt/data/OVERMANIFOLD_RECURSIVE_CHAT_CAPSULE_V2/README.md",
+      "size_bytes": 1077,
+      "sha256": "c71ee2c68397b3df39c34acd1b37c09977d4a09c2e5ef973d119cae93ad80f94",
+      "role": "generated_capsule_file"
+    },
+    {
+      "name": "transaction_endpoint_workers.openapi.yaml",
+      "path": "/mnt/data/OVERMANIFOLD_RECURSIVE_CHAT_CAPSULE_V2/transaction_endpoint_workers.openapi.yaml",
+      "size_bytes": 2983,
+      "sha256": "10bc7a20eea68985f0538c051b4dc659c13c2eb3af09c7f8ae437dd3e9d95d77",
+      "role": "generated_capsule_file"
+    }
+  ],
+  "merkle_root_excludes": [
+    "manifest.json",
+    "MERKLE_REPORT.md",
+    "hash_register.csv"
+  ]
+}

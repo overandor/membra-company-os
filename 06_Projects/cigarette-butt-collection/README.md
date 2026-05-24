@@ -137,9 +137,9 @@ A mobile and web application that incentivizes cigarette butt collection in NYC,
 ## API Keys Configuration
 
 ```bash
-GROQ_API_KEY=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
-GITHUB_API_KEY=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
-HUGGING_FACE_API_KEY=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
+GROQ_API_KEY=REDACTED_GROQ_KEY
+GITHUB_API_KEY=REDACTED_GITHUB_TOKEN
+HUGGING_FACE_API_KEY=REDACTED_HF_TOKEN
 ```
 
 ---

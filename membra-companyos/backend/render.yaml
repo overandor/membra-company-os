@@ -3,8 +3,11 @@ services:
     name: membra-companyos-api
     runtime: python
     plan: standard
+    rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    preDeployCommand: alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 2
+    healthCheckPath: /v1/health/
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -16,14 +19,14 @@ services:
         sync: false
       - key: OPENAI_API_KEY
         sync: false
-      - key: REDIS_URL
-        value: redis://redis:6379/0
       - key: ENVIRONMENT
         value: production
       - key: LOG_LEVEL
         value: INFO
+      - key: DEBUG
+        value: "false"
       - key: CORS_ORIGINS
-        value: "*"
+        sync: false
 
 databases:
   - name: membra-companyos-db

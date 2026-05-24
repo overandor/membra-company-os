@@ -1,0 +1,3 @@
+{"timestamp_ms": 1779048855519, "exchange_ts_ms": 1779048855392, "contract": "BTC_USDT", "message_type": "trade", "side": "sell", "price": "78303.9", "size": 2317, "local_sequence": 1}
+{"timestamp_ms": 1779048855537, "exchange_ts_ms": 1779048855410, "contract": "BTC_USDT", "message_type": "trade", "side": "buy", "price": "78304", "size": 2, "local_sequence": 2}
+{"timestamp_ms": 1779048857545, "exchange_ts_ms": 1779048857418, "contract": "BTC_USDT", "message_type": "trade", "side": "sell", "price": "78303.9", "size": 192, "local_sequence": 3}

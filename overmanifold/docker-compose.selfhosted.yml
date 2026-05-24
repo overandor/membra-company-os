@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: overmanifold-dashboard
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+      - ./ssl:/app/ssl:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mock-membra-bridge:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - overmanifold-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: overmanifold-postgres
+    environment:
+      POSTGRES_DB: overmanifold
+      POSTGRES_USER: overmanifold
+      POSTGRES_PASSWORD: changeme123
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - overmanifold-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U overmanifold"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: overmanifold-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - overmanifold-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mock-membra-bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock
+    container_name: mock-membra-bridge
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+    networks:
+      - overmanifold-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  nginx:
+    image: nginx:alpine
+    container_name: overmanifold-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx-selfhosted.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - dashboard
+    restart: unless-stopped
+    networks:
+      - overmanifold-network
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  overmanifold-network:
+    driver: bridge

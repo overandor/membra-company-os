@@ -1,0 +1,38 @@
+export const Colors = {
+  dark: {
+    background: '#0b0f1a',
+    surface: '#111827',
+    surfaceHighlight: '#1f2937',
+    primary: '#3b82f6',
+    primaryDark: '#2563eb',
+    accent: '#10b981',
+    accentDark: '#059669',
+    warning: '#f59e0b',
+    danger: '#ef4444',
+    text: '#f9fafb',
+    textSecondary: '#9ca3af',
+    textMuted: '#6b7280',
+    border: '#374151',
+    borderLight: '#4b5563',
+    overlay: 'rgba(0,0,0,0.7)',
+  },
+  light: {
+    background: '#f9fafb',
+    surface: '#ffffff',
+    surfaceHighlight: '#f3f4f6',
+    primary: '#2563eb',
+    primaryDark: '#1d4ed8',
+    accent: '#059669',
+    accentDark: '#047857',
+    warning: '#d97706',
+    danger: '#dc2626',
+    text: '#111827',
+    textSecondary: '#4b5563',
+    textMuted: '#9ca3af',
+    border: '#e5e7eb',
+    borderLight: '#d1d5db',
+    overlay: 'rgba(0,0,0,0.5)',
+  },
+} as const;
+
+export type Theme = 'dark' | 'light';

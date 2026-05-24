@@ -1,0 +1,6 @@
+{"timestamp_ms": 1779048930943, "exchange_ts_ms": 1779048930943, "contract": "", "message_type": "snapshot", "bids": [], "asks": [], "sequence": null, "local_sequence": 1}
+{"timestamp_ms": 1779048932396, "exchange_ts_ms": 1779048932228, "contract": "BTC_USDT", "message_type": "trade", "side": "sell", "price": "78299.4", "size": 102, "local_sequence": 2}
+{"timestamp_ms": 1779048932396, "exchange_ts_ms": 1779048932228, "contract": "BTC_USDT", "message_type": "trade", "side": "sell", "price": "78299.4", "size": 6, "local_sequence": 3}
+{"timestamp_ms": 1779048932396, "exchange_ts_ms": 1779048932228, "contract": "BTC_USDT", "message_type": "trade", "side": "sell", "price": "78299.4", "size": 5, "local_sequence": 4}
+{"timestamp_ms": 1779048932397, "exchange_ts_ms": 1779048932228, "contract": "BTC_USDT", "message_type": "trade", "side": "sell", "price": "78299.4", "size": 3743, "local_sequence": 5}
+{"timestamp_ms": 1779048932397, "exchange_ts_ms": 1779048932228, "contract": "BTC_USDT", "message_type": "trade", "side": "sell", "price": "78299.4", "size": 729, "local_sequence": 6}

@@ -1,0 +1,22 @@
+{
+  "model_name": "OM-CALP Heuristic Appraisal v1",
+  "factors": {
+    "novelty": 0.2,
+    "coherence": 0.15,
+    "provenance_strength": 0.15,
+    "technical_specificity": 0.15,
+    "reuse_transformability": 0.15,
+    "prototype_proximity": 0.1,
+    "market_packaging_readiness": 0.1
+  },
+  "total_usd": 13037.5,
+  "range_low_usd": 7400.0,
+  "range_high_usd": 21050.0,
+  "limitations": [
+    "No third-party buyer quote",
+    "No audited codebase",
+    "No bank commitment",
+    "No revenue proof",
+    "No legal opinion"
+  ]
+}

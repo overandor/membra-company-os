@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  membra-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: membra-dashboard
+    ports:
+      - "8000:8000"
+    environment:
+      - MEMBRA_API_URL=http://membra-bridge:8000
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/membra_dashboard
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=INFO
+      - SENTRY_DSN=${SENTRY_DSN}
+      - ENVIRONMENT=production
+    depends_on:
+      - postgres
+      - redis
+      - membra-bridge
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - membra-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  membra-bridge:
+    image: membrabridge/membra-bridge:latest
+    container_name: membra-bridge
+    ports:
+      - "8001:8000"
+    environment:
+      - NETWORK=mainnet
+      - RPC_URL=${SOLANA_RPC_URL}
+      - PRIVATE_KEY=${MEMBRA_PRIVATE_KEY}
+    volumes:
+      - ./membra-data:/data
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: membra-postgres
+    environment:
+      - POSTGRES_DB=membra_dashboard
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: membra-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: membra-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - membra-dashboard
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  membra-network:
+    driver: bridge

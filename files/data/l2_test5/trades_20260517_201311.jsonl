@@ -1,0 +1,2 @@
+{"timestamp_ms": 1779048793827, "exchange_ts_ms": 1779048793827, "contract": "", "message_type": "trade", "side": "unknown", "price": "78331.5", "size": 1, "local_sequence": 1}
+{"timestamp_ms": 1779048800664, "exchange_ts_ms": 1779048800664, "contract": "", "message_type": "trade", "side": "unknown", "price": "78331.4", "size": -1, "local_sequence": 2}

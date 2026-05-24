@@ -5,23 +5,31 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 import time
-import structlog
 
 from app.core.config import get_settings
 from app.core.logging import configure_logging, get_logger
-from app.db.base import engine, Base
 from app.api import api_router
 
 settings = get_settings()
 configure_logging(settings.LOG_LEVEL)
 logger = get_logger(__name__)
 
+if settings.SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.fastapi import FastApiIntegration
+
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        environment=settings.ENVIRONMENT,
+        release=settings.APP_VERSION,
+        integrations=[FastApiIntegration()],
+        traces_sample_rate=0.1 if settings.is_production else 1.0,
+    )
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("startup", version=settings.APP_VERSION, environment=settings.ENVIRONMENT)
-    Base.metadata.create_all(bind=engine)
-    logger.info("database_tables_created", count=len(Base.metadata.tables))
     yield
     logger.info("shutdown")
 
@@ -35,11 +43,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Middleware
+_cors_origins = settings.cors_origin_list()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_cors_origins,
+    allow_credentials="*" not in _cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -64,10 +72,10 @@ async def logging_middleware(request: Request, call_next):
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error("unhandled_exception", path=request.url.path, error=str(exc))
-    return JSONResponse(
-        status_code=500,
-        content={"success": False, "message": "Internal server error", "detail": str(exc)},
-    )
+    payload = {"success": False, "message": "Internal server error"}
+    if settings.DEBUG:
+        payload["detail"] = str(exc)
+    return JSONResponse(status_code=500, content=payload)
 
 
 # Root endpoint

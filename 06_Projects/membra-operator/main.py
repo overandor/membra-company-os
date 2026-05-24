@@ -57,9 +57,17 @@ class OperatorApp:
         tk.Button(sidebar, text="📋 Checklist", bg=SECONDARY, fg=FG, font=(FONT_FAMILY, 11),
                   relief=tk.FLAT, cursor="hand2", command=self._show_checklist).pack(fill=tk.X, padx=12, pady=4)
 
+        self.btn_reconnect = tk.Button(sidebar, text="🔄 Reconnect Ollama", bg=SECONDARY, fg=FG, font=(FONT_FAMILY, 10),
+                                        relief=tk.FLAT, cursor="hand2", command=self._reconnect_llm)
+        self.btn_reconnect.pack(fill=tk.X, padx=12, pady=4)
+
+        self.ollama_status = tk.Label(sidebar, text="Ollama: checking...", bg=SECONDARY, fg="#64748b",
+                                       font=(FONT_FAMILY, 9))
+        self.ollama_status.pack(side=tk.BOTTOM, pady=4)
+
         self.status_label = tk.Label(sidebar, text="Status: idle", bg=SECONDARY, fg="#64748b",
                                       font=(FONT_FAMILY, 9))
-        self.status_label.pack(side=tk.BOTTOM, pady=8)
+        self.status_label.pack(side=tk.BOTTOM, pady=4)
 
         # Main area
         main = tk.Frame(self.root, bg=BG)
@@ -96,7 +104,11 @@ class OperatorApp:
                       command=lambda l=label: self._quick_action(l)).pack(side=tk.LEFT, padx=(0, 6))
 
         self._log("system", "MEMBRA Operator initialized.\nWorkspace: " + self.operator.workspace)
-        self._log("system", "Say something or type a command.")
+        self._update_ollama_status()
+        if not self.operator.llm.connected:
+            self._log("system", "⚠️ Ollama not connected. Click '🔄 Reconnect Ollama' or run: ollama serve")
+        else:
+            self._log("system", "Ollama connected. Say something or type a command.")
 
     def _log(self, tag: str, text: str):
         self.log.insert(tk.END, text + "\n", tag)
@@ -113,6 +125,12 @@ class OperatorApp:
     def _process_text(self, text: str):
         self.operator.last_user_message = text
         self.operator.memory.add_message(self.operator.session_id, "user", text)
+        if not self.operator.llm.connected:
+            msg = "Ollama is not connected. Please run 'ollama serve' and click '🔄 Reconnect Ollama'."
+            self._log("system", msg)
+            self._set_status("idle")
+            self.operator.speak(msg)
+            return
         self._set_status("thinking...")
         try:
             from tools import TOOL_REGISTRY
@@ -163,9 +181,23 @@ class OperatorApp:
         self.operator.status = text
 
     def _update_loop(self):
-        # Poll stats every 2s
-        stats = self.operator.stats()
+        self._update_ollama_status()
         self.root.after(2000, self._update_loop)
+
+    def _update_ollama_status(self):
+        connected = self.operator.llm._check_health()
+        model = self.operator.llm.model
+        if connected:
+            self.ollama_status.config(text=f"Ollama: {model}", fg="#22c55e")
+        else:
+            self.ollama_status.config(text="Ollama: offline", fg="#ef4444")
+
+    def _reconnect_llm(self):
+        self._log("system", "Reconnecting to Ollama...")
+        if self.operator.llm._check_health():
+            self._log("system", f"Ollama connected ({self.operator.llm.model}).")
+        else:
+            self._log("system", "Ollama still unreachable. Make sure 'ollama serve' is running.")
 
     def _reopen(self):
         self.root.lift()

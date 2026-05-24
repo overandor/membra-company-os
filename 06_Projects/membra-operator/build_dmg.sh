@@ -31,6 +31,8 @@ pyinstaller main.py \
   --hidden-import pathlib \
   --hidden-import threading \
   --hidden-import datetime \
+  --hidden-import requests \
+  --hidden-import certifi \
   --exclude-module torch \
   --exclude-module torchvision \
   --exclude-module torchaudio \
@@ -58,6 +60,11 @@ if [ ! -d "$BUNDLE" ]; then
     echo "ERROR: Bundle not found at $BUNDLE"
     exit 1
 fi
+
+echo "[3.5/4] Signing bundle with network entitlements..."
+codesign --force --deep --sign - \
+  --entitlements MEMBRA_Operator.entitlements \
+  "$BUNDLE" || echo "Warning: codesign failed (non-fatal for local use)"
 
 echo "[4/4] Creating DMG..."
 rm -f "dist/$DMG_NAME"

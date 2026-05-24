@@ -1,0 +1,79 @@
+openapi: 3.1.0
+info:
+  title: Overmanifold Transaction Endpoint Workers API
+  version: 1.0.0
+  description: Observes blockchain transactions and converts them into Merkle-provable endpoint workers.
+paths:
+  /transactions/observe:
+    post:
+      operationId: observeTransaction
+      x-openai-isConsequential: false
+      summary: Observe a blockchain transaction and convert it into an endpoint worker candidate.
+  /transactions/{chainId}/{txHash}:
+    get:
+      operationId: getTransactionEndpoint
+      x-openai-isConsequential: false
+      summary: Retrieve transaction endpoint state.
+  /transactions/{chainId}/{txHash}/merkle:
+    post:
+      operationId: createTransactionMerkleProof
+      x-openai-isConsequential: false
+      summary: Create a Merkle proof for a transaction endpoint.
+  /transactions/{chainId}/{txHash}/push:
+    post:
+      operationId: pushTransactionEvent
+      x-openai-isConsequential: true
+      summary: Push a transaction-derived event into another protocol.
+  /transactions/{chainId}/{txHash}/cron:
+    post:
+      operationId: scheduleTransactionWorker
+      x-openai-isConsequential: true
+      summary: Schedule a transaction endpoint as a recurring or confirmation-based worker.
+  /transactions/{chainId}/{txHash}/attest:
+    post:
+      operationId: attestTransactionEndpoint
+      x-openai-isConsequential: true
+      summary: Attest a transaction endpoint to a protocol registry or public state layer.
+components:
+  schemas:
+    TransactionEndpointWorker:
+      type: object
+      properties:
+        id: {type: string}
+        chainId: {type: string}
+        txHash: {type: string}
+        explorerUrl: {type: string}
+        lifecycleState:
+          type: string
+          enum: [mempool_seen, pending, included, confirmed, finalized, failed, reorged]
+        eventType:
+          type: string
+          enum: [transfer, swap, mint, burn, deploy, bridge, stake, unstake, attest, oracle_update, governance, unknown]
+        payloadHash: {type: string}
+        merkleLeaf: {type: string}
+        merkleRoot: {type: string}
+        confirmationClock:
+          type: object
+          properties:
+            minConfirmations: {type: integer}
+            finalityType:
+              type: string
+              enum: [optimistic, probabilistic, deterministic, economic]
+        workerMode:
+          type: string
+          enum: [one_shot, confirmation_triggered, cron, reorg_watch, arbitrage_watch]
+        pushTargets:
+          type: array
+          items:
+            type: string
+            enum: [overmanifold, ipfs, github, oracle, sms, email, another_chain]
+        kpis:
+          type: object
+          properties:
+            confirmationLatencyMs: {type: number}
+            finalityConfidence: {type: number}
+            volatilityImpact: {type: number}
+            liquidityImpact: {type: number}
+            arbitrageSignal: {type: number}
+            provenanceScore: {type: number}
+            executionRisk: {type: number}

@@ -15,13 +15,14 @@
       "use": "@vercel/static"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/v1/:path*",
+      "destination": "https://membra-companyos-api.onrender.com/v1/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
-  ],
-  "env": {
-    "API_BASE_URL": "https://membra-companyos-api.onrender.com/v1"
-  }
+  ]
 }

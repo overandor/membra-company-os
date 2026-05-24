@@ -1,0 +1,65 @@
+OVERMANIFOLD_RECURSIVE_CONTINUATION_V2
+
+STATUS
+This capsule converts the current chat state into an Overmanifold object: collateral, asset, liquidity surface, provenance ledger, and recursive continuation marker.
+
+PRIMARY THESIS
+A link is no longer only a URL. A link becomes a bidirectional liquidity-capability endpoint: identity, routing, settlement, proof, compute, storage, messaging, oracle state, and appraisal compressed into one Merkle-verifiable object.
+
+CANONICAL PRIMITIVES
+1. Liquidity is reachable verified state.
+2. Each Overmanifold link is a liquidity pool and endpoint at the same time.
+3. Every observed blockchain transaction can become a TransactionEndpointWorker.
+4. Confirmations are decentralized worker clocks.
+5. Blockchains are worker networks.
+6. The LLM observes mempools as weather, not prey.
+7. The LLM may recommend; policy may permit; wallet may sign; chain may settle; Merkle root records.
+8. Zero, infinity, and undefined are a shared non-finite appraisal boundary only after typed projection, not ordinary arithmetic equality.
+
+FORMAL OBJECT
+Ω_link = (H, W, P, C, R, S, K, L)
+H = handlers: SMS, Telegram, email, Signal, Matrix
+W = wallets: Solana, EVM, Bitcoin, Lightning, stablecoin rails
+P = proofs: signatures, Merkle roots, artifact hashes, repo proofs
+C = capabilities: receive, send, relay, compute, infer, verify
+R = routing surfaces: web, SMS fragments, QR, Bluetooth, IPFS, relays
+S = settlement mappings: programs, escrows, relayers, sponsor vaults
+K = KPI vector: uptime, trust, novelty, proof quality, route success
+L = liquidity state: reachable verified economic capacity
+
+TRANSACTION ENDPOINT WORKER
+T = (χ, h, τ, φ, μ, κ, α)
+χ = chain
+h = tx hash
+τ = transaction lifecycle state
+φ = finality policy
+μ = Merkle commitment
+κ = KPI vector
+α = permitted action set
+
+Transition:
+T[t+1] = F(T[t], confirmations, logs, oracleState, liquidityDelta, finalityPolicy)
+
+MEMPOOL LLM ROUTER
+observed transaction -> decoded intent -> mempool/state context -> LLM review -> deterministic policy gate -> transaction builder -> signer -> relay/RPC/private route -> confirmation worker -> Merkle receipt
+
+Policy invariant:
+read / observe / simulate / prove = non-consequential
+push / schedule / notify / bridge / trade / write = consequential
+
+Safety invariant:
+The LLM must not directly sign, submit, or move funds. The LLM classifies and recommends. A deterministic policy engine permits or rejects. A wallet or human approval layer signs.
+
+FORBIDDEN MODES
+- sandwich attack
+- predatory frontrunning
+- spoof liquidity
+- oracle manipulation
+- exploit of vulnerable contracts
+- draining unowned funds
+
+APPRAISAL ROLE
+This chat and its attached artifacts are not money by themselves. They are provenance-backed protocol-IP evidence. They become collateralizable only as a package: authored works, source artifacts, Merkle roots, .llm ledgers, screenshots, runtime docs, valuation memo, and deployable prototype pathway.
+
+CAPSULE CLAIM
+Overmanifold converts semantic artifacts and observed chain events into addressable endpoint-workers whose provenance, finality, timing, liquidity impact, and routing value can be appraised, recorded, and recursively re-used as network state.

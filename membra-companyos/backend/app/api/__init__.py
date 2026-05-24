@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api import auth, intents, tasks, agents, jobs, companies, governance, proofbook, settlements, worldbridge, concierge, health, orchestrate, dashboard, workforce
+from app.api import auth, intents, tasks, agents, jobs, companies, governance, proofbook, settlements, worldbridge, concierge, health, orchestrate, dashboard, workforce, agent_network
 
 api_router = APIRouter(prefix="/v1")
 
@@ -18,3 +18,4 @@ api_router.include_router(orchestrate.router, prefix="/orchestrate", tags=["Orch
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
 api_router.include_router(health.router, prefix="/health", tags=["Health"])
 api_router.include_router(workforce.router, prefix="/workforce", tags=["Workforce"])
+api_router.include_router(agent_network.router, prefix="/agent-network", tags=["Agent Network Protocol OS"])

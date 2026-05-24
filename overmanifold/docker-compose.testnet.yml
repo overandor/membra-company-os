@@ -1,0 +1,160 @@
+version: '3.8'
+
+# Overmanifold Testnet v0.1 Deployment
+# READ-ONLY CHAIN INTEGRATION - NO PRIVATE KEYS - NO REAL VALUE TRANSFER
+
+services:
+  overmanifold-testnet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: overmanifold-testnet-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=testnet
+      - DEBUG=false
+      - HUMAN_APPROVAL_REQUIRED=true
+      - ETHEREUM_READ_ONLY=true
+      - SOLANA_READ_ONLY=true
+    env_file:
+      - .env.testnet
+    volumes:
+      - ./logs:/var/log/overmanifold
+      - ./overmanifold:/app/overmanifold
+      - ./testnet-data:/var/lib/overmanifold/testnet
+    depends_on:
+      postgres-testnet:
+        condition: service_healthy
+      redis-testnet:
+        condition: service_healthy
+    networks:
+      - testnet-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: ["python", "-m", "overmanifold.api.server"]
+
+  postgres-testnet:
+    image: postgres:15-alpine
+    container_name: overmanifold-testnet-postgres
+    environment:
+      - POSTGRES_DB=overmanifold_testnet
+      - POSTGRES_USER=overmanifold_testnet
+      - POSTGRES_PASSWORD=testnet_secure_password_change_in_production
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    volumes:
+      - testnet-postgres-data:/var/lib/postgresql/data
+      - ./sql/testnet-init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - testnet-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U overmanifold_testnet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis-testnet:
+    image: redis:7-alpine
+    container_name: overmanifold-testnet-redis
+    ports:
+      - "6380:6379"  # Different port to avoid conflicts
+    command: redis-server --appendonly yes --port 6379
+    volumes:
+      - testnet-redis-data:/data
+    networks:
+      - testnet-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  prometheus-testnet:
+    image: prom/prometheus:latest
+    container_name: overmanifold-testnet-prometheus
+    ports:
+      - "9091:9090"  # Different port to avoid conflicts
+    volumes:
+      - ./monitoring/testnet-prometheus.yml:/etc/prometheus/prometheus.yml
+      - testnet-prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - testnet-network
+    restart: unless-stopped
+
+  grafana-testnet:
+    image: grafana/grafana:latest
+    container_name: overmanifold-testnet-grafana
+    ports:
+      - "3001:3000"  # Different port to avoid conflicts
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=testnet_admin_change_in_production
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - testnet-grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - testnet-network
+    depends_on:
+      - prometheus-testnet
+    restart: unless-stopped
+
+  # Read-only blockchain watchers (no private keys)
+  ethereum-watcher:
+    image: overmanifold/protocol:latest
+    container_name: ethereum-testnet-watcher
+    environment:
+      - ENVIRONMENT=testnet
+      - WATCHER_MODE=ethereum
+      - READ_ONLY=true
+    env_file:
+      - .env.testnet
+    volumes:
+      - ./overmanifold:/app/overmanifold
+      - ./testnet-data/ethereum:/var/lib/overmanifold/ethereum
+    networks:
+      - testnet-network
+    depends_on:
+      - overmanifold-testnet
+    restart: unless-stopped
+    command: ["python", "-m", "overmanifold.watchers.ethereum"]
+
+  solana-watcher:
+    image: overmanifold/protocol:latest
+    container_name: solana-testnet-watcher
+    environment:
+      - ENVIRONMENT=testnet
+      - WATCHER_MODE=solana
+      - READ_ONLY=true
+    env_file:
+      - .env.testnet
+    volumes:
+      - ./overmanifold:/app/overmanifold
+      - ./testnet-data/solana:/var/lib/overmanifold/solana
+    networks:
+      - testnet-network
+    depends_on:
+      - overmanifold-testnet
+    restart: unless-stopped
+    command: ["python", "-m", "overmanifold.watchers.solana"]
+
+networks:
+  testnet-network:
+    driver: bridge
+
+volumes:
+  testnet-postgres-data:
+  testnet-redis-data:
+  testnet-prometheus-data:
+  testnet-grafana-data:

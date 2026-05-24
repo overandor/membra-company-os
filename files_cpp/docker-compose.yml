@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  depthos:
+    build: .
+    container_name: depthos-mm
+    restart: unless-stopped
+    environment:
+      - GATE_API_KEY=${GATE_API_KEY}
+      - GATE_API_SECRET=${GATE_API_SECRET}
+      - DRY_RUN=${DRY_RUN:-1}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    env_file:
+      - .env

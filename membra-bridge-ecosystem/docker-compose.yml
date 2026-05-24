@@ -1,0 +1,274 @@
+version: '3.8'
+
+services:
+  # IPFS Node
+  ipfs:
+    image: ipfs/kubo:latest
+    container_name: membra-ipfs
+    ports:
+      - "4001:4001"  # IPFS Swarm
+      - "5001:5001"  # IPFS API
+      - "8080:8080"  # IPFS Gateway
+    volumes:
+      - ipfs_data:/data/ipfs
+    environment:
+      - IPFS_PROFILE=server
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: membra-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  # PostgreSQL for metadata
+  postgres:
+    image: postgres:15-alpine
+    container_name: membra-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: membra_bridge
+      POSTGRES_USER: membra_user
+      POSTGRES_PASSWORD: membra_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  # File Tokenization Service
+  file-tokenizer:
+    build:
+      context: .
+      dockerfile: Dockerfile.tokenizer
+    container_name: membra-file-tokenizer
+    ports:
+      - "8001:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://membra_user:membra_password@postgres:5432/membra_bridge
+      - IPFS_URL=http://ipfs:5001
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      - redis
+      - postgres
+      - ipfs
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  # Oracle System Service
+  oracle-system:
+    build:
+      context: .
+      dockerfile: Dockerfile.oracle
+    container_name: membra-oracle
+    ports:
+      - "8002:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://membra_user:membra_password@postgres:5432/membra_bridge
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  # Phone Wallet Service
+  phone-wallet:
+    build:
+      context: .
+      dockerfile: Dockerfile.wallet
+    container_name: membra-phone-wallet
+    ports:
+      - "8003:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://membra_user:membra_password@postgres:5432/membra_bridge
+      - SOLANA_RPC_URL=https://api.devnet.solana.com
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  # KPI Tracker Service
+  kpi-tracker:
+    build:
+      context: .
+      dockerfile: Dockerfile.kpi
+    container_name: membra-kpi-tracker
+    ports:
+      - "8004:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://membra_user:membra_password@postgres:5432/membra_bridge
+      - ORACLE_URL=http://oracle-system:8000
+    depends_on:
+      - redis
+      - postgres
+      - oracle-system
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  # ZK Verifier Service
+  zk-verifier:
+    build:
+      context: .
+      dockerfile: Dockerfile.zk
+    container_name: membra-zk-verifier
+    ports:
+      - "8005:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://membra_user:membra_password@postgres:5432/membra_bridge
+    volumes:
+      - ./zk_proofs:/app/zk_proofs
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  # LLM Validator Service
+  llm-validator:
+    build:
+      context: .
+      dockerfile: Dockerfile.llm
+    container_name: membra-llm-validator
+    ports:
+      - "8006:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://membra_user:membra_password@postgres:5432/membra_bridge
+      - OLLAMA_URL=http://ollama:11434
+    depends_on:
+      - redis
+      - postgres
+      - ollama
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  # Ollama for local LLM inference
+  ollama:
+    image: ollama/ollama:latest
+    container_name: membra-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  # Liquidity Layer Service
+  liquidity-layer:
+    build:
+      context: .
+      dockerfile: Dockerfile.liquidity
+    container_name: membra-liquidity-layer
+    ports:
+      - "8007:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://membra_user:membra_password@postgres:5432/membra_bridge
+      - SOLANA_RPC_URL=https://api.devnet.solana.com
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    container_name: membra-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - FILE_TOKENIZER_URL=http://file-tokenizer:8000
+      - ORACLE_SYSTEM_URL=http://oracle-system:8000
+      - PHONE_WALLET_URL=http://phone-wallet:8000
+      - KPI_TRACKER_URL=http://kpi-tracker:8000
+      - ZK_VERIFIER_URL=http://zk-verifier:8000
+      - LLM_VALIDATOR_URL=http://llm-validator:8000
+      - LIQUIDITY_LAYER_URL=http://liquidity-layer:8000
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - file-tokenizer
+      - oracle-system
+      - phone-wallet
+      - kpi-tracker
+      - zk-verifier
+      - llm-validator
+      - liquidity-layer
+      - redis
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  # Monitoring Service (Prometheus)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: membra-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: membra-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - membra-network
+
+networks:
+  membra-network:
+    driver: bridge
+
+volumes:
+  ipfs_data:
+  redis_data:
+  postgres_data:
+  ollama_data:
+  prometheus_data:
+  grafana_data:
