@@ -515,7 +515,6 @@ def test_profit_simulation():
 # -----------------------------------------------------------------------
 
 def main():
-    global PASSED, FAILED
     print("=" * 60)
     print("  LLM Signal Hunter + Profit System — Test Suite")
     print("=" * 60)
