@@ -10,16 +10,14 @@ __pycache__/
 *.so
 *.egg
 *.egg-info/
-dist/
-build/
-*.egg-info/
 
 # Node modules
 node_modules/
 .npm
 .eslintcache
+package-lock.json.bak
 
-# Next.js
+# Next.js / Nuxt
 .next/
 .nuxt/
 out/
@@ -32,11 +30,12 @@ coverage/
 .coverage
 htmlcov/
 
-# Environment
+# Environment & secrets
 .env
 .env.local
 .env.*.local
-*.env
+.env.production
+.env.development
 
 # IDE
 .vscode/
@@ -45,6 +44,7 @@ htmlcov/
 *.swo
 *~
 .DS_Store
+Thumbs.db
 
 # Logs
 *.log
@@ -54,13 +54,10 @@ yarn-error.log*
 pnpm-debug.log*
 
 # TypeScript
-*.d.ts
-*.map
 *.tsbuildinfo
 
 # Rust
 **/*.rs.bk
-Cargo.lock
 
 # Python
 .mypy_cache/
@@ -68,6 +65,11 @@ Cargo.lock
 dmypy.json
 .pyre/
 .pytype/
+.ruff_cache/
+.venv/
+venv/
+env/
+*.whl
 
 # Temporary files
 *.tmp
@@ -75,12 +77,22 @@ dmypy.json
 .cache/
 
 # Solana
-*.so
 target/bpfel-unknown-unknown/release/
 target/sbf-solana-solana/release/
-# Auto-generated LLM adapters — run ollama_hub/install_llm.py to regenerate
+
+# Auto-generated LLM adapters -- run ollama_hub/install_llm.py to regenerate
 llm.py
 llm.js
 llm.rs
 llm.go
 llm.sh
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# OS files
+.Spotlight-V100
+.Trashes
+ehthumbs.db
