@@ -48,8 +48,8 @@ jobs:
         python-version: '3.11'
     - name: Install DeCloud dependencies
       run: |
-        pip install -r decloud/requirements.txt
+        pip install -r 06_Projects/decloud/requirements.txt
         pip install pytest
     - name: Run DeCloud tests
       run: |
-        pytest decloud/test_e2e.py -v
+        pytest 06_Projects/decloud/test_e2e.py -v
