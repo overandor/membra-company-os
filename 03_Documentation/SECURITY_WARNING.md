@@ -7,14 +7,14 @@ The following credentials are present in plaintext in this repository:
 - `GROQ_API_KEY=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`
 - `GATE_API_KEY=57897b69c76df6aa01a1a25b8d9c6bc8`
 - `GATE_API_SECRET=ed43f2696c3767685e8470c4ba98ea0f7ea85e9adeb9c3d098182889756d79d9`
-- `GITHUB_TOKEN=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`
+- `GITHUB_TOKEN=REDACTED_GITHUB_PAT`
 
 ## What to do RIGHT NOW
 
 1. **Revoke all tokens immediately:**
    - Groq: https://console.groq.com/keys → Delete `gsk_h0VD...`
    - Gate.io: https://www.gate.io/myaccount/api_keys → Delete the API key
-   - GitHub: https://github.com/settings/tokens → Delete `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`
+   - GitHub: https://github.com/settings/tokens → Delete `REDACTED_GITHUB_PAT`
 
 2. **Regenerate new keys** and store them OUTSIDE the repo (e.g., macOS Keychain):
    ```bash

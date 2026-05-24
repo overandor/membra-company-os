@@ -640,7 +640,7 @@
       {
         "project": "ENA_Hedging_Project",
         "issues": [
-          "config/ena_config.py: api_key = \"a925edf19f684946726f91625d33d123\"...",
+          "config/ena_config.py: api_key = \"REDACTED_GATE_KEY\"...",
           "config/ena_config.py: secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb...",
           "config/ena_config.py: secret:\n            errors...",
           "src/ena_hedging_market_maker_complete.py: secret=config...",
@@ -722,8 +722,8 @@
         "issues": [
           "create_trading_repos.py: token: str...",
           "create_trading_repos.py: token = github_token...",
-          "create_trading_repos.py: token = \"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\"...",
-          "create_trading_repos.py: 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...",
+          "create_trading_repos.py: token = \"REDACTED_GITHUB_PAT\"...",
+          "create_trading_repos.py: REDACTED_GITHUB_PAT...",
           "digital_gold_forge.py: api_key: str..."
         ]
       },
@@ -796,7 +796,7 @@
         "issues": [
           "README_SIMPLE_GATE_MM.md: API_KEY=your_gate_api_key_here...",
           "README_SIMPLE_GATE_MM.md: SECRET=your_gate_api_secret_here...",
-          "make_env_permanent.sh: API_KEY=\"a925edf19f684946726f91625d33d123\"...",
+          "make_env_permanent.sh: API_KEY=\"REDACTED_GATE_KEY\"...",
           "make_env_permanent.sh: API_KEY=\"sk...",
           "make_env_permanent.sh: SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d..."
         ]
@@ -868,7 +868,7 @@
       {
         "project": "ENA_Hedging_Project",
         "issues": [
-          "config/ena_config.py: api_key = \"a925edf19f684946726f91625d33d123\"...",
+          "config/ena_config.py: api_key = \"REDACTED_GATE_KEY\"...",
           "config/ena_config.py: secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb...",
           "config/ena_config.py: secret:\n            errors...",
           "src/ena_hedging_market_maker_complete.py: secret=config...",
@@ -888,7 +888,7 @@
       {
         "project": "setup_installation_systems",
         "issues": [
-          "update_gate_api_keys.py: API_KEY = \"a925edf19f684946726f91625d33d123\"...",
+          "update_gate_api_keys.py: API_KEY = \"REDACTED_GATE_KEY\"...",
           "update_gate_api_keys.py: API_KEY = os...",
           "update_gate_api_keys.py: SECRET = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb...",
           "update_gate_api_keys.py: SECRET = os...",
@@ -1025,8 +1025,8 @@
         "issues": [
           "create_trading_repos.py: token: str...",
           "create_trading_repos.py: token = github_token...",
-          "create_trading_repos.py: token = \"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\"...",
-          "create_trading_repos.py: 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...",
+          "create_trading_repos.py: token = \"REDACTED_GITHUB_PAT\"...",
+          "create_trading_repos.py: REDACTED_GITHUB_PAT...",
           "digital_gold_forge.py: api_key: str..."
         ]
       },
@@ -1113,7 +1113,7 @@
       {
         "project": "ENA_Hedging_Project",
         "issues": [
-          "config/ena_config.py: api_key = \"a925edf19f684946726f91625d33d123\"...",
+          "config/ena_config.py: api_key = \"REDACTED_GATE_KEY\"...",
           "config/ena_config.py: secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb...",
           "config/ena_config.py: secret:\n            errors...",
           "src/ena_hedging_market_maker_complete.py: secret=config...",
@@ -1232,7 +1232,7 @@
         "issues": [
           "README_SIMPLE_GATE_MM.md: API_KEY=your_gate_api_key_here...",
           "README_SIMPLE_GATE_MM.md: SECRET=your_gate_api_secret_here...",
-          "make_env_permanent.sh: API_KEY=\"a925edf19f684946726f91625d33d123\"...",
+          "make_env_permanent.sh: API_KEY=\"REDACTED_GATE_KEY\"...",
           "make_env_permanent.sh: API_KEY=\"sk...",
           "make_env_permanent.sh: SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d..."
         ]
@@ -1322,8 +1322,8 @@
         "issues": [
           "create_trading_repos.py: token: str...",
           "create_trading_repos.py: token = github_token...",
-          "create_trading_repos.py: token = \"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\"...",
-          "create_trading_repos.py: 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...",
+          "create_trading_repos.py: token = \"REDACTED_GITHUB_PAT\"...",
+          "create_trading_repos.py: REDACTED_GITHUB_PAT...",
           "digital_gold_forge.py: api_key: str..."
         ]
       },
@@ -1348,8 +1348,8 @@
       {
         "project": "agent-workforce",
         "issues": [
-          "_push.py: TOKEN = \"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\"...",
-          "_push.py: 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...",
+          "_push.py: TOKEN = \"REDACTED_GITHUB_PAT\"...",
+          "_push.py: REDACTED_GITHUB_PAT...",
           "docker-compose.yml: PASSWORD: postgres...",
           "app/main.py: credentials=True...",
           "app/core/config.py: api_key: Optional..."
@@ -1562,7 +1562,7 @@
         "issues": [
           "README_SIMPLE_GATE_MM.md: API_KEY=your_gate_api_key_here...",
           "README_SIMPLE_GATE_MM.md: SECRET=your_gate_api_secret_here...",
-          "make_env_permanent.sh: API_KEY=\"a925edf19f684946726f91625d33d123\"...",
+          "make_env_permanent.sh: API_KEY=\"REDACTED_GATE_KEY\"...",
           "make_env_permanent.sh: API_KEY=\"sk...",
           "make_env_permanent.sh: SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d..."
         ]
@@ -1710,7 +1710,7 @@
       {
         "project": "ENA_Hedging_Project",
         "issues": [
-          "config/ena_config.py: api_key = \"a925edf19f684946726f91625d33d123\"...",
+          "config/ena_config.py: api_key = \"REDACTED_GATE_KEY\"...",
           "config/ena_config.py: secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb...",
           "config/ena_config.py: secret:\n            errors...",
           "src/ena_hedging_market_maker_complete.py: secret=config...",
@@ -1730,7 +1730,7 @@
       {
         "project": "setup_installation_systems",
         "issues": [
-          "update_gate_api_keys.py: API_KEY = \"a925edf19f684946726f91625d33d123\"...",
+          "update_gate_api_keys.py: API_KEY = \"REDACTED_GATE_KEY\"...",
           "update_gate_api_keys.py: API_KEY = os...",
           "update_gate_api_keys.py: SECRET = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb...",
           "update_gate_api_keys.py: SECRET = os...",
@@ -1778,8 +1778,8 @@
       {
         "project": "agent-workforce",
         "issues": [
-          "_push.py: TOKEN = \"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\"...",
-          "_push.py: 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...",
+          "_push.py: TOKEN = \"REDACTED_GITHUB_PAT\"...",
+          "_push.py: REDACTED_GITHUB_PAT...",
           "docker-compose.yml: PASSWORD: postgres...",
           "app/main.py: credentials=True...",
           "app/core/config.py: api_key: Optional..."
@@ -1925,8 +1925,8 @@
         "issues": [
           "create_trading_repos.py: token: str...",
           "create_trading_repos.py: token = github_token...",
-          "create_trading_repos.py: token = \"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\"...",
-          "create_trading_repos.py: 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...",
+          "create_trading_repos.py: token = \"REDACTED_GITHUB_PAT\"...",
+          "create_trading_repos.py: REDACTED_GITHUB_PAT...",
           "digital_gold_forge.py: api_key: str..."
         ]
       },
@@ -2003,10 +2003,10 @@
       {
         "project": "membramoney",
         "issues": [
-          "test_futures_order.py: API_KEY = \"2b29d118d4fe92628f33a8f298416548\"...",
+          "test_futures_order.py: API_KEY = \"REDACTED_GATE_KEY\"...",
           "test_futures_order.py: SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa...",
           "test_futures_order.py: secret=GATE_API_SECRET...",
-          "gate_futures_market_maker.py: API_KEY = \"2b29d118d4fe92628f33a8f298416548\"...",
+          "gate_futures_market_maker.py: API_KEY = \"REDACTED_GATE_KEY\"...",
           "gate_futures_market_maker.py: SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa..."
         ]
       },
@@ -2021,7 +2021,7 @@
         "issues": [
           "README_SIMPLE_GATE_MM.md: API_KEY=your_gate_api_key_here...",
           "README_SIMPLE_GATE_MM.md: SECRET=your_gate_api_secret_here...",
-          "make_env_permanent.sh: API_KEY=\"a925edf19f684946726f91625d33d123\"...",
+          "make_env_permanent.sh: API_KEY=\"REDACTED_GATE_KEY\"...",
           "make_env_permanent.sh: API_KEY=\"sk...",
           "make_env_permanent.sh: SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d..."
         ]
@@ -2119,8 +2119,8 @@
       {
         "project": "agent-workforce",
         "issues": [
-          "_push.py: TOKEN = \"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\"...",
-          "_push.py: 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...",
+          "_push.py: TOKEN = \"REDACTED_GITHUB_PAT\"...",
+          "_push.py: REDACTED_GITHUB_PAT...",
           "docker-compose.yml: PASSWORD: postgres...",
           "app/main.py: credentials=True...",
           "app/core/config.py: api_key: Optional..."
@@ -2277,10 +2277,10 @@
       {
         "project": "membramoney",
         "issues": [
-          "test_futures_order.py: API_KEY = \"2b29d118d4fe92628f33a8f298416548\"...",
+          "test_futures_order.py: API_KEY = \"REDACTED_GATE_KEY\"...",
           "test_futures_order.py: SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa...",
           "test_futures_order.py: secret=GATE_API_SECRET...",
-          "gate_futures_market_maker.py: API_KEY = \"2b29d118d4fe92628f33a8f298416548\"...",
+          "gate_futures_market_maker.py: API_KEY = \"REDACTED_GATE_KEY\"...",
           "gate_futures_market_maker.py: SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa..."
         ]
       },
@@ -2424,10 +2424,10 @@
       {
         "project": "Downloads",
         "issues": [
-          "test_futures_order.py: API_KEY = \"2b29d118d4fe92628f33a8f298416548\"...",
+          "test_futures_order.py: API_KEY = \"REDACTED_GATE_KEY\"...",
           "test_futures_order.py: SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa...",
           "test_futures_order.py: secret=GATE_API_SECRET...",
-          "gate_futures_market_maker.py: API_KEY = \"2b29d118d4fe92628f33a8f298416548\"...",
+          "gate_futures_market_maker.py: API_KEY = \"REDACTED_GATE_KEY\"...",
           "gate_futures_market_maker.py: SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa..."
         ]
       }
@@ -3071,25 +3071,25 @@
           "file": "config/ena_config.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "======         self.api_key = \"a925edf19f684946726f91625d33d123\"         self.api_se"
+          "snippet": "======         self.api_key = \"REDACTED_GATE_KEY\"         self.api_se"
         },
         {
           "file": "config/ena_config.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "3\"         self.api_secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"     "
+          "snippet": "3\"         self.api_secret = \"REDACTED_GATE_SECRET\"     "
         },
         {
           "file": "src/ena_hedging_market_maker.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "ration         self.api_key = \"a925edf19f684946726f91625d33d123\"         self.api_se"
+          "snippet": "ration         self.api_key = \"REDACTED_GATE_KEY\"         self.api_se"
         },
         {
           "file": "src/ena_hedging_market_maker.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "3\"         self.api_secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"     "
+          "snippet": "3\"         self.api_secret = \"REDACTED_GATE_SECRET\"     "
         }
       ],
       "recommendations": [
@@ -3132,7 +3132,7 @@
         "Add Dockerfile for reproducible deployments"
       ],
       "readiness_issues": [
-        "config/ena_config.py: api_key = \"a925edf19f684946726f91625d33d123\"...",
+        "config/ena_config.py: api_key = \"REDACTED_GATE_KEY\"...",
         "config/ena_config.py: secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb...",
         "config/ena_config.py: secret:\n            errors...",
         "src/ena_hedging_market_maker_complete.py: secret=config...",
@@ -4476,13 +4476,13 @@
           "file": "create_trading_repos.py",
           "severity": "high",
           "description": "Hardcoded token",
-          "snippet": "guration     github_token = \"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\"     username = \"ove"
+          "snippet": "guration     github_token = \"REDACTED_GITHUB_PAT\"     username = \"ove"
         },
         {
           "file": "create_trading_repos.py",
           "severity": "critical",
           "description": "GitHub PAT",
-          "snippet": "    github_token = \"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\"     username = \"ov"
+          "snippet": "    github_token = \"REDACTED_GITHUB_PAT\"     username = \"ov"
         }
       ],
       "recommendations": [
@@ -4527,8 +4527,8 @@
       "readiness_issues": [
         "create_trading_repos.py: token: str...",
         "create_trading_repos.py: token = github_token...",
-        "create_trading_repos.py: token = \"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\"...",
-        "create_trading_repos.py: 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...",
+        "create_trading_repos.py: token = \"REDACTED_GITHUB_PAT\"...",
+        "create_trading_repos.py: REDACTED_GITHUB_PAT...",
         "digital_gold_forge.py: api_key: str..."
       ]
     },
@@ -5240,7 +5240,7 @@
           "file": "gate_mm_unified_onefile.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "tion #         self.api_key = \"a925edf19f684946726f91625d33d123\" #         self.api_"
+          "snippet": "tion #         self.api_key = \"REDACTED_GATE_KEY\" #         self.api_"
         },
         {
           "file": "gate_mm_unified_onefile.py",
@@ -6007,13 +6007,13 @@
           "file": "make_env_permanent.sh",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "riables export GATE_API_KEY=\"a925edf19f684946726f91625d33d123\" export GATE_API_SEC"
+          "snippet": "riables export GATE_API_KEY=\"REDACTED_GATE_KEY\" export GATE_API_SEC"
         },
         {
           "file": "make_env_permanent.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\" export"
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\" export"
         },
         {
           "file": "README_GATE_MM.md",
@@ -6037,7 +6037,7 @@
           "file": "export_openrouter_key.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"  echo "
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\"  echo "
         },
         {
           "file": "setup_complete_trading_system.sh",
@@ -6049,19 +6049,19 @@
           "file": "setup_complete_trading_system.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"  echo "
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\"  echo "
         },
         {
           "file": "export_gate_keys.sh",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "iables  export GATE_API_KEY=\"a925edf19f684946726f91625d33d123\" export GATE_API_SEC"
+          "snippet": "iables  export GATE_API_KEY=\"REDACTED_GATE_KEY\" export GATE_API_SEC"
         },
         {
           "file": "export_gate_keys.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"  # Als"
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\"  # Als"
         },
         {
           "file": "README_AUTOGEN_OLLAMA.md",
@@ -6118,7 +6118,7 @@
       "readiness_issues": [
         "README_SIMPLE_GATE_MM.md: API_KEY=your_gate_api_key_here...",
         "README_SIMPLE_GATE_MM.md: SECRET=your_gate_api_secret_here...",
-        "make_env_permanent.sh: API_KEY=\"a925edf19f684946726f91625d33d123\"...",
+        "make_env_permanent.sh: API_KEY=\"REDACTED_GATE_KEY\"...",
         "make_env_permanent.sh: API_KEY=\"sk...",
         "make_env_permanent.sh: SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d..."
       ]
@@ -7902,25 +7902,25 @@
           "file": "config/ena_config.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "======         self.api_key = \"a925edf19f684946726f91625d33d123\"         self.api_se"
+          "snippet": "======         self.api_key = \"REDACTED_GATE_KEY\"         self.api_se"
         },
         {
           "file": "config/ena_config.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "3\"         self.api_secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"     "
+          "snippet": "3\"         self.api_secret = \"REDACTED_GATE_SECRET\"     "
         },
         {
           "file": "src/ena_hedging_market_maker.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "ration         self.api_key = \"a925edf19f684946726f91625d33d123\"         self.api_se"
+          "snippet": "ration         self.api_key = \"REDACTED_GATE_KEY\"         self.api_se"
         },
         {
           "file": "src/ena_hedging_market_maker.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "3\"         self.api_secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"     "
+          "snippet": "3\"         self.api_secret = \"REDACTED_GATE_SECRET\"     "
         }
       ],
       "recommendations": [
@@ -7963,7 +7963,7 @@
         "Add Dockerfile for reproducible deployments"
       ],
       "readiness_issues": [
-        "config/ena_config.py: api_key = \"a925edf19f684946726f91625d33d123\"...",
+        "config/ena_config.py: api_key = \"REDACTED_GATE_KEY\"...",
         "config/ena_config.py: secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb...",
         "config/ena_config.py: secret:\n            errors...",
         "src/ena_hedging_market_maker_complete.py: secret=config...",
@@ -8333,13 +8333,13 @@
           "file": "update_gate_api_keys.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "  # API Credentials API_KEY = \"a925edf19f684946726f91625d33d123\" API_SECRET = \"b18dc"
+          "snippet": "  # API Credentials API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"b18dc"
         },
         {
           "file": "update_gate_api_keys.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "6f91625d33d123\" API_SECRET = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"  # F"
+          "snippet": "6f91625d33d123\" API_SECRET = \"REDACTED_GATE_SECRET\"  # F"
         },
         {
           "file": "fix_all_env_keys.py",
@@ -8391,7 +8391,7 @@
         "Add Dockerfile for reproducible deployments"
       ],
       "readiness_issues": [
-        "update_gate_api_keys.py: API_KEY = \"a925edf19f684946726f91625d33d123\"...",
+        "update_gate_api_keys.py: API_KEY = \"REDACTED_GATE_KEY\"...",
         "update_gate_api_keys.py: API_KEY = os...",
         "update_gate_api_keys.py: SECRET = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb...",
         "update_gate_api_keys.py: SECRET = os...",
@@ -11204,13 +11204,13 @@
           "file": "create_trading_repos.py",
           "severity": "high",
           "description": "Hardcoded token",
-          "snippet": "guration     github_token = \"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\"     username = \"ove"
+          "snippet": "guration     github_token = \"REDACTED_GITHUB_PAT\"     username = \"ove"
         },
         {
           "file": "create_trading_repos.py",
           "severity": "critical",
           "description": "GitHub PAT",
-          "snippet": "    github_token = \"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\"     username = \"ov"
+          "snippet": "    github_token = \"REDACTED_GITHUB_PAT\"     username = \"ov"
         }
       ],
       "recommendations": [
@@ -11255,8 +11255,8 @@
       "readiness_issues": [
         "create_trading_repos.py: token: str...",
         "create_trading_repos.py: token = github_token...",
-        "create_trading_repos.py: token = \"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\"...",
-        "create_trading_repos.py: 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...",
+        "create_trading_repos.py: token = \"REDACTED_GITHUB_PAT\"...",
+        "create_trading_repos.py: REDACTED_GITHUB_PAT...",
         "digital_gold_forge.py: api_key: str..."
       ]
     },
@@ -12886,7 +12886,7 @@
           "file": "gate_mm_unified_onefile.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "tion #         self.api_key = \"a925edf19f684946726f91625d33d123\" #         self.api_"
+          "snippet": "tion #         self.api_key = \"REDACTED_GATE_KEY\" #         self.api_"
         },
         {
           "file": "gate_mm_unified_onefile.py",
@@ -13161,25 +13161,25 @@
           "file": "config/ena_config.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "======         self.api_key = \"a925edf19f684946726f91625d33d123\"         self.api_se"
+          "snippet": "======         self.api_key = \"REDACTED_GATE_KEY\"         self.api_se"
         },
         {
           "file": "config/ena_config.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "3\"         self.api_secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"     "
+          "snippet": "3\"         self.api_secret = \"REDACTED_GATE_SECRET\"     "
         },
         {
           "file": "src/ena_hedging_market_maker.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "ration         self.api_key = \"a925edf19f684946726f91625d33d123\"         self.api_se"
+          "snippet": "ration         self.api_key = \"REDACTED_GATE_KEY\"         self.api_se"
         },
         {
           "file": "src/ena_hedging_market_maker.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "3\"         self.api_secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"     "
+          "snippet": "3\"         self.api_secret = \"REDACTED_GATE_SECRET\"     "
         }
       ],
       "recommendations": [
@@ -13222,7 +13222,7 @@
         "Add Dockerfile for reproducible deployments"
       ],
       "readiness_issues": [
-        "config/ena_config.py: api_key = \"a925edf19f684946726f91625d33d123\"...",
+        "config/ena_config.py: api_key = \"REDACTED_GATE_KEY\"...",
         "config/ena_config.py: secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb...",
         "config/ena_config.py: secret:\n            errors...",
         "src/ena_hedging_market_maker_complete.py: secret=config...",
@@ -16400,13 +16400,13 @@
           "file": "make_env_permanent.sh",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "riables export GATE_API_KEY=\"a925edf19f684946726f91625d33d123\" export GATE_API_SEC"
+          "snippet": "riables export GATE_API_KEY=\"REDACTED_GATE_KEY\" export GATE_API_SEC"
         },
         {
           "file": "make_env_permanent.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\" export"
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\" export"
         },
         {
           "file": "README_GATE_MM.md",
@@ -16430,7 +16430,7 @@
           "file": "export_openrouter_key.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"  echo "
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\"  echo "
         },
         {
           "file": "setup_complete_trading_system.sh",
@@ -16442,19 +16442,19 @@
           "file": "setup_complete_trading_system.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"  echo "
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\"  echo "
         },
         {
           "file": "export_gate_keys.sh",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "iables  export GATE_API_KEY=\"a925edf19f684946726f91625d33d123\" export GATE_API_SEC"
+          "snippet": "iables  export GATE_API_KEY=\"REDACTED_GATE_KEY\" export GATE_API_SEC"
         },
         {
           "file": "export_gate_keys.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"  # Als"
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\"  # Als"
         },
         {
           "file": "README_AUTOGEN_OLLAMA.md",
@@ -16511,7 +16511,7 @@
       "readiness_issues": [
         "README_SIMPLE_GATE_MM.md: API_KEY=your_gate_api_key_here...",
         "README_SIMPLE_GATE_MM.md: SECRET=your_gate_api_secret_here...",
-        "make_env_permanent.sh: API_KEY=\"a925edf19f684946726f91625d33d123\"...",
+        "make_env_permanent.sh: API_KEY=\"REDACTED_GATE_KEY\"...",
         "make_env_permanent.sh: API_KEY=\"sk...",
         "make_env_permanent.sh: SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d..."
       ]
@@ -18156,13 +18156,13 @@
           "file": "create_trading_repos.py",
           "severity": "high",
           "description": "Hardcoded token",
-          "snippet": "guration     github_token = \"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\"     username = \"ove"
+          "snippet": "guration     github_token = \"REDACTED_GITHUB_PAT\"     username = \"ove"
         },
         {
           "file": "create_trading_repos.py",
           "severity": "critical",
           "description": "GitHub PAT",
-          "snippet": "    github_token = \"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\"     username = \"ov"
+          "snippet": "    github_token = \"REDACTED_GITHUB_PAT\"     username = \"ov"
         }
       ],
       "recommendations": [
@@ -18207,8 +18207,8 @@
       "readiness_issues": [
         "create_trading_repos.py: token: str...",
         "create_trading_repos.py: token = github_token...",
-        "create_trading_repos.py: token = \"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\"...",
-        "create_trading_repos.py: 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...",
+        "create_trading_repos.py: token = \"REDACTED_GITHUB_PAT\"...",
+        "create_trading_repos.py: REDACTED_GITHUB_PAT...",
         "digital_gold_forge.py: api_key: str..."
       ]
     },
@@ -19019,13 +19019,13 @@
           "file": "_push.py",
           "severity": "high",
           "description": "Hardcoded token",
-          "snippet": "athlib import Path  TOKEN = \"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\" OWNER = \"overandor\""
+          "snippet": "athlib import Path  TOKEN = \"REDACTED_GITHUB_PAT\" OWNER = \"overandor\""
         },
         {
           "file": "_push.py",
           "severity": "critical",
           "description": "GitHub PAT",
-          "snippet": "port Path  TOKEN = \"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\" OWNER = \"overandor"
+          "snippet": "port Path  TOKEN = \"REDACTED_GITHUB_PAT\" OWNER = \"overandor"
         },
         {
           "file": "app/core/config.py",
@@ -19069,8 +19069,8 @@
         "Add linting (ruff/eslint/prettier)"
       ],
       "readiness_issues": [
-        "_push.py: TOKEN = \"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\"...",
-        "_push.py: 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...",
+        "_push.py: TOKEN = \"REDACTED_GITHUB_PAT\"...",
+        "_push.py: REDACTED_GITHUB_PAT...",
         "docker-compose.yml: PASSWORD: postgres...",
         "app/main.py: credentials=True...",
         "app/core/config.py: api_key: Optional..."
@@ -21661,7 +21661,7 @@
           "file": "gate_mm_unified_onefile.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "tion #         self.api_key = \"a925edf19f684946726f91625d33d123\" #         self.api_"
+          "snippet": "tion #         self.api_key = \"REDACTED_GATE_KEY\" #         self.api_"
         },
         {
           "file": "gate_mm_unified_onefile.py",
@@ -24713,13 +24713,13 @@
           "file": "make_env_permanent.sh",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "riables export GATE_API_KEY=\"a925edf19f684946726f91625d33d123\" export GATE_API_SEC"
+          "snippet": "riables export GATE_API_KEY=\"REDACTED_GATE_KEY\" export GATE_API_SEC"
         },
         {
           "file": "make_env_permanent.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\" export"
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\" export"
         },
         {
           "file": "README_GATE_MM.md",
@@ -24743,7 +24743,7 @@
           "file": "export_openrouter_key.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"  echo "
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\"  echo "
         },
         {
           "file": "setup_complete_trading_system.sh",
@@ -24755,19 +24755,19 @@
           "file": "setup_complete_trading_system.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"  echo "
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\"  echo "
         },
         {
           "file": "export_gate_keys.sh",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "iables  export GATE_API_KEY=\"a925edf19f684946726f91625d33d123\" export GATE_API_SEC"
+          "snippet": "iables  export GATE_API_KEY=\"REDACTED_GATE_KEY\" export GATE_API_SEC"
         },
         {
           "file": "export_gate_keys.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"  # Als"
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\"  # Als"
         },
         {
           "file": "README_AUTOGEN_OLLAMA.md",
@@ -24824,7 +24824,7 @@
       "readiness_issues": [
         "README_SIMPLE_GATE_MM.md: API_KEY=your_gate_api_key_here...",
         "README_SIMPLE_GATE_MM.md: SECRET=your_gate_api_secret_here...",
-        "make_env_permanent.sh: API_KEY=\"a925edf19f684946726f91625d33d123\"...",
+        "make_env_permanent.sh: API_KEY=\"REDACTED_GATE_KEY\"...",
         "make_env_permanent.sh: API_KEY=\"sk...",
         "make_env_permanent.sh: SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d..."
       ]
@@ -28106,25 +28106,25 @@
           "file": "config/ena_config.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "======         self.api_key = \"a925edf19f684946726f91625d33d123\"         self.api_se"
+          "snippet": "======         self.api_key = \"REDACTED_GATE_KEY\"         self.api_se"
         },
         {
           "file": "config/ena_config.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "3\"         self.api_secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"     "
+          "snippet": "3\"         self.api_secret = \"REDACTED_GATE_SECRET\"     "
         },
         {
           "file": "src/ena_hedging_market_maker.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "ration         self.api_key = \"a925edf19f684946726f91625d33d123\"         self.api_se"
+          "snippet": "ration         self.api_key = \"REDACTED_GATE_KEY\"         self.api_se"
         },
         {
           "file": "src/ena_hedging_market_maker.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "3\"         self.api_secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"     "
+          "snippet": "3\"         self.api_secret = \"REDACTED_GATE_SECRET\"     "
         }
       ],
       "recommendations": [
@@ -28167,7 +28167,7 @@
         "Add Dockerfile for reproducible deployments"
       ],
       "readiness_issues": [
-        "config/ena_config.py: api_key = \"a925edf19f684946726f91625d33d123\"...",
+        "config/ena_config.py: api_key = \"REDACTED_GATE_KEY\"...",
         "config/ena_config.py: secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb...",
         "config/ena_config.py: secret:\n            errors...",
         "src/ena_hedging_market_maker_complete.py: secret=config...",
@@ -28537,13 +28537,13 @@
           "file": "update_gate_api_keys.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "  # API Credentials API_KEY = \"a925edf19f684946726f91625d33d123\" API_SECRET = \"b18dc"
+          "snippet": "  # API Credentials API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"b18dc"
         },
         {
           "file": "update_gate_api_keys.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "6f91625d33d123\" API_SECRET = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"  # F"
+          "snippet": "6f91625d33d123\" API_SECRET = \"REDACTED_GATE_SECRET\"  # F"
         },
         {
           "file": "fix_all_env_keys.py",
@@ -28595,7 +28595,7 @@
         "Add Dockerfile for reproducible deployments"
       ],
       "readiness_issues": [
-        "update_gate_api_keys.py: API_KEY = \"a925edf19f684946726f91625d33d123\"...",
+        "update_gate_api_keys.py: API_KEY = \"REDACTED_GATE_KEY\"...",
         "update_gate_api_keys.py: API_KEY = os...",
         "update_gate_api_keys.py: SECRET = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb...",
         "update_gate_api_keys.py: SECRET = os...",
@@ -29947,13 +29947,13 @@
           "file": "_push.py",
           "severity": "high",
           "description": "Hardcoded token",
-          "snippet": "athlib import Path  TOKEN = \"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\" OWNER = \"overandor\""
+          "snippet": "athlib import Path  TOKEN = \"REDACTED_GITHUB_PAT\" OWNER = \"overandor\""
         },
         {
           "file": "_push.py",
           "severity": "critical",
           "description": "GitHub PAT",
-          "snippet": "port Path  TOKEN = \"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\" OWNER = \"overandor"
+          "snippet": "port Path  TOKEN = \"REDACTED_GITHUB_PAT\" OWNER = \"overandor"
         },
         {
           "file": "app/core/config.py",
@@ -29997,8 +29997,8 @@
         "Add linting (ruff/eslint/prettier)"
       ],
       "readiness_issues": [
-        "_push.py: TOKEN = \"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\"...",
-        "_push.py: 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...",
+        "_push.py: TOKEN = \"REDACTED_GITHUB_PAT\"...",
+        "_push.py: REDACTED_GITHUB_PAT...",
         "docker-compose.yml: PASSWORD: postgres...",
         "app/main.py: credentials=True...",
         "app/core/config.py: api_key: Optional..."
@@ -32415,13 +32415,13 @@
           "file": "create_trading_repos.py",
           "severity": "high",
           "description": "Hardcoded token",
-          "snippet": "guration     github_token = \"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\"     username = \"ove"
+          "snippet": "guration     github_token = \"REDACTED_GITHUB_PAT\"     username = \"ove"
         },
         {
           "file": "create_trading_repos.py",
           "severity": "critical",
           "description": "GitHub PAT",
-          "snippet": "    github_token = \"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\"     username = \"ov"
+          "snippet": "    github_token = \"REDACTED_GITHUB_PAT\"     username = \"ov"
         }
       ],
       "recommendations": [
@@ -32466,8 +32466,8 @@
       "readiness_issues": [
         "create_trading_repos.py: token: str...",
         "create_trading_repos.py: token = github_token...",
-        "create_trading_repos.py: token = \"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\"...",
-        "create_trading_repos.py: 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...",
+        "create_trading_repos.py: token = \"REDACTED_GITHUB_PAT\"...",
+        "create_trading_repos.py: REDACTED_GITHUB_PAT...",
         "digital_gold_forge.py: api_key: str..."
       ]
     },
@@ -33864,7 +33864,7 @@
           "file": "gate_mm_unified_onefile.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "tion #         self.api_key = \"a925edf19f684946726f91625d33d123\" #         self.api_"
+          "snippet": "tion #         self.api_key = \"REDACTED_GATE_KEY\" #         self.api_"
         },
         {
           "file": "gate_mm_unified_onefile.py",
@@ -34626,49 +34626,49 @@
           "file": "test_futures_order.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "s import time  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "s import time  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "test_futures_order.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "gate_futures_market_maker.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": " = True  # API Keys API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": " = True  # API Keys API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "gate_futures_market_maker.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "futures_market_maker.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "ue  # API Keys GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "ue  # API Keys GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "futures_market_maker.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "debug_futures.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "\"\"  import os  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "\"\"  import os  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "debug_futures.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "SECURITY_WARNING.md",
@@ -34698,145 +34698,145 @@
           "file": "test_gate_sdk_v2.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "xception import os  API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": "xception import os  API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "test_gate_sdk_v2.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  def"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  def"
         },
         {
           "file": "micro_futures_trader.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "ue  # API Keys GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "ue  # API Keys GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "micro_futures_trader.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "test_ccxt_order.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "s import time  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "s import time  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "test_ccxt_order.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "paper_futures_bot.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "b import Path  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "b import Path  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "paper_futures_bot.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "close_shib_positions.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "s import time  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "s import time  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "close_shib_positions.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "gate_market_maker_live.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": " = True  # API Keys API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": " = True  # API Keys API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "gate_market_maker_live.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "test_gate_sdk.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "xception import os  API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": "xception import os  API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "test_gate_sdk.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  def"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  def"
         },
         {
           "file": "micro_notional_spot_trader.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": " = True  # API Keys API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": " = True  # API Keys API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "micro_notional_spot_trader.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "debug_contracts.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "contracts \"\"\"  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "contracts \"\"\"  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "debug_contracts.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "check_futures_balance.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "\"\"  import os  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "\"\"  import os  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "check_futures_balance.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "inspect_positions.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "\"\"  import os  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "\"\"  import os  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "inspect_positions.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "check_futures_v2.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "\"\"  import os  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "\"\"  import os  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "check_futures_v2.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "training_data/chatgpt_exports/chatgpt/ChatGPT-Code_as_Executable_Protocol.md",
@@ -35058,13 +35058,13 @@
           "file": "training_data/chatgpt_exports/chatgpt/ChatGPT-Asset_Appraisal_in_Dollars.md",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "LY STORED HERE self.api_key = \"a925edf19f684946726f91625d33d123\" self.api_secret = \""
+          "snippet": "LY STORED HERE self.api_key = \"REDACTED_GATE_KEY\" self.api_secret = \""
         },
         {
           "file": "training_data/chatgpt_exports/chatgpt/ChatGPT-Asset_Appraisal_in_Dollars.md",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "25d33d123\" self.api_secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\" \ud83e\ude99 MU"
+          "snippet": "25d33d123\" self.api_secret = \"REDACTED_GATE_SECRET\" \ud83e\ude99 MU"
         },
         {
           "file": "training_data/chatgpt_exports/chatgpt/ChatGPT-Solana_NFT_Pipeline_APIs (1).md",
@@ -35172,13 +35172,13 @@
           "file": "agent-workforce/_push.py",
           "severity": "high",
           "description": "Hardcoded token",
-          "snippet": "athlib import Path  TOKEN = \"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\" OWNER = \"overandor\""
+          "snippet": "athlib import Path  TOKEN = \"REDACTED_GITHUB_PAT\" OWNER = \"overandor\""
         },
         {
           "file": "agent-workforce/_push.py",
           "severity": "critical",
           "description": "GitHub PAT",
-          "snippet": "port Path  TOKEN = \"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\" OWNER = \"overandor"
+          "snippet": "port Path  TOKEN = \"REDACTED_GITHUB_PAT\" OWNER = \"overandor"
         },
         {
           "file": "agent-workforce/app/core/config.py",
@@ -35220,13 +35220,13 @@
           "file": "02_AI_Agents/ai_control_center_systems/ai_control_center.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "gine()         self.api_key = \"a925edf19f684946726f91625d33d123\"         self.api_se"
+          "snippet": "gine()         self.api_key = \"REDACTED_GATE_KEY\"         self.api_se"
         },
         {
           "file": "02_AI_Agents/ai_control_center_systems/ai_control_center.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "3\"         self.api_secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"     "
+          "snippet": "3\"         self.api_secret = \"REDACTED_GATE_SECRET\"     "
         },
         {
           "file": "02_AI_Agents/terminal_agent/start_collab.sh",
@@ -35319,10 +35319,10 @@
         "Add linting (ruff/eslint/prettier)"
       ],
       "readiness_issues": [
-        "test_futures_order.py: API_KEY = \"2b29d118d4fe92628f33a8f298416548\"...",
+        "test_futures_order.py: API_KEY = \"REDACTED_GATE_KEY\"...",
         "test_futures_order.py: SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa...",
         "test_futures_order.py: secret=GATE_API_SECRET...",
-        "gate_futures_market_maker.py: API_KEY = \"2b29d118d4fe92628f33a8f298416548\"...",
+        "gate_futures_market_maker.py: API_KEY = \"REDACTED_GATE_KEY\"...",
         "gate_futures_market_maker.py: SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa..."
       ]
     },
@@ -35544,13 +35544,13 @@
           "file": "make_env_permanent.sh",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "riables export GATE_API_KEY=\"a925edf19f684946726f91625d33d123\" export GATE_API_SEC"
+          "snippet": "riables export GATE_API_KEY=\"REDACTED_GATE_KEY\" export GATE_API_SEC"
         },
         {
           "file": "make_env_permanent.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\" export"
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\" export"
         },
         {
           "file": "README_GATE_MM.md",
@@ -35574,7 +35574,7 @@
           "file": "export_openrouter_key.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"  echo "
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\"  echo "
         },
         {
           "file": "setup_complete_trading_system.sh",
@@ -35586,19 +35586,19 @@
           "file": "setup_complete_trading_system.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"  echo "
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\"  echo "
         },
         {
           "file": "export_gate_keys.sh",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "iables  export GATE_API_KEY=\"a925edf19f684946726f91625d33d123\" export GATE_API_SEC"
+          "snippet": "iables  export GATE_API_KEY=\"REDACTED_GATE_KEY\" export GATE_API_SEC"
         },
         {
           "file": "export_gate_keys.sh",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "23\" export GATE_API_SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"  # Als"
+          "snippet": "23\" export GATE_API_SECRET=\"REDACTED_GATE_SECRET\"  # Als"
         },
         {
           "file": "README_AUTOGEN_OLLAMA.md",
@@ -35655,7 +35655,7 @@
       "readiness_issues": [
         "README_SIMPLE_GATE_MM.md: API_KEY=your_gate_api_key_here...",
         "README_SIMPLE_GATE_MM.md: SECRET=your_gate_api_secret_here...",
-        "make_env_permanent.sh: API_KEY=\"a925edf19f684946726f91625d33d123\"...",
+        "make_env_permanent.sh: API_KEY=\"REDACTED_GATE_KEY\"...",
         "make_env_permanent.sh: API_KEY=\"sk...",
         "make_env_permanent.sh: SECRET=\"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d..."
       ]
@@ -37248,13 +37248,13 @@
           "file": "_push.py",
           "severity": "high",
           "description": "Hardcoded token",
-          "snippet": "athlib import Path  TOKEN = \"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\" OWNER = \"overandor\""
+          "snippet": "athlib import Path  TOKEN = \"REDACTED_GITHUB_PAT\" OWNER = \"overandor\""
         },
         {
           "file": "_push.py",
           "severity": "critical",
           "description": "GitHub PAT",
-          "snippet": "port Path  TOKEN = \"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\" OWNER = \"overandor"
+          "snippet": "port Path  TOKEN = \"REDACTED_GITHUB_PAT\" OWNER = \"overandor"
         },
         {
           "file": "app/core/config.py",
@@ -37298,8 +37298,8 @@
         "Add linting (ruff/eslint/prettier)"
       ],
       "readiness_issues": [
-        "_push.py: TOKEN = \"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\"...",
-        "_push.py: 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...",
+        "_push.py: TOKEN = \"REDACTED_GITHUB_PAT\"...",
+        "_push.py: REDACTED_GITHUB_PAT...",
         "docker-compose.yml: PASSWORD: postgres...",
         "app/main.py: credentials=True...",
         "app/core/config.py: api_key: Optional..."
@@ -41538,49 +41538,49 @@
           "file": "test_futures_order.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "s import time  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "s import time  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "test_futures_order.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "gate_futures_market_maker.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": " = True  # API Keys API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": " = True  # API Keys API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "gate_futures_market_maker.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "futures_market_maker.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "ue  # API Keys GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "ue  # API Keys GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "futures_market_maker.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "debug_futures.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "\"\"  import os  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "\"\"  import os  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "debug_futures.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "SECURITY_WARNING.md",
@@ -41610,145 +41610,145 @@
           "file": "test_gate_sdk_v2.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "xception import os  API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": "xception import os  API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "test_gate_sdk_v2.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  def"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  def"
         },
         {
           "file": "micro_futures_trader.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "ue  # API Keys GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "ue  # API Keys GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "micro_futures_trader.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "test_ccxt_order.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "s import time  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "s import time  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "test_ccxt_order.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "paper_futures_bot.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "b import Path  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "b import Path  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "paper_futures_bot.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "close_shib_positions.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "s import time  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "s import time  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "close_shib_positions.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "gate_market_maker_live.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": " = True  # API Keys API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": " = True  # API Keys API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "gate_market_maker_live.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "test_gate_sdk.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "xception import os  API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": "xception import os  API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "test_gate_sdk.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  def"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  def"
         },
         {
           "file": "micro_notional_spot_trader.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": " = True  # API Keys API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": " = True  # API Keys API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "micro_notional_spot_trader.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "debug_contracts.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "contracts \"\"\"  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "contracts \"\"\"  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "debug_contracts.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "check_futures_balance.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "\"\"  import os  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "\"\"  import os  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "check_futures_balance.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "inspect_positions.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "\"\"  import os  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "\"\"  import os  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "inspect_positions.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "check_futures_v2.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "\"\"  import os  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "\"\"  import os  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "check_futures_v2.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "training_data/chatgpt_exports/chatgpt/ChatGPT-Code_as_Executable_Protocol.md",
@@ -41970,13 +41970,13 @@
           "file": "training_data/chatgpt_exports/chatgpt/ChatGPT-Asset_Appraisal_in_Dollars.md",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "LY STORED HERE self.api_key = \"a925edf19f684946726f91625d33d123\" self.api_secret = \""
+          "snippet": "LY STORED HERE self.api_key = \"REDACTED_GATE_KEY\" self.api_secret = \""
         },
         {
           "file": "training_data/chatgpt_exports/chatgpt/ChatGPT-Asset_Appraisal_in_Dollars.md",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "25d33d123\" self.api_secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\" \ud83e\ude99 MU"
+          "snippet": "25d33d123\" self.api_secret = \"REDACTED_GATE_SECRET\" \ud83e\ude99 MU"
         },
         {
           "file": "training_data/chatgpt_exports/chatgpt/ChatGPT-Solana_NFT_Pipeline_APIs (1).md",
@@ -42084,13 +42084,13 @@
           "file": "agent-workforce/_push.py",
           "severity": "high",
           "description": "Hardcoded token",
-          "snippet": "athlib import Path  TOKEN = \"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\" OWNER = \"overandor\""
+          "snippet": "athlib import Path  TOKEN = \"REDACTED_GITHUB_PAT\" OWNER = \"overandor\""
         },
         {
           "file": "agent-workforce/_push.py",
           "severity": "critical",
           "description": "GitHub PAT",
-          "snippet": "port Path  TOKEN = \"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\" OWNER = \"overandor"
+          "snippet": "port Path  TOKEN = \"REDACTED_GITHUB_PAT\" OWNER = \"overandor"
         },
         {
           "file": "agent-workforce/app/core/config.py",
@@ -42132,13 +42132,13 @@
           "file": "02_AI_Agents/ai_control_center_systems/ai_control_center.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "gine()         self.api_key = \"a925edf19f684946726f91625d33d123\"         self.api_se"
+          "snippet": "gine()         self.api_key = \"REDACTED_GATE_KEY\"         self.api_se"
         },
         {
           "file": "02_AI_Agents/ai_control_center_systems/ai_control_center.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "3\"         self.api_secret = \"b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05\"     "
+          "snippet": "3\"         self.api_secret = \"REDACTED_GATE_SECRET\"     "
         },
         {
           "file": "02_AI_Agents/terminal_agent/start_collab.sh",
@@ -42231,10 +42231,10 @@
         "Add linting (ruff/eslint/prettier)"
       ],
       "readiness_issues": [
-        "test_futures_order.py: API_KEY = \"2b29d118d4fe92628f33a8f298416548\"...",
+        "test_futures_order.py: API_KEY = \"REDACTED_GATE_KEY\"...",
         "test_futures_order.py: SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa...",
         "test_futures_order.py: secret=GATE_API_SECRET...",
-        "gate_futures_market_maker.py: API_KEY = \"2b29d118d4fe92628f33a8f298416548\"...",
+        "gate_futures_market_maker.py: API_KEY = \"REDACTED_GATE_KEY\"...",
         "gate_futures_market_maker.py: SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa..."
       ]
     },
@@ -48318,49 +48318,49 @@
           "file": "test_futures_order.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "s import time  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "s import time  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "test_futures_order.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "gate_futures_market_maker.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": " = True  # API Keys API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": " = True  # API Keys API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "gate_futures_market_maker.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "futures_market_maker.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "ue  # API Keys GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "ue  # API Keys GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "futures_market_maker.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "debug_futures.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "\"\"  import os  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "\"\"  import os  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "debug_futures.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "SECURITY_WARNING.md",
@@ -48390,73 +48390,73 @@
           "file": "test_gate_sdk_v2.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "xception import os  API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": "xception import os  API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "test_gate_sdk_v2.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  def"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  def"
         },
         {
           "file": "micro_futures_trader.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "ue  # API Keys GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "ue  # API Keys GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "micro_futures_trader.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "test_ccxt_order.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "s import time  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "s import time  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "test_ccxt_order.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "paper_futures_bot.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "b import Path  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "b import Path  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "paper_futures_bot.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "close_shib_positions.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "s import time  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "s import time  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "close_shib_positions.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "gate_market_maker_live.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": " = True  # API Keys API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": " = True  # API Keys API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "gate_market_maker_live.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": ".env",
@@ -48480,73 +48480,73 @@
           "file": "test_gate_sdk.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "xception import os  API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": "xception import os  API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "test_gate_sdk.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  def"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  def"
         },
         {
           "file": "micro_notional_spot_trader.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": " = True  # API Keys API_KEY = \"2b29d118d4fe92628f33a8f298416548\" API_SECRET = \"09b7b"
+          "snippet": " = True  # API Keys API_KEY = \"REDACTED_GATE_KEY\" API_SECRET = \"09b7b"
         },
         {
           "file": "micro_notional_spot_trader.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "33a8f298416548\" API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  # C"
+          "snippet": "33a8f298416548\" API_SECRET = \"REDACTED_GATE_SECRET\"  # C"
         },
         {
           "file": "debug_contracts.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "contracts \"\"\"  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "contracts \"\"\"  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "debug_contracts.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "check_futures_balance.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "\"\"  import os  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "\"\"  import os  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "check_futures_balance.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "inspect_positions.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "\"\"  import os  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "\"\"  import os  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "inspect_positions.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         },
         {
           "file": "check_futures_v2.py",
           "severity": "high",
           "description": "Hardcoded API key",
-          "snippet": "\"\"  import os  GATE_API_KEY = \"2b29d118d4fe92628f33a8f298416548\" GATE_API_SECRET = \""
+          "snippet": "\"\"  import os  GATE_API_KEY = \"REDACTED_GATE_KEY\" GATE_API_SECRET = \""
         },
         {
           "file": "check_futures_v2.py",
           "severity": "high",
           "description": "Hardcoded secret",
-          "snippet": "298416548\" GATE_API_SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35\"  try"
+          "snippet": "298416548\" GATE_API_SECRET = \"REDACTED_GATE_SECRET\"  try"
         }
       ],
       "recommendations": [
@@ -48578,10 +48578,10 @@
         "Add linting (ruff/eslint/prettier)"
       ],
       "readiness_issues": [
-        "test_futures_order.py: API_KEY = \"2b29d118d4fe92628f33a8f298416548\"...",
+        "test_futures_order.py: API_KEY = \"REDACTED_GATE_KEY\"...",
         "test_futures_order.py: SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa...",
         "test_futures_order.py: secret=GATE_API_SECRET...",
-        "gate_futures_market_maker.py: API_KEY = \"2b29d118d4fe92628f33a8f298416548\"...",
+        "gate_futures_market_maker.py: API_KEY = \"REDACTED_GATE_KEY\"...",
         "gate_futures_market_maker.py: SECRET = \"09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa..."
       ]
     }

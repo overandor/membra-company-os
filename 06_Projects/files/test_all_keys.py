@@ -19,7 +19,7 @@ all_keys = [
     ("Key 1 (abcd)", "abcd9ea5956f5819386efaaa90fa0e41", "ed43f2696c3767685e8470c4ba98ea0f7ea85e9adeb9c3d098182889756d79d9"),
     ("Key 2 (cbdf)", "cbdf439fddf1d99b13113054eb3295e6", "e0d1e5d4411a250f8aaf7a540c4b395ffc08667d93f2ad9039d08342f7964937"),
     ("Key 3 (eb55)", "eb55dca15fca01bfd6ebcc67f22e7bc8", "d83ed484c5da96147061d8452c4448d2577a347308c1ef4e76f96f88709620a4"),
-    ("Key 4 (gate_api)", "2b29d118d4fe92628f33a8f298416548", "09b7b2c7af4ba6ee1bd93823591a5216945030d760e27b94aa26fed337e05d35"),
+    ("Key 4 (gate_api)", os.environ.get("GATE_API_KEY", ""), os.environ.get("GATE_API_SECRET", "")),
 ]
 
 async def test_key(label, api_key, api_secret):

@@ -31,8 +31,8 @@ class SecondProfitSystem:
     
     def __init__(self):
         # API Configuration
-        self.api_key = "a925edf19f684946726f91625d33d123"
-        self.api_secret = "b18dcc2cee347aaf1e28407de1a3e8638e6597c3b311cd59cb7d3573bfb3fc05"
+        self.api_key = os.environ.get("GATE_API_KEY", "")
+        self.api_secret = os.environ.get("GATE_API_SECRET", "")
         
         # Initialize API
         cfg = Configuration(key=self.api_key, secret=self.api_secret)

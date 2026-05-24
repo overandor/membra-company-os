@@ -3,7 +3,7 @@
 import os, base64, json, time
 from pathlib import Path
 
-TOKEN = "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"
+TOKEN = os.environ.get("GITHUB_TOKEN", "")
 OWNER = "overandor"
 REPO = "agent-workforce"
 BRANCH = "main"
