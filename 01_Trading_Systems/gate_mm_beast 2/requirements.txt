@@ -1,5 +1,0 @@
-aiohttp
-websockets
-pandas
-numpy
-python-dotenv
