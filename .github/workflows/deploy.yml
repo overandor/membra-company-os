@@ -105,4 +105,4 @@ jobs:
     - name: Deploy landing page to Vercel
       run: |
         cd MEMBRA_BLOCKCHAIN_FORTRESS/01_SYSTEMS/membra-proof-of-inference/landing
-        vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
+        vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
