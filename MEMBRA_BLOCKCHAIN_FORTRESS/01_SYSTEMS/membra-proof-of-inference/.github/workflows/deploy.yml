@@ -10,7 +10,7 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
-  deploy-vercel:
+  deploy-ipfs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -22,49 +22,6 @@ jobs:
         toolchain: stable
         override: true
     
-    - name: Build CLI
-      run: cargo build --release --bin poi
-    
-    - name: Deploy to Vercel
-      uses: amondnet/vercel-action@v25
-      with:
-        vercel-token: ${{ secrets.VERCEL_TOKEN }}
-        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-        vercel-args: '--prod'
-        working-directory: ./
-
-  deploy-hf-space:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Deploy to Hugging Face Space
-      env:
-        HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}
-        HF_SPACE_REPO: ${{ secrets.HF_SPACE_REPO }}
-      run: |
-        echo "Deploying to Hugging Face Space..."
-        # Add Hugging Face deployment logic here
-        # This would typically involve pushing to a HF Space repository
-
-  deploy-render:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Trigger Render Deployment
-      env:
-        RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
-      run: |
-        echo "Triggering Render deployment..."
-        curl -X POST "$RENDER_DEPLOY_HOOK"
-
-  deploy-ipfs:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    
     - name: Install IPFS CLI
       run: |
         wget https://dist.ipfs.tech/go-ipfs/v0.27.0/go-ipfs_v0.27.0_linux-amd64.tar.gz
@@ -74,11 +31,60 @@ jobs:
     - name: Initialize IPFS
       run: ipfs init
     
-    - name: Build and Upload to IPFS
-      env:
-        IPFS_PINATA_API_KEY: ${{ secrets.IPFS_PINATA_API_KEY }}
-        IPFS_PINATA_SECRET: ${{ secrets.IPFS_PINATA_SECRET }}
+    - name: Build CLI
+      run: cargo build --release --bin poi
+    
+    - name: Load .env and Upload to IPFS
       run: |
-        cargo build --release --bin poi
-        ipfs add -r target/release/
-        # Pin to Pinata for persistence
+        if [ -f .env ]; then
+          export $(cat .env | grep -v '^#' | xargs)
+          echo "Loaded .env file"
+          
+          if [ -n "$pinata key" ] && [ -n "$pinata secret" ]; then
+            echo "Uploading to IPFS and pinning to Pinata..."
+            CID=$(ipfs add -r target/release/ --quieter)
+            echo "IPFS CID: $CID"
+            
+            # Pin to Pinata using JWT
+            if [ -n "$pinata jwt" ]; then
+              curl -X POST "https://api.pinata.cloud/pinning/pinFileToIPFS" \
+                -H "Authorization: Bearer $pinata jwt" \
+                -F "file=@target/release/poi" \
+                -F "pinataMetadata={\"name\":\"membra-proof-of-inference-cli\",\"keyvalues\":{\"project\":\"membra-proof-of-inference\"}}"
+            else
+              # Fallback to API key/secret
+              curl -X POST "https://api.pinata.cloud/pinning/pinFileToIPFS" \
+                -H "pinata_api_key: $pinata key" \
+                -H "pinata_secret_api_key: $pinata secret" \
+                -F "file=@target/release/poi" \
+                -F "pinataMetadata={\"name\":\"membra-proof-of-inference-cli\",\"keyvalues\":{\"project\":\"membra-proof-of-inference\"}}"
+            fi
+          else
+            echo "Pinata credentials not set in .env, uploading to IPFS without pinning"
+            ipfs add -r target/release/
+          fi
+        else
+          echo "No .env file found, skipping IPFS deployment"
+        fi
+
+  deploy-hf-space:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Load .env and Deploy to Hugging Face
+      run: |
+        if [ -f .env ]; then
+          export $(cat .env | grep -v '^#' | xargs)
+          echo "Loaded .env file"
+          
+          if [ -n "$hf" ]; then
+            echo "Deploying to Hugging Face Space..."
+            # Add Hugging Face Space deployment logic here
+            # Example: git clone with HF token, push to space repo
+          else
+            echo "Hugging Face token not set in .env, skipping deployment"
+          fi
+        else
+          echo "No .env file found, skipping HF Space deployment"
+        fi
