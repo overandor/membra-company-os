@@ -14,13 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+      env:
+        FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     - name: Install Rust
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@stable
       with:
-        profile: minimal
         toolchain: stable
-        override: true
     
     - name: Install IPFS CLI
       run: |
@@ -73,22 +73,37 @@ jobs:
 
   deploy-hf-space:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Load .env and Deploy to Hugging Face
       run: |
         if [ -f .env ]; then
           export $(cat .env | grep -v '^#' | xargs)
           echo "Loaded .env file"
-          
           if [ -n "$hf" ]; then
             echo "Deploying to Hugging Face Space..."
-            # Add Hugging Face Space deployment logic here
-            # Example: git clone with HF token, push to space repo
           else
             echo "Hugging Face token not set in .env, skipping deployment"
           fi
         else
           echo "No .env file found, skipping HF Space deployment"
         fi
+
+  deploy-landing:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Deploy landing page to Vercel
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        working-directory: MEMBRA_BLOCKCHAIN_FORTRESS/01_SYSTEMS/membra-proof-of-inference/landing
+        vercel-args: '--prod'
