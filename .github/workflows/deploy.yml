@@ -1,0 +1,90 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  deploy-ipfs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    
+    - name: Install IPFS CLI
+      run: |
+        wget https://dist.ipfs.tech/go-ipfs/v0.27.0/go-ipfs_v0.27.0_linux-amd64.tar.gz
+        tar -xvzf go-ipfs_v0.27.0_linux-amd64.tar.gz
+        sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
+    
+    - name: Initialize IPFS
+      run: ipfs init
+    
+    - name: Build CLI
+      run: cargo build --release --bin poi
+    
+    - name: Load .env and Upload to IPFS
+      run: |
+        if [ -f .env ]; then
+          export $(cat .env | grep -v '^#' | xargs)
+          echo "Loaded .env file"
+          
+          if [ -n "$pinata key" ] && [ -n "$pinata secret" ]; then
+            echo "Uploading to IPFS and pinning to Pinata..."
+            CID=$(ipfs add -r target/release/ --quieter)
+            echo "IPFS CID: $CID"
+            
+            # Pin to Pinata using JWT
+            if [ -n "$pinata jwt" ]; then
+              curl -X POST "https://api.pinata.cloud/pinning/pinFileToIPFS" \
+                -H "Authorization: Bearer $pinata jwt" \
+                -F "file=@target/release/poi" \
+                -F "pinataMetadata={\"name\":\"membra-proof-of-inference-cli\",\"keyvalues\":{\"project\":\"membra-proof-of-inference\"}}"
+            else
+              # Fallback to API key/secret
+              curl -X POST "https://api.pinata.cloud/pinning/pinFileToIPFS" \
+                -H "pinata_api_key: $pinata key" \
+                -H "pinata_secret_api_key: $pinata secret" \
+                -F "file=@target/release/poi" \
+                -F "pinataMetadata={\"name\":\"membra-proof-of-inference-cli\",\"keyvalues\":{\"project\":\"membra-proof-of-inference\"}}"
+            fi
+          else
+            echo "Pinata credentials not set in .env, uploading to IPFS without pinning"
+            ipfs add -r target/release/
+          fi
+        else
+          echo "No .env file found, skipping IPFS deployment"
+        fi
+
+  deploy-hf-space:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Load .env and Deploy to Hugging Face
+      run: |
+        if [ -f .env ]; then
+          export $(cat .env | grep -v '^#' | xargs)
+          echo "Loaded .env file"
+          
+          if [ -n "$hf" ]; then
+            echo "Deploying to Hugging Face Space..."
+            # Add Hugging Face Space deployment logic here
+            # Example: git clone with HF token, push to space repo
+          else
+            echo "Hugging Face token not set in .env, skipping deployment"
+          fi
+        else
+          echo "No .env file found, skipping HF Space deployment"
+        fi
