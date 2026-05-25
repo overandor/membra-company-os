@@ -99,11 +99,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install Vercel CLI
-      run: npm i -g vercel@latest
-
     - name: Deploy landing page to Vercel
-      uses: amondnet/vercel-action@v25
+      uses: vercel/vercel-action@v1
       with:
         vercel-token: ${{ secrets.VERCEL_TOKEN }}
         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
