@@ -1,0 +1,498 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// USER MANAGEMENT & AUTHENTICATION
+// ============================================================================
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String?
+  password      String
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  
+  // Relations
+  sessions      Session[]
+  files         File[]
+  agentWork     AgentWork[]
+  invoices      Invoice[]
+  appraisals     Appraisal[]
+  liquidity     Liquidity[]
+  activities    Activity[]
+  portfolios    Portfolio[]
+  
+  @@index([email])
+  @@index([role])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  token        String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([token])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  ANALYST
+  TRADER
+}
+
+// ============================================================================
+// FILE MANAGEMENT & DNA SYSTEM
+// ============================================================================
+
+model File {
+  id              String    @id @default(uuid())
+  userId          String
+  filePath        String
+  fileName        String
+  fileSize        BigInt
+  fileType        String
+  mimeType        String
+  dnaHash         String    @unique
+  contentHash     String
+  metadataHash    String
+  version         Int       @default(1)
+  isDeleted       Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  lastAccessedAt  DateTime?
+  
+  // Relations
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileHistory     FileHistory[]
+  fileMetadata    FileMetadata
+  appraisals      Appraisal[]
+  liquidity       Liquidity[]
+  analysis        FileAnalysis[]
+  
+  @@index([userId])
+  @@index([dnaHash])
+  @@index([fileType])
+  @@index([createdAt])
+}
+
+model FileHistory {
+  id              String    @id @default(uuid())
+  fileId          String
+  version         Int
+  dnaHash         String
+  fileSize        BigInt
+  changeDescription String
+  creatorSignature String
+  createdAt       DateTime  @default(now())
+  
+  file            File      @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  @@index([fileId])
+  @@index([version])
+  @@unique([fileId, version])
+}
+
+model FileMetadata {
+  id              String    @id @default(uuid())
+  fileId          String    @unique
+  
+  // Common fields
+  fileType        String
+  mimeType        String
+  encoding        String
+  
+  // Code-specific
+  language        String?
+  lineCount       Int?
+  functionCount   Int?
+  hasTests        Boolean?
+  
+  // Document-specific
+  author          String?
+  pageCount       Int?
+  wordCount       Int?
+  
+  // Media-specific
+  duration        BigInt?
+  resolution      String?
+  bitrate         BigInt?
+  
+  // Custom fields
+  customFields    Json?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  file            File      @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  @@index([fileId])
+}
+
+// ============================================================================
+// AGENT WORK TRACKING
+// ============================================================================
+
+model AgentWork {
+  id              String    @id @default(uuid())
+  userId          String
+  agentType       String
+  taskType        String
+  taskDescription String
+  inputHash       String?
+  outputHash      String?
+  status          WorkStatus @default(PENDING)
+  startTime       DateTime?
+  endTime         DateTime?
+  durationMs      BigInt?
+  tokensUsed      Int?
+  costUsd         Float?
+  qualityScore    Float?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documentation   Documentation[]
+  billing         Billing[]
+  
+  @@index([userId])
+  @@index([agentType])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum WorkStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model Documentation {
+  id              String    @id @default(uuid())
+  agentWorkId     String
+  title           String
+  content         String    @db.Text
+  documentationType String
+  tags            String[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  agentWork       AgentWork  @relation(fields: [agentWorkId], references: [id], onDelete: Cascade)
+  
+  @@index([agentWorkId])
+  @@index([documentationType])
+}
+
+// ============================================================================
+// BILLING & INVOICING
+// ============================================================================
+
+model Billing {
+  id              String    @id @default(uuid())
+  agentWorkId     String?
+  userId          String
+  description     String
+  quantity        Int
+  unitPriceUsd    Float
+  totalUsd        Float
+  billingPeriod   DateTime
+  status          BillingStatus @default(PENDING)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  agentWork       AgentWork? @relation(fields: [agentWorkId], references: [id])
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoiceItems    InvoiceItem[]
+  
+  @@index([userId])
+  @@index([agentWorkId])
+  @@index([billingPeriod])
+  @@index([status])
+}
+
+enum BillingStatus {
+  PENDING
+  APPROVED
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model Invoice {
+  id              String    @id @default(uuid())
+  userId          String
+  invoiceNumber   String    @unique
+  totalUsd        Float
+  status          InvoiceStatus @default(DRAFT)
+  issuedAt        DateTime?
+  dueAt           DateTime?
+  paidAt          DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items           InvoiceItem[]
+  
+  @@index([userId])
+  @@index([invoiceNumber])
+  @@index([status])
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model InvoiceItem {
+  id              String    @id @default(uuid())
+  invoiceId       String
+  billingId       String
+  description     String
+  quantity        Int
+  unitPriceUsd    Float
+  totalUsd        Float
+  
+  invoice         Invoice    @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  billing         Billing    @relation(fields: [billingId], references: [id])
+  
+  @@index([invoiceId])
+  @@index([billingId])
+}
+
+// ============================================================================
+// LLM APPRAISAL & PRICING
+// ============================================================================
+
+model Appraisal {
+  id                      String    @id @default(uuid())
+  userId                  String
+  fileId                  String?
+  agentWorkId             String?
+  llmModel                String
+  appraisalType           AppraisalType
+  
+  // Scoring (0-1 scale)
+  contentQualityScore     Float
+  marketDemandScore       Float
+  technicalMeritScore     Float
+  usageFrequencyScore     Float
+  overallScore            Float
+  
+  // Financial
+  estimatedValueUsd       Float
+  confidenceLevel         Float
+  
+  // Metadata
+  appraisalNotes          String    @db.Text
+  appraisalTimestamp      DateTime  @default(now())
+  
+  // Relations
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  file                    File?     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([fileId])
+  @@index([agentWorkId])
+  @@index([llmModel])
+  @@index([appraisalTimestamp])
+}
+
+enum AppraisalType {
+  FILE
+  AGENT_WORK
+  PORTFOLIO
+  IP_ASSET
+}
+
+// ============================================================================
+// LIQUIDITY & PRICE DISCOVERY
+// ============================================================================
+
+model Liquidity {
+  id                      String    @id @default(uuid())
+  userId                  String
+  fileId                  String?
+  
+  // Pricing
+  currentPriceUsd         Float
+  openingPriceUsd         Float
+  highPriceUsd            Float
+  lowPriceUsd             Float
+  closingPriceUsd         Float
+  
+  // Liquidity metrics
+  volumeUsd               Float
+  marketDepthUsd          Float
+  spreadUsd               Float
+  liquidityScore          Float
+  
+  // Derivatives
+  volatility              Float
+  beta                    Float
+  correlation             Float?
+  
+  // Time
+  timestamp               DateTime  @default(now())
+  
+  // Relations
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  file                    File?     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  priceHistory            PriceHistory[]
+  
+  @@index([userId])
+  @@index([fileId])
+  @@index([timestamp])
+}
+
+model PriceHistory {
+  id                      String    @id @default(uuid())
+  liquidityId             String
+  priceUsd                Float
+  volumeUsd               Float
+  timestamp               DateTime  @default(now())
+  
+  liquidity               Liquidity  @relation(fields: [liquidityId], references: [id], onDelete: Cascade)
+  
+  @@index([liquidityId])
+  @@index([timestamp])
+}
+
+// ============================================================================
+// FILE ANALYSIS & HISTORICAL DATA
+// ============================================================================
+
+model FileAnalysis {
+  id                      String    @id @default(uuid())
+  fileId                  String
+  
+  // Analysis results
+  complexityScore         Float
+  qualityScore            Float
+  securityScore           Float
+  performanceScore        Float
+  maintainabilityIndex    Float
+  
+  // Resource usage
+  cpuUsage                Float
+  memoryUsageBytes        BigInt
+  diskUsageBytes          BigInt
+  networkUsageBytes       BigInt
+  
+  // Time metrics
+  analysisDurationMs      BigInt
+  lastAnalysisTime        DateTime  @default(now())
+  
+  // Relations
+  file                    File      @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  
+  @@index([fileId])
+  @@index([lastAnalysisTime])
+}
+
+// ============================================================================
+// PORTFOLIO MANAGEMENT
+// ============================================================================
+
+model Portfolio {
+  id                      String    @id @default(uuid())
+  userId                  String
+  name                    String
+  description             String?
+  
+  // Portfolio metrics
+  totalValueUsd           Float
+  totalAssets             Int
+  dailyChangePct          Float
+  weeklyChangePct         Float
+  monthlyChangePct        Float
+  
+  // Risk metrics
+  volatility              Float
+  sharpeRatio             Float
+  maxDrawdown             Float
+  beta                    Float
+  
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  
+  // Relations
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assets                  PortfolioAsset[]
+  
+  @@index([userId])
+  @@index([name])
+}
+
+model PortfolioAsset {
+  id                      String    @id @default(uuid())
+  portfolioId             String
+  fileId                  String
+  quantity                Int
+  averageCostUsd          Float
+  currentValueUsd         Float
+  weightPct               Float
+  
+  portfolio               Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  
+  @@index([portfolioId])
+  @@index([fileId])
+  @@unique([portfolioId, fileId])
+}
+
+// ============================================================================
+// ACTIVITY LOGGING & ANALYTICS
+// ============================================================================
+
+model Activity {
+  id                      String    @id @default(uuid())
+  userId                  String
+  activityType            String
+  description             String
+  metadata                Json?
+  ipAddress               String?
+  userAgent               String?
+  timestamp               DateTime  @default(now())
+  
+  // Relations
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([activityType])
+  @@index([timestamp])
+}
+
+// ============================================================================
+// SYSTEM CONFIGURATION
+// ============================================================================
+
+model SystemConfig {
+  id                      String    @id @default(uuid())
+  key                     String    @unique
+  value                   String    @db.Text
+  description             String?
+  updatedAt               DateTime  @updatedAt
+  
+  @@index([key])
+}

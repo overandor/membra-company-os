@@ -1,0 +1,50 @@
+# Vercel Environment Variables
+# Add these in your Vercel project settings under Environment Variables
+
+# ===================================================================
+# REQUIRED VARIABLES
+# ===================================================================
+
+# NextAuth Configuration
+NEXTAUTH_SECRET=your-super-secret-random-string-generate-with-openssl-rand-base64-32
+NEXTAUTH_URL=https://your-project.vercel.app
+
+# Cloud LLM Service (OpenAI)
+OPENAI_API_KEY=sk-your-openai-api-key-starting-with-sk
+LLM_PROVIDER=openai
+LLM_MODEL=gpt-4
+
+# Cloud IPFS Service (Pinata)
+PINATA_API_KEY=your-pinata-api-key
+PINATA_SECRET_KEY=your-pinata-secret-key
+PINATA_GATEWAY=https://gateway.pinata.cloud/ipfs
+
+# Database (Vercel Postgres or external PostgreSQL)
+DATABASE_URL=postgresql://user:password@host:5432/database
+
+# ===================================================================
+# OPTIONAL VARIABLES
+# ===================================================================
+
+# Solana Blockchain
+SOLANA_RPC_URL=https://api.devnet.solana.com
+
+# AWS S3 (for cloud storage - optional)
+AWS_ACCESS_KEY_ID=your-aws-access-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+AWS_REGION=us-east-1
+AWS_S3_BUCKET=your-bucket-name
+
+# Node Environment
+NODE_ENV=production
+
+# ===================================================================
+# VERCEL-SPECIFIC VARIABLES (Auto-set by Vercel)
+# ===================================================================
+
+# Vercel automatically sets these:
+# VERCEL_URL
+# VERCEL_ENV
+# VERCEL_GIT_COMMIT_SHA
+# VERCEL_GIT_COMMIT_AUTHOR_LOGIN
+# VERCEL_GIT_COMMIT_MESSAGE

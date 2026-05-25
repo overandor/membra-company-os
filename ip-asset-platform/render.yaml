@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: ip-asset-platform
+    env: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ip-asset-db
+          property: connectionString
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: PINATA_API_KEY
+        sync: false
+      - key: PINATA_SECRET_KEY
+        sync: false
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: NEXTAUTH_URL
+        value: https://ip-asset-platform.onrender.com
+
+databases:
+  - name: ip-asset-db
+    databaseName: ip_assets
+    user: ip_asset_user

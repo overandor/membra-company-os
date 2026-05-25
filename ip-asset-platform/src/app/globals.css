@@ -1,0 +1,251 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Neumorphic Color Palette */
+  --bg-primary: #e0e5ec;
+  --bg-secondary: #e0e5ec;
+  --text-primary: #2d3748;
+  --text-secondary: #4a5568;
+  --accent-primary: #667eea;
+  --accent-secondary: #764ba2;
+  --success: #48bb78;
+  --warning: #ed8936;
+  --error: #f56565;
+  
+  /* Neumorphic Shadows */
+  --shadow-light: #ffffff;
+  --shadow-dark: #a3b1c6;
+  --shadow-soft: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+  --shadow-inset: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+  --shadow-hover: 12px 12px 24px var(--shadow-dark), -12px -12px 24px var(--shadow-light);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* Neumorphic Base Components */
+.neu-card {
+  background: var(--bg-primary);
+  border-radius: 20px;
+  box-shadow: var(--shadow-soft);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.neu-card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.neu-button {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  border: none;
+  padding: 12px 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.neu-button:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+.neu-button:active {
+  box-shadow: var(--shadow-inset);
+  transform: translateY(0);
+}
+
+.neu-button.primary {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+}
+
+.neu-input {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  box-shadow: var(--shadow-inset);
+  border: none;
+  padding: 12px 16px;
+  width: 100%;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.neu-input:focus {
+  outline: none;
+  box-shadow: var(--shadow-inset), 0 0 0 2px var(--accent-primary);
+}
+
+.neu-stat-card {
+  background: var(--bg-primary);
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+  padding: 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.neu-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.neu-progress-bar {
+  background: var(--bg-primary);
+  border-radius: 10px;
+  box-shadow: var(--shadow-inset);
+  height: 12px;
+  overflow: hidden;
+}
+
+.neu-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.neu-badge {
+  background: var(--bg-primary);
+  border-radius: 20px;
+  box-shadow: var(--shadow-soft);
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.neu-badge.success {
+  color: var(--success);
+}
+
+.neu-badge.warning {
+  color: var(--warning);
+}
+
+.neu-badge.error {
+  color: var(--error);
+}
+
+/* Layout Components */
+.neu-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.neu-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.neu-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.neu-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.neu-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1024px) {
+  .neu-grid-4, .neu-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .neu-grid-4, .neu-grid-3, .neu-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Typography */
+.neu-heading {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.neu-subheading {
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.neu-text {
+  color: var(--text-secondary);
+}
+
+.neu-text-primary {
+  color: var(--text-primary);
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.neu-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.neu-slide-in {
+  animation: slideIn 0.5s ease-out;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  box-shadow: var(--shadow-inset);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
