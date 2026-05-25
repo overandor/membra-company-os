@@ -1,0 +1,62 @@
+{
+  "_comment": "Canonical MEMBRA proof receipt. Every field is produced by the live Rust implementation. Run: poi demo --fast",
+  "membra_receipt": {
+    "version": "1.0",
+    "generated_at": "2026-05-25T11:01:34Z",
+
+    "worker": {
+      "_comment": "Ed25519 worker identity. trust_multiplier gates all collateral signals.",
+      "id": "worker-b4381bbe906804a5",
+      "pubkey": "76b15b2f2ddcb2b17b848c3fe70105d180098dd56d0156c3",
+      "trust_multiplier": 1.0,
+      "registry_epoch": 1
+    },
+
+    "inference": {
+      "_comment": "Proof-of-Inference attestation. model_cid is a content-addressed model handle.",
+      "id": "inf-791ab0a5d0f443af",
+      "model_cid": "bafybeigf2cd25c03f0b3c23c4q",
+      "runtime": "llama.cpp-b3412",
+      "quantization": "Q4_K_M",
+      "hardware": "apple-m5-pro / 14.2 TFLOPS"
+    },
+
+    "kv_state": {
+      "_comment": "32-layer KV cache collateralised with e^(-3t) freshness decay. 6h TTL.",
+      "id": "kv-f45fa28bca0c77f4",
+      "layers": 32,
+      "context_length": 4096,
+      "collateral_lamports": 163840,
+      "ttl_hours": 6,
+      "freshness_model": "exp(-3t)"
+    },
+
+    "memory": {
+      "_comment": "Memory CID in emergent market. emergent_reuse_score drives market_price_lamports.",
+      "cid": "Qm742468924dbdb40cT9x",
+      "emergent_reuse_score": 0.3006,
+      "market_price_lamports": 99595,
+      "retrieval_count": 23,
+      "downstream_references": 8
+    },
+
+    "score_breakdown": {
+      "_comment": "Four market signals, each normalised 0–1, composite gated by worker trust.",
+      "retrieval_frequency": 0.23,
+      "reference_density": 0.16,
+      "semantic_similarity": 0.0,
+      "attention_density": 0.766,
+      "composite": 0.3006,
+      "formula": "retrieval×0.30 + references×0.25 + semantic×0.20 + attention×0.25, ×trust"
+    },
+
+    "memgas": {
+      "_comment": "Credit grows as market price rises through burst cycles. Consumed via relay.",
+      "initial_credit_lamports": 10185,
+      "post_burst_credit_lamports": 99595,
+      "spent_lamports": 33098,
+      "remaining_lamports": 66498,
+      "daily_cap_lamports": 1000000
+    }
+  }
+}

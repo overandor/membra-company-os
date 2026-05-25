@@ -1,0 +1,16 @@
+[package]
+name = "poi-core"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+sha2.workspace = true
+ed25519-dalek.workspace = true
+rand.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+bincode.workspace = true
+hex.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+chrono.workspace = true

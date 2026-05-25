@@ -1,0 +1,17 @@
+[package]
+name = "memory-market"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+worker-reputation = { path = "../worker-reputation" }
+kv-state-collateral = { path = "../kv-state-collateral" }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+hex.workspace = true
+dashmap.workspace = true
+parking_lot.workspace = true
+chrono.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true

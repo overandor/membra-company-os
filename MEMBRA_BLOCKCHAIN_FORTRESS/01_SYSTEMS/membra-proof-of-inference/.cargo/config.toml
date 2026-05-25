@@ -1,0 +1,18 @@
+[build]
+# Apple Silicon (M5 Pro) optimizations
+[target.aarch64-apple-darwin]
+rustflags = [
+    "-C", "target-cpu=native",                  # Use M5 Pro native CPU features
+    "-C", "target-feature=+neon,+fp-armv8",     # NEON SIMD + FP on ARMv8
+]
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = true
+overflow-checks = false
+
+[profile.dev]
+opt-level = 0

@@ -1,0 +1,16 @@
+[package]
+name = "poi-bridge"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+poi-core = { path = "../poi-core" }
+poi-network = { path = "../poi-network" }
+memgas-protocol = { path = "../memgas-protocol" }
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+hex.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+chrono.workspace = true

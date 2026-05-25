@@ -1,0 +1,27 @@
+[package]
+name = "poi-cli"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "poi"
+path = "src/main.rs"
+
+[dependencies]
+poi-core = { path = "../poi-core" }
+poi-network = { path = "../poi-network" }
+poi-bridge = { path = "../poi-bridge" }
+memgas-protocol = { path = "../memgas-protocol" }
+worker-reputation = { path = "../worker-reputation" }
+kv-state-collateral = { path = "../kv-state-collateral" }
+memory-market = { path = "../memory-market" }
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+ed25519-dalek.workspace = true
+rand.workspace = true
+hex.workspace = true
+sha2.workspace = true
+chrono.workspace = true
+anyhow.workspace = true
+clap = { version = "4.5", features = ["derive"] }

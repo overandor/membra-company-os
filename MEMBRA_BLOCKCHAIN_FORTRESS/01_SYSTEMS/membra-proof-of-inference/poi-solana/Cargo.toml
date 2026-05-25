@@ -1,0 +1,15 @@
+[package]
+name = "poi-solana"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+poi-core = { path = "../poi-core" }
+solana-sdk.workspace = true
+solana-client.workspace = true
+anchor-lang.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+hex.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true

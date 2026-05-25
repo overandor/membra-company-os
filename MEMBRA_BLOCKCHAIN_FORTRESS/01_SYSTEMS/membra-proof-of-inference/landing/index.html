@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MEMBRA — Proof-of-Inference + MemGas Protocol</title>
+  <meta name="description" content="MEMBRA proves and prices AI cognition. Verified inference memory and reusable transformer state become temporary execution collateral on Solana." />
+  <meta property="og:title" content="MEMBRA — Verified AI Memory as Execution Collateral" />
+  <meta property="og:description" content="Run poi demo --fast and watch verified AI memory become gas credit." />
+  <meta property="og:type" content="website" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0a0a0f;
+      --surface:  #12121a;
+      --border:   #1e1e2e;
+      --cyan:     #00d4ff;
+      --green:    #00ff88;
+      --yellow:   #ffd700;
+      --dim:      #4a4a6a;
+      --text:     #e0e0f0;
+      --text-dim: #8080a0;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.1em;
+    }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 30%, rgba(0,212,255,0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(0,255,136,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.2);
+      padding: 0.35rem 1rem;
+      border-radius: 2rem;
+      margin-bottom: 2rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      max-width: 900px;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--green) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 1.2rem;
+      color: var(--text-dim);
+      max-width: 620px;
+      margin-bottom: 3rem;
+      line-height: 1.7;
+    }
+    .hero-cta {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+      margin-bottom: 4rem;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      background: var(--cyan);
+      color: #000;
+      font-weight: 700;
+      font-size: 0.95rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,212,255,0.3);
+    }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      background: transparent;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      text-decoration: none;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .btn-secondary:hover {
+      border-color: var(--cyan);
+      transform: translateY(-2px);
+    }
+
+    /* ── TERMINAL ── */
+    .terminal-wrap {
+      width: 100%; max-width: 800px;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    }
+    .terminal-bar {
+      background: #1a1a28;
+      padding: 0.65rem 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .terminal-title {
+      margin-left: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--dim);
+    }
+    .terminal-body {
+      background: #0e0e18;
+      padding: 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.7;
+      text-align: left;
+      overflow-x: auto;
+    }
+    .t-cyan  { color: var(--cyan); }
+    .t-green { color: var(--green); }
+    .t-yellow{ color: var(--yellow); }
+    .t-dim   { color: var(--text-dim); }
+    .t-bold  { font-weight: 700; }
+    .t-bar-fill { color: var(--cyan); }
+    .t-bar-empty{ color: #2a2a3a; }
+
+    /* ── PIPELINE ── */
+    .pipeline-section {
+      padding: 6rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+    .section-sub {
+      color: var(--text-dim);
+      max-width: 560px;
+      margin-bottom: 3rem;
+      font-size: 1.05rem;
+    }
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .pipeline-step {
+      display: flex; gap: 2rem; align-items: flex-start;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .pipeline-step:last-child { border-bottom: none; }
+    .step-num {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--dim);
+      padding-top: 0.2rem;
+      min-width: 2rem;
+    }
+    .step-content { flex: 1; }
+    .step-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.3rem;
+    }
+    .step-desc { color: var(--text-dim); font-size: 0.95rem; }
+    .step-badge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 0.25rem;
+      white-space: nowrap;
+      align-self: center;
+    }
+    .badge-cyan   { background: rgba(0,212,255,0.12); color: var(--cyan);   border: 1px solid rgba(0,212,255,0.2); }
+    .badge-green  { background: rgba(0,255,136,0.10); color: var(--green);  border: 1px solid rgba(0,255,136,0.2); }
+    .badge-yellow { background: rgba(255,215,0,0.10); color: var(--yellow); border: 1px solid rgba(255,215,0,0.2); }
+
+    /* ── METRICS ── */
+    .metrics-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 5rem 2rem;
+    }
+    .metrics-grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+    }
+    .metric-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+    }
+    .metric-value {
+      font-family: var(--font-mono);
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--cyan);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .metric-label { font-size: 0.9rem; color: var(--text-dim); }
+    .metric-sub { font-family: var(--font-mono); font-size: 0.75rem; color: var(--dim); margin-top: 0.4rem; }
+
+    /* ── FORMULA ── */
+    .formula-section {
+      padding: 6rem 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .formula-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--cyan);
+      border-radius: 0.5rem;
+      padding: 2rem;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 2;
+      margin-bottom: 2rem;
+    }
+    .formula-block .comment { color: var(--dim); }
+    .signal-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .signal-table th {
+      text-align: left;
+      padding: 0.6rem 1rem;
+      color: var(--text-dim);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .signal-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .signal-table tr:last-child td { border-bottom: none; }
+
+    /* ── CRATES ── */
+    .crates-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 6rem 2rem;
+    }
+    .crates-grid {
+      max-width: 1100px;
+      margin: 3rem auto 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .crate-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      transition: border-color 0.2s;
+    }
+    .crate-card:hover { border-color: var(--cyan); }
+    .crate-name {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: var(--cyan);
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+    .crate-desc { color: var(--text-dim); font-size: 0.9rem; line-height: 1.5; }
+
+    /* ── DEMO STEPS ── */
+    .demo-section {
+      padding: 6rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .demo-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+      margin-top: 3rem;
+    }
+    .demo-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+    }
+    .demo-step-num {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--dim);
+      margin-bottom: 0.5rem;
+    }
+    .demo-step-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .demo-step-desc { color: var(--text-dim); font-size: 0.9rem; line-height: 1.5; }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 8rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(0,212,255,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-section h2 {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cta-section p {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      margin-bottom: 2.5rem;
+    }
+    .cmd-block {
+      display: inline-block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem 2rem;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      color: var(--green);
+      margin-bottom: 2.5rem;
+      cursor: pointer;
+      user-select: all;
+      transition: border-color 0.2s;
+    }
+    .cmd-block:hover { border-color: var(--green); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .pipeline-step { flex-direction: column; gap: 0.5rem; }
+      .step-badge { align-self: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">MEMBRA</div>
+  <div class="nav-links">
+    <a href="#how-it-works">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#crates">Crates</a>
+    <a href="#demo">Demo</a>
+    <a href="https://github.com" target="_blank">GitHub</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">Proof-of-Inference · MemGas Protocol · Solana</div>
+  <h1>Verified AI memory as<br/><em>execution collateral</em></h1>
+  <p class="hero-sub">
+    MEMBRA proves and prices AI cognition. Every inference generates a cryptographic receipt.
+    Every reused transformer state becomes temporary gas credit on Solana.
+  </p>
+  <div class="hero-cta">
+    <a class="btn-primary" href="#demo">▶ Run the demo</a>
+    <a class="btn-secondary" href="https://github.com" target="_blank">View source →</a>
+  </div>
+
+  <!-- LIVE TERMINAL OUTPUT -->
+  <div class="terminal-wrap">
+    <div class="terminal-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="terminal-title">poi demo --fast</span>
+    </div>
+    <div class="terminal-body">
+<span class="t-cyan t-bold">╔══════════════════════════════════════════════════════════════════════╗</span>
+<span class="t-cyan t-bold">║          MEMBRA — Proof-of-Inference / MemGas Demo Console          ║</span>
+<span class="t-cyan t-bold">╚══════════════════════════════════════════════════════════════════════╝</span>
+<br/>
+<span class="t-bold">┌─ Step 4/7: Simulate Retrieval &amp; Reuse Cycles</span>
+<span class="t-dim">  →  Firing 8 retrieval events from distinct downstream inferences…</span>
+<br/>
+<span>  [ 1] <span class="t-bar-fill">████</span><span class="t-bar-empty">░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span>  36,375 lam  score 0.039  layers  4/32</span>
+<span>  [ 2] <span class="t-bar-fill">█████</span><span class="t-bar-empty">░░░░░░░░░░░░░░░░░░░░░░░░░░░</span>  42,090 lam  score 0.063  layers  8/32</span>
+<span>  [ 4] <span class="t-bar-fill">██████</span><span class="t-bar-empty">░░░░░░░░░░░░░░░░░░░░░░░░░░</span>  53,521 lam  score 0.110  layers 16/32</span>
+<span>  [ 6] <span class="t-bar-fill">███████</span><span class="t-bar-empty">░░░░░░░░░░░░░░░░░░░░░░░░░</span>  64,952 lam  score 0.157  layers 24/32</span>
+<span>  [ 8] <span class="t-bar-fill">█████████</span><span class="t-bar-empty">░░░░░░░░░░░░░░░░░░░░░░░</span>  76,382 lam  score 0.205  layers 32/32</span>
+<br/>
+<span class="t-bold">┌─ Step 5/7: Price Rise &amp; Decay</span>
+<span>  <span class="t-green">▲</span> burst 5  <span class="t-bar-fill">█████</span><span class="t-bar-empty">░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span>  <span class="t-yellow">99,595 lam</span></span>
+<span>  <span class="t-dim">▼</span> cool-1   <span class="t-bar-fill">████</span><span class="t-bar-empty">░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span>  76,422 lam</span>
+<span>  <span class="t-dim">▼</span> cool-3   <span class="t-bar-fill">█</span><span class="t-bar-empty">░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span>  30,074 lam</span>
+<br/>
+<span class="t-bold">┌─ Step 6/7: Spend MemGas Credit</span>
+<span class="t-green">  ✓  Relay validated — 33,098 lamports authorised</span>
+<span class="t-dim">     Available credit  99,296 lam (post-burst market price)</span>
+<span class="t-dim">     Remaining         66,198 lam</span>
+<br/>
+<span class="t-green t-bold">╔══════════════════════╗</span>
+<span class="t-green t-bold">║    Demo Complete     ║</span>
+<span class="t-green t-bold">╚══════════════════════╝</span>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="pipeline-section">
+  <div class="section-label">Protocol Stack</div>
+  <h2 class="section-title">From inference to gas credit in one pipeline</h2>
+  <p class="section-sub">Every step is cryptographically linked. No oracle, no committee.</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <div class="step-title">Proof-of-Inference</div>
+        <div class="step-desc">Ed25519-signed attestation binding model CID, prompt hash, token Merkle root, KV commitment, hardware, and worker identity. Challenge window enforces contestability.</div>
+      </div>
+      <div class="step-badge badge-cyan">poi-core</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <div class="step-title">Worker Trust</div>
+        <div class="step-desc">Every signal is gated by the worker's reputation multiplier (0–1.0×). Untrusted workers produce zero credit. Trust accrues from valid PoI and passed challenges.</div>
+      </div>
+      <div class="step-badge badge-yellow">worker-reputation</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <div class="step-title">KV-State Collateral</div>
+        <div class="step-desc">Live transformer KV caches, prefills, attention states, and reasoning contexts become collateral. Value decays as e<sup>−3t</sup>. Reuse events reprice upward.</div>
+      </div>
+      <div class="step-badge badge-green">kv-state-collateral</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">04</div>
+      <div class="step-content">
+        <div class="step-title">Emergent Market Pricing</div>
+        <div class="step-desc">Price is a live function of retrieval frequency, downstream references, semantic cluster cohesion, and KV-layer activation density. No static appraisal.</div>
+      </div>
+      <div class="step-badge badge-cyan">memory-market</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">05</div>
+      <div class="step-content">
+        <div class="step-title">MemGas Credit → Relay → Solana</div>
+        <div class="step-desc">Rising market price expands the credit pool. A UserIntent with a unique nonce is validated against the spend ledger and daily cap, then lamports are authorised for the Solana relay.</div>
+      </div>
+      <div class="step-badge badge-yellow">memgas-protocol</div>
+    </div>
+  </div>
+</section>
+
+<!-- METRICS -->
+<section class="metrics-section">
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-value">99,595</div>
+      <div class="metric-label">Peak market price (lamports)</div>
+      <div class="metric-sub">post 5 burst cycles · score 0.30 · trust 1.00×</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">163,840</div>
+      <div class="metric-label">KV-state collateral (lamports)</div>
+      <div class="metric-sub">32 layers · 4096 tokens · 32 MB cache</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">e<sup style="font-size:1.2rem">−3t</sup></div>
+      <div class="metric-label">Freshness decay model</div>
+      <div class="metric-sub">4 collateral types · 4–12h TTL</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">7</div>
+      <div class="metric-label">Protocol steps in the live demo</div>
+      <div class="metric-sub">poi demo --fast · exit 0 · ~3 seconds</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING FORMULA -->
+<section id="pricing" class="formula-section">
+  <div class="section-label">Emergent Pricing</div>
+  <h2 class="section-title">The formula is open. The market is real.</h2>
+  <p class="section-sub" style="margin-bottom:2rem">
+    Four on-chain observable signals. One trust gate. No committee.
+  </p>
+
+  <div class="formula-block">
+    <span class="comment">-- Phase 3: Emergent Memory Market Pricing</span><br/>
+    score  =  retrieval_frequency    × 0.30<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ downstream_references   × 0.25<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ semantic_cluster_cohesion × 0.20<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ attention_reuse_density  × 0.25<br/>
+    <br/>
+    score  =  score × worker_trust_multiplier  <span class="comment">← Phase 2 gate</span><br/>
+    <br/>
+    price  =  base_lamports × (1 + score × 9.0)<br/>
+    price  =  max(price, 1_000)               <span class="comment">← floor</span>
+  </div>
+
+  <table class="signal-table">
+    <thead>
+      <tr>
+        <th>Signal</th>
+        <th>Window</th>
+        <th>Cap</th>
+        <th>Weight</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="t-cyan">retrieval_frequency</span></td>
+        <td>24 h</td>
+        <td>100</td>
+        <td>30 %</td>
+      </tr>
+      <tr>
+        <td><span class="t-cyan">downstream_references</span></td>
+        <td>48 h</td>
+        <td>50</td>
+        <td>25 %</td>
+      </tr>
+      <tr>
+        <td><span class="t-cyan">semantic_cluster_cohesion</span></td>
+        <td>cluster</td>
+        <td>—</td>
+        <td>20 %</td>
+      </tr>
+      <tr>
+        <td><span class="t-cyan">attention_reuse_density</span></td>
+        <td>24 h</td>
+        <td>—</td>
+        <td>25 %</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- CRATES -->
+<section id="crates" class="crates-section">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label">Workspace Crates</div>
+    <h2 class="section-title">Built in Rust. No external runtime.</h2>
+    <div class="crates-grid">
+      <div class="crate-card">
+        <div class="crate-name">poi-core</div>
+        <div class="crate-desc">ProofOfInference struct, Ed25519 signing, SHA-256 KV Merkle commitment, runtime fingerprint, hardware attestation.</div>
+      </div>
+      <div class="crate-card">
+        <div class="crate-name">worker-reputation</div>
+        <div class="crate-desc">WorkerRegistry, ReputationLedger, ChallengeSystem. Trust scoring gates all collateral and pricing signals.</div>
+      </div>
+      <div class="crate-card">
+        <div class="crate-name">kv-state-collateral</div>
+        <div class="crate-desc">Four collateral types (KV-state, prefill, attention, reasoning context) with e<sup>−3t</sup> decay and reuse repricing.</div>
+      </div>
+      <div class="crate-card">
+        <div class="crate-name">memory-market</div>
+        <div class="crate-desc">RetrievalTracker (24h), ReferenceGraph (48h), AttentionDensityTracker, EmergentPricingEngine with semantic clusters.</div>
+      </div>
+      <div class="crate-card">
+        <div class="crate-name">memgas-protocol</div>
+        <div class="crate-desc">MemGasProtocol: spend ledger, nonce anti-replay, relay validation, daily wallet caps, credit deduction.</div>
+      </div>
+      <div class="crate-card">
+        <div class="crate-name">poi-network</div>
+        <div class="crate-desc">Custom PoI consensus chain with block production and PoI-anchored finality.</div>
+      </div>
+      <div class="crate-card">
+        <div class="crate-name">poi-bridge</div>
+        <div class="crate-desc">Solana relayer infrastructure: MemGas-authorised transaction submission bridge.</div>
+      </div>
+      <div class="crate-card">
+        <div class="crate-name">poi-cli</div>
+        <div class="crate-desc">The <code>poi</code> binary. All CLI commands + the 7-step public demo console.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO STEPS -->
+<section id="demo" class="demo-section">
+  <div class="section-label">Public Demo Console</div>
+  <h2 class="section-title">Seven steps. One command.</h2>
+  <p class="section-sub">Every number is computed by the live Rust implementation — no mocks.</p>
+
+  <div class="demo-steps">
+    <div class="demo-step">
+      <div class="demo-step-num">Step 01</div>
+      <div class="demo-step-title">Generate Inference Proof</div>
+      <div class="demo-step-desc">Fresh Ed25519 keypair → PoI attestation signed by worker key. Challenge window timestamp printed.</div>
+    </div>
+    <div class="demo-step">
+      <div class="demo-step-num">Step 02</div>
+      <div class="demo-step-title">Register Memory</div>
+      <div class="demo-step-desc">Worker trust seeded (1.00×) → memory registered → initial MemGas credit issued: 10,185 lam.</div>
+    </div>
+    <div class="demo-step">
+      <div class="demo-step-num">Step 03</div>
+      <div class="demo-step-title">Register KV-State Collateral</div>
+      <div class="demo-step-desc">32-layer × 4096-token KV cache → 32 SHA-256 commitments → 163,840 lam collateral value.</div>
+    </div>
+    <div class="demo-step">
+      <div class="demo-step-num">Step 04</div>
+      <div class="demo-step-title">Simulate Retrieval &amp; Reuse</div>
+      <div class="demo-step-desc">8 cycles: retrieval + reference + attention layer activation. Live price bar grows 36K → 76K lam.</div>
+    </div>
+    <div class="demo-step">
+      <div class="demo-step-num">Step 05</div>
+      <div class="demo-step-title">Price Rise &amp; Decay</div>
+      <div class="demo-step-desc">5 burst rounds peak at 99,595 lam. 3 cooling steps decay to 30,074 lam. Bars shrink visibly.</div>
+    </div>
+    <div class="demo-step">
+      <div class="demo-step-num">Step 06</div>
+      <div class="demo-step-title">Spend MemGas Credit</div>
+      <div class="demo-step-desc">UserIntent → relay validates nonce + credit + daily cap → 33,098 lam authorised for Solana tx.</div>
+    </div>
+    <div class="demo-step">
+      <div class="demo-step-num">Step 07</div>
+      <div class="demo-step-title">Export Proof Receipt</div>
+      <div class="demo-step-desc">JSON audit receipt: worker, inference, KV-state, emergent score, MemGas. Submittable on-chain.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Run it in under 30 seconds</h2>
+  <p>Rust 1.75+. No external services. Exit 0.</p>
+  <div class="cmd-block">cargo build --release &amp;&amp; ./target/release/poi demo --fast</div>
+  <br/>
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+    <a class="btn-primary" href="https://github.com" target="_blank">View on GitHub</a>
+    <a class="btn-secondary" href="examples/proof-receipt-sample.json" target="_blank">Sample Receipt JSON</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>MEMBRA · Proof-of-Inference + MemGas Protocol</div>
+  <div style="display:flex;gap:1.5rem">
+    <a href="README.md">README</a>
+    <a href="DEMO.md">Demo Guide</a>
+    <a href="MEMGAS_PROTOCOL.md">Protocol Spec</a>
+    <a href="https://github.com" target="_blank">GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>
