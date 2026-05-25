@@ -32,7 +32,9 @@ jobs:
       run: ipfs init
     
     - name: Build CLI
-      run: cargo build --release --bin poi
+      run: |
+        cd MEMBRA_BLOCKCHAIN_FORTRESS/01_SYSTEMS/membra-proof-of-inference
+        cargo build --release --bin poi
     
     - name: Load .env and Upload to IPFS
       run: |
@@ -42,6 +44,7 @@ jobs:
           
           if [ -n "$pinata key" ] && [ -n "$pinata secret" ]; then
             echo "Uploading to IPFS and pinning to Pinata..."
+            cd MEMBRA_BLOCKCHAIN_FORTRESS/01_SYSTEMS/membra-proof-of-inference
             CID=$(ipfs add -r target/release/ --quieter)
             echo "IPFS CID: $CID"
             
@@ -61,6 +64,7 @@ jobs:
             fi
           else
             echo "Pinata credentials not set in .env, uploading to IPFS without pinning"
+            cd MEMBRA_BLOCKCHAIN_FORTRESS/01_SYSTEMS/membra-proof-of-inference
             ipfs add -r target/release/
           fi
         else
