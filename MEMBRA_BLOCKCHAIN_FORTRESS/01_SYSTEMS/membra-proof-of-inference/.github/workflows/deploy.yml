@@ -1,0 +1,84 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  deploy-vercel:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    
+    - name: Build CLI
+      run: cargo build --release --bin poi
+    
+    - name: Deploy to Vercel
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-args: '--prod'
+        working-directory: ./
+
+  deploy-hf-space:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to Hugging Face Space
+      env:
+        HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}
+        HF_SPACE_REPO: ${{ secrets.HF_SPACE_REPO }}
+      run: |
+        echo "Deploying to Hugging Face Space..."
+        # Add Hugging Face deployment logic here
+        # This would typically involve pushing to a HF Space repository
+
+  deploy-render:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Trigger Render Deployment
+      env:
+        RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+      run: |
+        echo "Triggering Render deployment..."
+        curl -X POST "$RENDER_DEPLOY_HOOK"
+
+  deploy-ipfs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install IPFS CLI
+      run: |
+        wget https://dist.ipfs.tech/go-ipfs/v0.27.0/go-ipfs_v0.27.0_linux-amd64.tar.gz
+        tar -xvzf go-ipfs_v0.27.0_linux-amd64.tar.gz
+        sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
+    
+    - name: Initialize IPFS
+      run: ipfs init
+    
+    - name: Build and Upload to IPFS
+      env:
+        IPFS_PINATA_API_KEY: ${{ secrets.IPFS_PINATA_API_KEY }}
+        IPFS_PINATA_SECRET: ${{ secrets.IPFS_PINATA_SECRET }}
+      run: |
+        cargo build --release --bin poi
+        ipfs add -r target/release/
+        # Pin to Pinata for persistence
