@@ -57,6 +57,9 @@ export default function Dashboard() {
             <Link href="/settings">
               <button className="neu-button">Settings</button>
             </Link>
+            <Link href="/overllm">
+              <button className="neu-button primary">OverLLM Training</button>
+            </Link>
           </div>
         </div>
       </header>
