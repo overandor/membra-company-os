@@ -15,22 +15,32 @@ import crypto from 'crypto';
 // ---------------------------------------------------------------------------
 // Try to connect Prisma — graceful fallback if no DB
 // ---------------------------------------------------------------------------
-let prisma: any = null;
-let dbAvailable = false;
+let _prisma: any = null;
+let _dbChecked = false;
+let _dbOk = false;
 
 async function getPrisma() {
-  if (prisma) return prisma;
+  if (_dbChecked) return _dbOk ? _prisma : null;
+  _dbChecked = true;
+
+  // Skip DB entirely if DATABASE_URL looks like a placeholder
+  const url = process.env.DATABASE_URL || '';
+  if (!url || url.includes('user:password') || url.includes('your-') || (!url.startsWith('postgres') && !url.startsWith('prisma'))) {
+    _dbOk = false;
+    return null;
+  }
+
   try {
     const { PrismaClient } = await import('@prisma/client');
     const g = globalThis as any;
-    prisma = g.__prisma || new PrismaClient();
-    if (process.env.NODE_ENV !== 'production') g.__prisma = prisma;
-    // Test connection
-    await prisma.$connect();
-    dbAvailable = true;
-    return prisma;
+    _prisma = g.__prisma || new PrismaClient();
+    if (process.env.NODE_ENV !== 'production') g.__prisma = _prisma;
+    await _prisma.$queryRaw`SELECT 1`;
+    _dbOk = true;
+    return _prisma;
   } catch {
-    dbAvailable = false;
+    _dbOk = false;
+    _prisma = null;
     return null;
   }
 }
