@@ -28,6 +28,7 @@ model User {
   invoices      Invoice[]
   appraisals     Appraisal[]
   liquidity     Liquidity[]
+  billings      Billing[]
   activities    Activity[]
   portfolios    Portfolio[]
   
@@ -79,7 +80,7 @@ model File {
   // Relations
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   fileHistory     FileHistory[]
-  fileMetadata    FileMetadata
+  fileMetadata    FileMetadata?
   appraisals      Appraisal[]
   liquidity       Liquidity[]
   analysis        FileAnalysis[]
@@ -138,8 +139,8 @@ model FileMetadata {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   
-  file            File      @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  
+  file            File      @relation(fields: [fileId], references: [id])
+
   @@index([fileId])
 }
 
@@ -493,6 +494,79 @@ model SystemConfig {
   value                   String    @db.Text
   description             String?
   updatedAt               DateTime  @updatedAt
-  
+
+  @@index([key])
+}
+
+// ============================================================================
+// OVERLLM TRAINING PIPELINE
+// ============================================================================
+
+model CrawlDocument {
+  id              String    @id @default(uuid())
+  sourceId        String
+  sourceName      String
+  title           String
+  content         String    @db.Text
+  contentHash     String    @unique
+  byteSize        Int
+  tokenEstimate   Int
+  crawledAt       DateTime  @default(now())
+  usedInTraining  Boolean   @default(false)
+  trainingRunId   String?
+
+  trainingRun     OverLLMTrainingRun? @relation(fields: [trainingRunId], references: [id])
+
+  @@index([sourceId])
+  @@index([crawledAt])
+  @@index([usedInTraining])
+  @@index([contentHash])
+}
+
+model CrawlCycle {
+  id                String    @id @default(uuid())
+  startedAt         DateTime  @default(now())
+  completedAt       DateTime?
+  totalDocuments    Int       @default(0)
+  totalBytes        Int       @default(0)
+  totalTokens       Int       @default(0)
+  sourcesSucceeded  Int       @default(0)
+  sourcesFailed     Int       @default(0)
+  crawlTimeMs       Int       @default(0)
+  sourceResults     Json?
+  status            String    @default("running")
+  errorMessage      String?
+
+  @@index([startedAt])
+  @@index([status])
+}
+
+model OverLLMTrainingRun {
+  id              String    @id @default(uuid())
+  status          String    @default("pending")
+  startedAt       DateTime  @default(now())
+  completedAt     DateTime?
+  documentsUsed   Int       @default(0)
+  tokensUsed      Int       @default(0)
+  finetunJobId    String?
+  baseModel       String    @default("gpt-4o-mini-2024-07-18")
+  resultModel     String?
+  trainingFileId  String?
+  epochs          Int       @default(3)
+  loss            Float?
+  errorMessage    String?
+
+  documents       CrawlDocument[]
+
+  @@index([status])
+  @@index([startedAt])
+}
+
+model OverLLMConfig {
+  id              String    @id @default(uuid())
+  key             String    @unique
+  value           String    @db.Text
+  updatedAt       DateTime  @updatedAt
+
   @@index([key])
 }

@@ -1,0 +1,35 @@
+name: OverLLM Continuous Crawl
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # Every 5 minutes, 24/7
+  workflow_dispatch: {}     # Manual trigger
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Trigger OverLLM Crawl Cycle
+        run: |
+          echo "Triggering crawl at $(date -u)"
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://ip-asset-platform.vercel.app/api/overllm/cron")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          echo "Status: $HTTP_CODE"
+          echo "$BODY" | python3 -c "
+          import sys, json
+          try:
+            d = json.load(sys.stdin)
+            if d.get('success'):
+              s = d['snapshot']
+              print(f'Crawled {s[\"totalDocuments\"]} docs, {s[\"totalBytes\"]} bytes, {s[\"sourcesSucceeded\"]}/{s[\"sourcesSucceeded\"]+s[\"sourcesFailed\"]} sources OK')
+            else:
+              print(f'Error: {d.get(\"error\",\"unknown\")}')
+          except: print(sys.stdin.read() if hasattr(sys.stdin,'read') else 'parse error')
+          "
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::warning::Crawl returned $HTTP_CODE"
+          fi

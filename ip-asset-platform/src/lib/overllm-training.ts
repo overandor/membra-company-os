@@ -1,7 +1,19 @@
 /**
- * OverLLM Real Crawling Engine
- * Actually fetches data from public APIs and aggregates results.
+ * OverLLM Persistent Crawling & Training Engine
+ * Crawls real public APIs, stores in PostgreSQL, triggers OpenAI fine-tuning.
+ * Designed to run 24/7 via Vercel Cron.
  */
+
+import { PrismaClient } from '@prisma/client';
+import crypto from 'crypto';
+
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+const prisma = globalForPrisma.prisma || new PrismaClient();
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 export interface CrawlResult {
   sourceId: string;
@@ -16,6 +28,7 @@ export interface CrawlResult {
 }
 
 export interface CrawlSnapshot {
+  cycleId: string;
   timestamp: string;
   totalDocuments: number;
   totalBytes: number;
@@ -26,61 +39,56 @@ export interface CrawlSnapshot {
   sources: CrawlResult[];
 }
 
-interface SourceDef {
-  id: string;
-  name: string;
-  crawl: () => Promise<{ documents: number; bytes: number; titles: string[] }>;
+interface RawDoc {
+  title: string;
+  content: string;
 }
 
-async function fetchJson(url: string, timeout = 10000): Promise<any> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeout);
+// ---------------------------------------------------------------------------
+// HTTP helpers
+// ---------------------------------------------------------------------------
+
+async function fetchJson(url: string, timeout = 12000): Promise<any> {
+  const c = new AbortController();
+  const t = setTimeout(() => c.abort(), timeout);
   try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: { 'User-Agent': 'OverLLM-Crawler/1.0' },
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  } finally {
-    clearTimeout(timer);
-  }
+    const r = await fetch(url, { signal: c.signal, headers: { 'User-Agent': 'OverLLM-Crawler/2.0' } });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  } finally { clearTimeout(t); }
 }
 
-async function fetchText(url: string, timeout = 10000): Promise<string> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeout);
+async function fetchText(url: string, timeout = 12000): Promise<string> {
+  const c = new AbortController();
+  const t = setTimeout(() => c.abort(), timeout);
   try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: { 'User-Agent': 'OverLLM-Crawler/1.0' },
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.text();
-  } finally {
-    clearTimeout(timer);
-  }
+    const r = await fetch(url, { signal: c.signal, headers: { 'User-Agent': 'OverLLM-Crawler/2.0' } });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.text();
+  } finally { clearTimeout(t); }
 }
 
-const SOURCES: SourceDef[] = [
+function contentHash(text: string): string {
+  return crypto.createHash('sha256').update(text).digest('hex');
+}
+
+// ---------------------------------------------------------------------------
+// Source crawlers — each returns raw documents
+// ---------------------------------------------------------------------------
+
+const SOURCES: { id: string; name: string; crawl: () => Promise<RawDoc[]> }[] = [
   {
     id: 'wikipedia',
     name: 'Wikipedia (Random Articles)',
     crawl: async () => {
-      const titles: string[] = [];
-      let totalBytes = 0;
-      let docs = 0;
-      // Fetch 5 random articles
+      const docs: RawDoc[] = [];
       for (let i = 0; i < 5; i++) {
         try {
-          const data = await fetchJson('https://en.wikipedia.org/api/rest_v1/page/random/summary');
-          titles.push(data.title || 'Untitled');
-          const text = data.extract || '';
-          totalBytes += new TextEncoder().encode(text).length;
-          docs++;
+          const d = await fetchJson('https://en.wikipedia.org/api/rest_v1/page/random/summary');
+          if (d.extract) docs.push({ title: d.title || 'Untitled', content: d.extract });
         } catch { /* skip */ }
       }
-      return { documents: docs, bytes: totalBytes, titles };
+      return docs;
     },
   },
   {
@@ -90,14 +98,12 @@ const SOURCES: SourceDef[] = [
       const xml = await fetchText(
         'https://export.arxiv.org/api/query?search_query=cat:cs.AI&sortBy=submittedDate&sortOrder=descending&max_results=10'
       );
-      const titleMatches = [...xml.matchAll(/<title>([\s\S]*?)<\/title>/g)];
-      const summaryMatches = [...xml.matchAll(/<summary>([\s\S]*?)<\/summary>/g)];
-      const titles = titleMatches.slice(1).map(m => m[1].trim()).slice(0, 10);
-      let totalBytes = 0;
-      for (const m of summaryMatches) {
-        totalBytes += new TextEncoder().encode(m[1]).length;
-      }
-      return { documents: titles.length, bytes: totalBytes, titles };
+      const entries = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)];
+      return entries.map(e => {
+        const title = e[1].match(/<title>([\s\S]*?)<\/title>/)?.[1]?.trim() || 'Untitled';
+        const summary = e[1].match(/<summary>([\s\S]*?)<\/summary>/)?.[1]?.trim() || '';
+        return { title, content: `${title}\n\n${summary}` };
+      });
     },
   },
   {
@@ -105,24 +111,17 @@ const SOURCES: SourceDef[] = [
     name: 'Hacker News (Top Stories)',
     crawl: async () => {
       const ids: number[] = await fetchJson('https://hacker-news.firebaseio.com/v0/topstories.json');
-      const topIds = ids.slice(0, 10);
-      const titles: string[] = [];
-      let totalBytes = 0;
-      let docs = 0;
-      await Promise.all(
-        topIds.map(async (id) => {
-          try {
-            const item = await fetchJson(`https://hacker-news.firebaseio.com/v0/item/${id}.json`);
-            if (item?.title) {
-              titles.push(item.title);
-              const text = JSON.stringify(item);
-              totalBytes += new TextEncoder().encode(text).length;
-              docs++;
-            }
-          } catch { /* skip */ }
-        })
-      );
-      return { documents: docs, bytes: totalBytes, titles };
+      const docs: RawDoc[] = [];
+      await Promise.all(ids.slice(0, 10).map(async (id) => {
+        try {
+          const item = await fetchJson(`https://hacker-news.firebaseio.com/v0/item/${id}.json`);
+          if (item?.title) {
+            const content = [item.title, item.text || '', item.url || ''].filter(Boolean).join('\n');
+            docs.push({ title: item.title, content });
+          }
+        } catch { /* skip */ }
+      }));
+      return docs;
     },
   },
   {
@@ -130,10 +129,10 @@ const SOURCES: SourceDef[] = [
     name: 'Project Gutenberg (Books)',
     crawl: async () => {
       const data = await fetchJson('https://gutendex.com/books/?languages=en&sort=popular&page=1');
-      const books = data.results || [];
-      const titles = books.map((b: any) => b.title).slice(0, 10);
-      const totalBytes = new TextEncoder().encode(JSON.stringify(books)).length;
-      return { documents: books.length, bytes: totalBytes, titles };
+      return (data.results || []).slice(0, 10).map((b: any) => ({
+        title: b.title,
+        content: `${b.title} by ${(b.authors || []).map((a: any) => a.name).join(', ')}. Subjects: ${(b.subjects || []).join(', ')}`,
+      }));
     },
   },
   {
@@ -144,19 +143,16 @@ const SOURCES: SourceDef[] = [
         'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmode=json&retmax=10&sort=date&term=machine+learning'
       );
       const ids: string[] = search?.esearchresult?.idlist || [];
-      if (ids.length === 0) return { documents: 0, bytes: 0, titles: [] };
-      const summaryUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id=${ids.join(',')}`;
-      const summary = await fetchJson(summaryUrl);
-      const titles: string[] = [];
-      let totalBytes = 0;
+      if (!ids.length) return [];
+      const summary = await fetchJson(
+        `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id=${ids.join(',')}`
+      );
+      const docs: RawDoc[] = [];
       for (const id of ids) {
-        const article = summary?.result?.[id];
-        if (article?.title) {
-          titles.push(article.title);
-          totalBytes += new TextEncoder().encode(JSON.stringify(article)).length;
-        }
+        const a = summary?.result?.[id];
+        if (a?.title) docs.push({ title: a.title, content: JSON.stringify(a) });
       }
-      return { documents: titles.length, bytes: totalBytes, titles };
+      return docs;
     },
   },
   {
@@ -166,10 +162,10 @@ const SOURCES: SourceDef[] = [
       const data = await fetchJson(
         'https://api.github.com/search/repositories?q=stars:>100+language:python&sort=updated&per_page=10'
       );
-      const repos = data.items || [];
-      const titles = repos.map((r: any) => `${r.full_name}: ${r.description || ''}`).slice(0, 10);
-      const totalBytes = new TextEncoder().encode(JSON.stringify(repos)).length;
-      return { documents: repos.length, bytes: totalBytes, titles };
+      return (data.items || []).map((r: any) => ({
+        title: r.full_name,
+        content: `${r.full_name}: ${r.description || 'No description'}. Stars: ${r.stargazers_count}. Language: ${r.language || 'Unknown'}. Topics: ${(r.topics || []).join(', ')}`,
+      }));
     },
   },
   {
@@ -179,13 +175,10 @@ const SOURCES: SourceDef[] = [
       const data = await fetchJson(
         'https://api.stackexchange.com/2.3/questions?order=desc&sort=activity&site=stackoverflow&pagesize=10&filter=withbody'
       );
-      const questions = data.items || [];
-      const titles = questions.map((q: any) => q.title).slice(0, 10);
-      let totalBytes = 0;
-      for (const q of questions) {
-        totalBytes += new TextEncoder().encode(q.body || q.title || '').length;
-      }
-      return { documents: questions.length, bytes: totalBytes, titles };
+      return (data.items || []).map((q: any) => ({
+        title: q.title,
+        content: `Q: ${q.title}\n\n${q.body || ''}`,
+      }));
     },
   },
   {
@@ -193,68 +186,230 @@ const SOURCES: SourceDef[] = [
     name: 'Open Library (Book Metadata)',
     crawl: async () => {
       const data = await fetchJson('https://openlibrary.org/subjects/science.json?limit=10');
-      const works = data.works || [];
-      const titles = works.map((w: any) => w.title).slice(0, 10);
-      const totalBytes = new TextEncoder().encode(JSON.stringify(works)).length;
-      return { documents: works.length, bytes: totalBytes, titles };
+      return (data.works || []).map((w: any) => ({
+        title: w.title,
+        content: `${w.title} by ${(w.authors || []).map((a: any) => a.name).join(', ')}. First published: ${w.first_publish_year || 'unknown'}`,
+      }));
     },
   },
 ];
 
-/**
- * Run a real crawl across all enabled sources in parallel.
- * Each source makes real HTTP requests to public APIs.
- */
-export async function runCrawl(enabledSourceIds?: string[]): Promise<CrawlSnapshot> {
-  const startTime = Date.now();
-  const activeSources = enabledSourceIds
-    ? SOURCES.filter(s => enabledSourceIds.includes(s.id))
-    : SOURCES;
+// ---------------------------------------------------------------------------
+// Core: run a full crawl cycle, persist every document to PostgreSQL
+// ---------------------------------------------------------------------------
+
+export async function runCrawlCycle(): Promise<CrawlSnapshot> {
+  const cycleStart = Date.now();
+
+  const cycle = await prisma.crawlCycle.create({ data: { status: 'running' } });
 
   const results: CrawlResult[] = await Promise.all(
-    activeSources.map(async (source): Promise<CrawlResult> => {
+    SOURCES.map(async (source): Promise<CrawlResult> => {
       const t0 = Date.now();
       try {
-        const { documents, bytes, titles } = await source.crawl();
+        const rawDocs = await source.crawl();
+        let bytesCollected = 0;
+        let tokensEstimated = 0;
+        let stored = 0;
+        const titles: string[] = [];
+
+        for (const doc of rawDocs) {
+          const ch = contentHash(doc.content);
+          const byteSize = Buffer.byteLength(doc.content, 'utf8');
+          const tokenEst = Math.round(byteSize / 4);
+
+          try {
+            await prisma.crawlDocument.create({
+              data: {
+                sourceId: source.id,
+                sourceName: source.name,
+                title: doc.title.slice(0, 500),
+                content: doc.content,
+                contentHash: ch,
+                byteSize,
+                tokenEstimate: tokenEst,
+              },
+            });
+            stored++;
+          } catch (e: any) {
+            if (!e.code || e.code !== 'P2002') throw e;
+            // duplicate — already have this content
+          }
+
+          bytesCollected += byteSize;
+          tokensEstimated += tokenEst;
+          titles.push(doc.title);
+        }
+
         return {
-          sourceId: source.id,
-          sourceName: source.name,
-          status: 'success',
-          documentsCollected: documents,
-          bytesCollected: bytes,
-          tokensEstimated: Math.round(bytes / 4), // ~4 bytes per token
-          crawlTimeMs: Date.now() - t0,
-          sampleTitles: titles.slice(0, 5),
+          sourceId: source.id, sourceName: source.name, status: 'success',
+          documentsCollected: stored, bytesCollected, tokensEstimated,
+          crawlTimeMs: Date.now() - t0, sampleTitles: titles.slice(0, 5),
         };
       } catch (err) {
         return {
-          sourceId: source.id,
-          sourceName: source.name,
-          status: 'error',
-          documentsCollected: 0,
-          bytesCollected: 0,
-          tokensEstimated: 0,
-          crawlTimeMs: Date.now() - t0,
-          sampleTitles: [],
+          sourceId: source.id, sourceName: source.name, status: 'error',
+          documentsCollected: 0, bytesCollected: 0, tokensEstimated: 0,
+          crawlTimeMs: Date.now() - t0, sampleTitles: [],
           error: err instanceof Error ? err.message : String(err),
         };
       }
     })
   );
 
-  const totalDocuments = results.reduce((s, r) => s + r.documentsCollected, 0);
+  const totalDocs = results.reduce((s, r) => s + r.documentsCollected, 0);
   const totalBytes = results.reduce((s, r) => s + r.bytesCollected, 0);
   const totalTokens = results.reduce((s, r) => s + r.tokensEstimated, 0);
+  const succeeded = results.filter(r => r.status === 'success').length;
+  const failed = results.filter(r => r.status === 'error').length;
+  const elapsed = Date.now() - cycleStart;
+
+  await prisma.crawlCycle.update({
+    where: { id: cycle.id },
+    data: {
+      completedAt: new Date(), totalDocuments: totalDocs, totalBytes, totalTokens: totalTokens,
+      sourcesSucceeded: succeeded, sourcesFailed: failed, crawlTimeMs: elapsed,
+      sourceResults: JSON.parse(JSON.stringify(results)), status: 'completed',
+    },
+  });
+
+  // Auto-trigger training if enough unused docs
+  const unusedCount = await prisma.crawlDocument.count({ where: { usedInTraining: false } });
+  const activeTraining = await prisma.overLLMTrainingRun.count({ where: { status: { in: ['preparing', 'training'] } } });
+  if (unusedCount >= 100 && activeTraining === 0) {
+    try { await triggerTraining(); } catch { /* log but don't fail crawl */ }
+  }
 
   return {
-    timestamp: new Date().toISOString(),
-    totalDocuments,
-    totalBytes,
-    totalTokensEstimated: totalTokens,
-    totalCrawlTimeMs: Date.now() - startTime,
-    sourcesSucceeded: results.filter(r => r.status === 'success').length,
-    sourcesFailed: results.filter(r => r.status === 'error').length,
+    cycleId: cycle.id, timestamp: new Date().toISOString(),
+    totalDocuments: totalDocs, totalBytes, totalTokensEstimated: totalTokens,
+    totalCrawlTimeMs: elapsed, sourcesSucceeded: succeeded, sourcesFailed: failed,
     sources: results,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Training: build JSONL from unused docs, upload to OpenAI, start fine-tune
+// ---------------------------------------------------------------------------
+
+export async function triggerTraining(): Promise<{
+  runId: string; documentsUsed: number; tokensUsed: number;
+  finetunJobId?: string; status: string; message: string;
+}> {
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  const docs = await prisma.crawlDocument.findMany({
+    where: { usedInTraining: false },
+    orderBy: { crawledAt: 'asc' },
+    take: 500,
+  });
+
+  if (docs.length < 10) {
+    return { runId: '', documentsUsed: 0, tokensUsed: 0, status: 'waiting',
+      message: `Only ${docs.length} unused docs. Need at least 10.` };
+  }
+
+  const run = await prisma.overLLMTrainingRun.create({
+    data: {
+      status: 'preparing',
+      documentsUsed: docs.length,
+      tokensUsed: docs.reduce((s, d) => s + d.tokenEstimate, 0),
+    },
+  });
+
+  // Build JSONL
+  const jsonlLines = docs.map(doc => JSON.stringify({
+    messages: [
+      { role: 'system', content: 'You are OverLLM, a knowledgeable AI trained on diverse real-world data.' },
+      { role: 'user', content: `Tell me about: ${doc.title}` },
+      { role: 'assistant', content: doc.content },
+    ],
+  }));
+  const jsonlContent = jsonlLines.join('\n');
+
+  await prisma.crawlDocument.updateMany({
+    where: { id: { in: docs.map(d => d.id) } },
+    data: { usedInTraining: true, trainingRunId: run.id },
+  });
+
+  if (!apiKey || apiKey === 'your-openai-api-key') {
+    await prisma.overLLMTrainingRun.update({
+      where: { id: run.id },
+      data: { status: 'data_ready', errorMessage: 'OPENAI_API_KEY not set. JSONL ready but fine-tune not submitted.' },
+    });
+    return { runId: run.id, documentsUsed: docs.length,
+      tokensUsed: docs.reduce((s, d) => s + d.tokenEstimate, 0),
+      status: 'data_ready', message: `${docs.length} docs ready. Set OPENAI_API_KEY to fine-tune.` };
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('purpose', 'fine-tune');
+    formData.append('file', new Blob([jsonlContent], { type: 'application/jsonl' }), 'overllm-training.jsonl');
+
+    const uploadRes = await fetch('https://api.openai.com/v1/files', {
+      method: 'POST', headers: { 'Authorization': `Bearer ${apiKey}` }, body: formData,
+    });
+    const uploadData = await uploadRes.json();
+    if (!uploadRes.ok) throw new Error(`Upload failed: ${JSON.stringify(uploadData)}`);
+
+    const ftRes = await fetch('https://api.openai.com/v1/fine_tuning/jobs', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        training_file: uploadData.id, model: 'gpt-4o-mini-2024-07-18',
+        hyperparameters: { n_epochs: 3 }, suffix: 'overllm',
+      }),
+    });
+    const ftData = await ftRes.json();
+    if (!ftRes.ok) throw new Error(`Fine-tune failed: ${JSON.stringify(ftData)}`);
+
+    await prisma.overLLMTrainingRun.update({
+      where: { id: run.id },
+      data: { status: 'training', finetunJobId: ftData.id, trainingFileId: uploadData.id, baseModel: 'gpt-4o-mini-2024-07-18' },
+    });
+
+    return { runId: run.id, documentsUsed: docs.length,
+      tokensUsed: docs.reduce((s, d) => s + d.tokenEstimate, 0),
+      finetunJobId: ftData.id, status: 'training',
+      message: `Fine-tuning started. Job: ${ftData.id}` };
+  } catch (err) {
+    await prisma.overLLMTrainingRun.update({
+      where: { id: run.id },
+      data: { status: 'failed', errorMessage: err instanceof Error ? err.message : String(err) },
+    });
+    throw err;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Dashboard stats from PostgreSQL
+// ---------------------------------------------------------------------------
+
+export async function getDashboardStats() {
+  const [totalDocs, totalCycles, recentCycles, trainingRuns, docsBySource, aggTokens, aggBytes, unusedDocs] = await Promise.all([
+    prisma.crawlDocument.count(),
+    prisma.crawlCycle.count(),
+    prisma.crawlCycle.findMany({ orderBy: { startedAt: 'desc' }, take: 30 }),
+    prisma.overLLMTrainingRun.findMany({ orderBy: { startedAt: 'desc' }, take: 10 }),
+    prisma.crawlDocument.groupBy({ by: ['sourceId'], _count: true, _sum: { byteSize: true, tokenEstimate: true } }),
+    prisma.crawlDocument.aggregate({ _sum: { tokenEstimate: true } }),
+    prisma.crawlDocument.aggregate({ _sum: { byteSize: true } }),
+    prisma.crawlDocument.count({ where: { usedInTraining: false } }),
+  ]);
+
+  return {
+    totalDocuments: totalDocs,
+    totalCrawlCycles: totalCycles,
+    totalTokens: aggTokens._sum.tokenEstimate || 0,
+    totalBytes: aggBytes._sum.byteSize || 0,
+    unusedDocuments: unusedDocs,
+    recentCycles,
+    trainingRuns,
+    sourceBreakdown: docsBySource.map(s => ({
+      sourceId: s.sourceId, documentCount: s._count,
+      totalBytes: s._sum.byteSize || 0, totalTokens: s._sum.tokenEstimate || 0,
+    })),
   };
 }
 

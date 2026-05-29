@@ -3,90 +3,71 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 
-interface CrawlResult {
-  sourceId: string;
-  sourceName: string;
-  status: 'success' | 'error';
-  documentsCollected: number;
-  bytesCollected: number;
-  tokensEstimated: number;
-  crawlTimeMs: number;
-  sampleTitles: string[];
-  error?: string;
-}
-
-interface CrawlSnapshot {
-  timestamp: string;
-  totalDocuments: number;
-  totalBytes: number;
-  totalTokensEstimated: number;
-  totalCrawlTimeMs: number;
-  sourcesSucceeded: number;
-  sourcesFailed: number;
-  sources: CrawlResult[];
-}
-
-function fmtBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
-  if (bytes < 1073741824) return `${(bytes / 1048576).toFixed(1)} MB`;
-  return `${(bytes / 1073741824).toFixed(2)} GB`;
+function fmtBytes(b: number) {
+  if (b < 1024) return `${b} B`;
+  if (b < 1048576) return `${(b / 1024).toFixed(1)} KB`;
+  if (b < 1073741824) return `${(b / 1048576).toFixed(1)} MB`;
+  return `${(b / 1073741824).toFixed(2)} GB`;
 }
 
 function fmtTokens(n: number) {
   if (n < 1000) return String(n);
-  if (n < 1000000) return `${(n / 1000).toFixed(1)}K`;
-  return `${(n / 1000000).toFixed(2)}M`;
+  if (n < 1e6) return `${(n / 1000).toFixed(1)}K`;
+  return `${(n / 1e6).toFixed(2)}M`;
 }
 
-function StatusDot({ ok }: { ok: boolean }) {
-  return (
-    <span style={{
-      display: 'inline-block', width: 8, height: 8, borderRadius: '50%',
-      backgroundColor: ok ? '#22c55e' : '#ef4444', marginRight: 6,
-    }} />
-  );
+function Dot({ ok }: { ok: boolean }) {
+  return <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: ok ? '#22c55e' : '#ef4444', marginRight: 6 }} />;
 }
 
 export default function OverLLMDashboard() {
-  const [latest, setLatest] = useState<CrawlSnapshot | null>(null);
-  const [history, setHistory] = useState<CrawlSnapshot[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [triggeringTraining, setTriggeringTraining] = useState(false);
+  const [trainResult, setTrainResult] = useState<string | null>(null);
   const [refreshCount, setRefreshCount] = useState(0);
-  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
-  // Accumulated totals across all crawl cycles
-  const totalDocs = history.reduce((s, h) => s + h.totalDocuments, 0);
-  const totalBytes = history.reduce((s, h) => s + h.totalBytes, 0);
-  const totalTokens = history.reduce((s, h) => s + h.totalTokensEstimated, 0);
-  const totalCrawls = history.length;
-
-  const doCrawl = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const fetchStats = useCallback(async () => {
     try {
       const res = await fetch('/api/overllm/kpis');
       const data = await res.json();
-      if (data.success && data.snapshot) {
-        setLatest(data.snapshot);
-        setHistory(prev => [data.snapshot, ...prev].slice(0, 100));
-        setRefreshCount(c => c + 1);
-        setLastRefresh(new Date());
-      } else {
-        setError(data.error || 'Unknown error');
-      }
+      if (data.success) { setStats(data.stats); setError(null); }
+      else setError(data.error || 'Unknown error');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Fetch failed');
     }
     setLoading(false);
+    setRefreshCount(c => c + 1);
   }, []);
 
   useEffect(() => {
-    doCrawl();
-    const interval = setInterval(doCrawl, 60000);
-    return () => clearInterval(interval);
-  }, [doCrawl]);
+    fetchStats();
+    const iv = setInterval(fetchStats, 60000);
+    return () => clearInterval(iv);
+  }, [fetchStats]);
+
+  async function handleTriggerTraining() {
+    setTriggeringTraining(true);
+    setTrainResult(null);
+    try {
+      const res = await fetch('/api/overllm/training', { method: 'POST' });
+      const data = await res.json();
+      setTrainResult(data.message || data.error || JSON.stringify(data));
+      fetchStats();
+    } catch (e) {
+      setTrainResult(e instanceof Error ? e.message : 'Failed');
+    }
+    setTriggeringTraining(false);
+  }
+
+  if (loading && !stats) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="neu-card p-8"><div className="neu-pulse text-xl font-semibold">Loading OverLLM Pipeline...</div></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -94,16 +75,11 @@ export default function OverLLMDashboard() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold neu-heading">OverLLM Training Dashboard</h1>
-            <p className="neu-text">Real-time multi-source data crawling pipeline</p>
+            <p className="neu-text">24/7 multi-source crawling &amp; continuous fine-tuning pipeline</p>
           </div>
           <div className="flex gap-3 items-center">
-            <span className="text-xs neu-text">
-              Auto-crawl every 60s &middot; Cycle #{refreshCount}
-              {lastRefresh && <> &middot; {lastRefresh.toLocaleTimeString()}</>}
-            </span>
-            <button className="neu-button" onClick={doCrawl} disabled={loading}>
-              {loading ? 'Crawling...' : 'Crawl Now'}
-            </button>
+            <span className="text-xs neu-text">Auto-refresh 60s &middot; #{refreshCount}</span>
+            <button className="neu-button" onClick={fetchStats}>Refresh</button>
             <Link href="/"><button className="neu-button">Home</button></Link>
           </div>
         </div>
@@ -116,107 +92,126 @@ export default function OverLLMDashboard() {
           </div>
         )}
 
-        {/* Status Banner */}
-        <section className="mb-6">
-          <div className="neu-card p-6" style={{ borderLeft: `4px solid ${loading ? '#eab308' : latest ? '#22c55e' : '#6b7280'}` }}>
-            <div className="flex items-center gap-3">
-              <StatusDot ok={!loading && !!latest} />
-              <span className="text-lg font-bold neu-text-primary">
-                {loading ? 'Crawling all sources...' : latest
-                  ? `Last crawl: ${latest.sourcesSucceeded}/${latest.sources.length} sources OK in ${(latest.totalCrawlTimeMs / 1000).toFixed(1)}s`
-                  : 'Initializing...'}
-              </span>
-            </div>
-          </div>
-        </section>
+        {stats && (
+          <>
+            {/* Top KPIs — persistent totals from DB */}
+            <section className="mb-6">
+              <h2 className="text-xl font-bold neu-heading mb-4">Pipeline Totals (all time)</h2>
+              <div className="neu-grid neu-grid-4">
+                <div className="neu-stat-card">
+                  <div className="neu-subheading text-sm">Documents Crawled</div>
+                  <div className="text-3xl font-bold neu-text-primary">{stats.totalDocuments.toLocaleString()}</div>
+                  <div className="text-xs neu-text mt-1">{stats.totalCrawlCycles} crawl cycles</div>
+                </div>
+                <div className="neu-stat-card">
+                  <div className="neu-subheading text-sm">Total Data</div>
+                  <div className="text-3xl font-bold neu-text-primary">{fmtBytes(stats.totalBytes)}</div>
+                  <div className="text-xs neu-text mt-1">stored in PostgreSQL</div>
+                </div>
+                <div className="neu-stat-card">
+                  <div className="neu-subheading text-sm">Tokens Estimated</div>
+                  <div className="text-3xl font-bold neu-text-primary">{fmtTokens(stats.totalTokens)}</div>
+                  <div className="text-xs neu-text mt-1">{stats.unusedDocuments.toLocaleString()} unused for training</div>
+                </div>
+                <div className="neu-stat-card">
+                  <div className="neu-subheading text-sm">Training Runs</div>
+                  <div className="text-3xl font-bold neu-text-primary">{stats.trainingRuns.length}</div>
+                  <div className="text-xs neu-text mt-1">
+                    {stats.trainingRuns.filter((r: any) => r.status === 'training').length > 0 ? '🟢 Training active' : 'Auto-triggers at 100+ docs'}
+                  </div>
+                </div>
+              </div>
+            </section>
 
-        {/* Cumulative KPIs */}
-        <section className="mb-6">
-          <h2 className="text-xl font-bold neu-heading mb-4">Cumulative Totals (this session)</h2>
-          <div className="neu-grid neu-grid-4">
-            <div className="neu-stat-card neu-slide-in">
-              <div className="neu-subheading text-sm">Total Documents</div>
-              <div className="text-3xl font-bold neu-text-primary">{totalDocs.toLocaleString()}</div>
-              <div className="text-xs neu-text mt-1">{totalCrawls} crawl cycles</div>
-            </div>
-            <div className="neu-stat-card neu-slide-in" style={{ animationDelay: '0.1s' }}>
-              <div className="neu-subheading text-sm">Total Data</div>
-              <div className="text-3xl font-bold neu-text-primary">{fmtBytes(totalBytes)}</div>
-              <div className="text-xs neu-text mt-1">raw bytes crawled</div>
-            </div>
-            <div className="neu-stat-card neu-slide-in" style={{ animationDelay: '0.2s' }}>
-              <div className="neu-subheading text-sm">Tokens Estimated</div>
-              <div className="text-3xl font-bold neu-text-primary">{fmtTokens(totalTokens)}</div>
-              <div className="text-xs neu-text mt-1">~4 bytes/token</div>
-            </div>
-            <div className="neu-stat-card neu-slide-in" style={{ animationDelay: '0.3s' }}>
-              <div className="neu-subheading text-sm">Sources Active</div>
-              <div className="text-3xl font-bold neu-text-primary">{latest?.sourcesSucceeded ?? 0}/{latest?.sources.length ?? 8}</div>
-              <div className="text-xs neu-text mt-1">{latest?.sourcesFailed ?? 0} failed</div>
-            </div>
-          </div>
-        </section>
+            {/* Training Control */}
+            <section className="mb-6">
+              <div className="neu-card p-6" style={{ borderLeft: '4px solid #3b82f6' }}>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <div className="font-bold neu-text-primary text-lg">Training Pipeline</div>
+                    <div className="text-sm neu-text mt-1">
+                      {stats.unusedDocuments} documents ready for training.
+                      Auto-triggers when 100+ unused docs accumulate.
+                    </div>
+                    {trainResult && <div className="text-sm mt-2 neu-text-primary">{trainResult}</div>}
+                  </div>
+                  <button className="neu-button primary" onClick={handleTriggerTraining} disabled={triggeringTraining}>
+                    {triggeringTraining ? 'Starting...' : 'Trigger Training Now'}
+                  </button>
+                </div>
+              </div>
+            </section>
 
-        {/* Latest Crawl - Per Source */}
-        {latest && (
-          <section className="mb-6">
-            <h2 className="text-xl font-bold neu-heading mb-4">Latest Crawl Results</h2>
-            <div className="neu-card p-6">
-              <div className="space-y-3">
-                {latest.sources.map(src => (
-                  <div key={src.sourceId} className="neu-card p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        <StatusDot ok={src.status === 'success'} />
-                        <span className="font-semibold neu-text-primary">{src.sourceName}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs neu-text">{src.crawlTimeMs}ms</span>
-                        <span className={`neu-badge ${src.status === 'success' ? 'success' : 'error'}`}>
-                          {src.status === 'success'
-                            ? `${src.documentsCollected} docs · ${fmtBytes(src.bytesCollected)} · ${fmtTokens(src.tokensEstimated)} tokens`
-                            : src.error || 'ERROR'}
+            {/* Training Runs */}
+            {stats.trainingRuns.length > 0 && (
+              <section className="mb-6">
+                <h2 className="text-xl font-bold neu-heading mb-4">Training Runs</h2>
+                <div className="neu-card p-6">
+                  <div className="space-y-2">
+                    {stats.trainingRuns.map((run: any) => (
+                      <div key={run.id} className="neu-card p-3 flex justify-between items-center">
+                        <div>
+                          <span className="font-semibold neu-text-primary">{run.id.slice(0, 12)}...</span>
+                          <span className="text-xs neu-text ml-2">{new Date(run.startedAt).toLocaleString()}</span>
+                          <span className="text-xs neu-text ml-2">{run.documentsUsed} docs · {fmtTokens(run.tokensUsed)} tokens</span>
+                          {run.finetunJobId && <span className="text-xs neu-text ml-2">Job: {run.finetunJobId}</span>}
+                        </div>
+                        <span className={`neu-badge ${run.status === 'training' ? 'success' : run.status === 'failed' ? 'error' : 'warning'}`}>
+                          {run.status.toUpperCase()}
                         </span>
                       </div>
-                    </div>
-                    {src.sampleTitles.length > 0 && (
-                      <div className="ml-4 space-y-1">
-                        {src.sampleTitles.map((title, i) => (
-                          <div key={i} className="text-xs neu-text truncate">
-                            &bull; {title}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
+                </div>
+              </section>
+            )}
 
-        {/* Crawl History Timeline */}
-        {history.length > 1 && (
-          <section className="mb-8">
-            <h2 className="text-xl font-bold neu-heading mb-4">Crawl History</h2>
-            <div className="neu-card p-6" style={{ maxHeight: 400, overflowY: 'auto' }}>
-              <div className="space-y-2 font-mono text-xs">
-                {history.map((snap, i) => (
-                  <div key={i} className="flex gap-4 items-center">
-                    <span className="neu-text whitespace-nowrap">{new Date(snap.timestamp).toLocaleTimeString()}</span>
-                    <span className="neu-text-primary">
-                      {snap.totalDocuments} docs
-                    </span>
-                    <span className="neu-text">{fmtBytes(snap.totalBytes)}</span>
-                    <span className="neu-text">{fmtTokens(snap.totalTokensEstimated)} tokens</span>
-                    <span className="text-green-400">{snap.sourcesSucceeded} OK</span>
-                    {snap.sourcesFailed > 0 && <span className="text-red-400">{snap.sourcesFailed} failed</span>}
-                    <span className="neu-text">{(snap.totalCrawlTimeMs / 1000).toFixed(1)}s</span>
-                  </div>
-                ))}
+            {/* Source Breakdown */}
+            <section className="mb-6">
+              <h2 className="text-xl font-bold neu-heading mb-4">Source Breakdown (all time)</h2>
+              <div className="neu-card p-6">
+                <div className="space-y-2">
+                  {stats.sourceBreakdown.map((src: any) => (
+                    <div key={src.sourceId} className="neu-card p-3 flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <Dot ok={true} />
+                        <span className="font-semibold neu-text-primary">{src.sourceId}</span>
+                      </div>
+                      <div className="flex gap-4 text-sm">
+                        <span className="neu-text">{src.documentCount.toLocaleString()} docs</span>
+                        <span className="neu-text">{fmtBytes(src.totalBytes)}</span>
+                        <span className="neu-text">{fmtTokens(src.totalTokens)} tokens</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+
+            {/* Recent Crawl Cycles */}
+            <section className="mb-8">
+              <h2 className="text-xl font-bold neu-heading mb-4">Recent Crawl Cycles</h2>
+              <div className="neu-card p-6" style={{ maxHeight: 400, overflowY: 'auto' }}>
+                <div className="space-y-1 font-mono text-xs">
+                  {stats.recentCycles.map((c: any) => (
+                    <div key={c.id} className="flex gap-4 items-center">
+                      <span className="neu-text whitespace-nowrap">{new Date(c.startedAt).toLocaleString()}</span>
+                      <Dot ok={c.status === 'completed'} />
+                      <span className="neu-text-primary">{c.totalDocuments} docs</span>
+                      <span className="neu-text">{fmtBytes(c.totalBytes)}</span>
+                      <span className="neu-text">{fmtTokens(c.totalTokens)} tokens</span>
+                      <span className="text-green-400">{c.sourcesSucceeded} OK</span>
+                      {c.sourcesFailed > 0 && <span className="text-red-400">{c.sourcesFailed} fail</span>}
+                      <span className="neu-text">{(c.crawlTimeMs / 1000).toFixed(1)}s</span>
+                    </div>
+                  ))}
+                  {stats.recentCycles.length === 0 && (
+                    <div className="neu-text text-center py-4">No crawl cycles yet. Cron runs every minute.</div>
+                  )}
+                </div>
+              </div>
+            </section>
+          </>
         )}
       </main>
     </div>
