@@ -13,6 +13,8 @@ app = FastAPI(
     version="1.0.0",
 )
 
+PAGES_DIR = Path(__file__).parent / "pages"
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -265,6 +267,13 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 </style>
 </head>
 <body>
+<nav style="background:#111;border-bottom:1px solid #333;padding:0.75rem 2rem;display:flex;align-items:center;gap:1.5rem;margin:-2rem -2rem 2rem -2rem;font-size:0.8rem">
+  <span style="color:#ff6b00;font-weight:bold;font-size:1rem;margin-right:auto">MEMBRA</span>
+  <a href="/" style="color:#ff6b00;text-decoration:none">Dashboard</a>
+  <a href="/explorer" style="color:#888;text-decoration:none">Explorer</a>
+  <a href="/passport" style="color:#888;text-decoration:none">Passport</a>
+  <a href="/docs" style="color:#888;text-decoration:none">API Docs</a>
+</nav>
 <h1>MEMBRA Language Platform</h1>
 <p class="subtitle">Unified collateral API &mdash; language-protocol &bull; language-surfaces &bull; language-runtime</p>
 
@@ -347,6 +356,16 @@ init();
 @app.get("/", response_class=HTMLResponse)
 def dashboard():
     return DASHBOARD_HTML
+
+
+@app.get("/explorer", response_class=HTMLResponse)
+def explorer():
+    return (PAGES_DIR / "explorer.html").read_text()
+
+
+@app.get("/passport", response_class=HTMLResponse)
+def passport():
+    return (PAGES_DIR / "passport.html").read_text()
 
 
 if __name__ == "__main__":
