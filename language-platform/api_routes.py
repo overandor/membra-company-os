@@ -704,3 +704,184 @@ def export_json():
             })
     return JSONResponse(content={"generated_at": datetime.utcnow().isoformat(), "assets": data})
 
+
+
+# ─── GitHub Integration (T10) ───────────────────────────────────
+
+@router.get("/assets/{asset_id}/github")
+async def github_metadata(asset_id: str):
+    from github_client import fetch_repo_metadata, fetch_contributors, fetch_languages
+    with get_session() as session:
+        a = session.query(Asset).filter(Asset.id == asset_id).first()
+        if not a:
+            raise HTTPException(status_code=404, detail="Asset not found")
+        if not a.repo_url:
+            return {"error": "No repo_url configured for this asset"}
+        meta = await fetch_repo_metadata(a.repo_url)
+        contributors = await fetch_contributors(a.repo_url)
+        languages = await fetch_languages(a.repo_url)
+        return {"metadata": meta, "contributors": contributors, "languages": languages}
+
+
+# ─── Security Scanning (T12, T15) ────────────────────────────────
+
+@router.post("/assets/{asset_id}/scan")
+def scan_asset(asset_id: str, repo_path: Optional[str] = Query(None)):
+    from security_scanner import detect_risk_flags, scan_repo_secrets
+    with get_session() as session:
+        a = session.query(Asset).filter(Asset.id == asset_id).first()
+        if not a:
+            raise HTTPException(status_code=404, detail="Asset not found")
+        repo_meta = {"license": None, "stars": 0, "forks": 0}
+        path = repo_path or a.repo_url or ""
+        if path.startswith("http"):
+            path = None
+        flags = detect_risk_flags(repo_path=path, repo_metadata=repo_meta)
+        secrets = scan_repo_secrets(path) if path else []
+        for f in flags:
+            r = RiskFlag(asset_id=asset_id, category=f["category"], severity=f["severity"],
+                         reason=f["reason"], remediation=f.get("remediation"))
+            session.add(r)
+        session.commit()
+        return {"flags_detected": len(flags), "secrets_detected": len(secrets), "risks_persisted": len(flags)}
+
+
+@router.get("/assets/{asset_id}/secrets")
+def list_secrets(asset_id: str, repo_path: Optional[str] = Query(None)):
+    from security_scanner import scan_repo_secrets
+    with get_session() as session:
+        a = session.query(Asset).filter(Asset.id == asset_id).first()
+        if not a:
+            raise HTTPException(status_code=404, detail="Asset not found")
+        path = repo_path or a.repo_url or ""
+        if path.startswith("http"):
+            return {"error": "Provide a local repo_path for secret scanning"}
+        secrets = scan_repo_secrets(path) if path else []
+        return {"scanned_path": path, "secrets_found": secrets}
+
+
+# ─── LLM Agent Improvements (T23) ───────────────────────────────
+
+@router.post("/assets/{asset_id}/improvements/generate")
+async def generate_improvements_llm(asset_id: str, prefer_local: bool = Query(False)):
+    from agent_llm import generate_improvements
+    with get_session() as session:
+        a = session.query(Asset).filter(Asset.id == asset_id).first()
+        if not a:
+            raise HTTPException(status_code=404, detail="Asset not found")
+        asset_dict = {
+            "name": a.name,
+            "type": a.type.value if a.type else "repo",
+            "status": a.status.value if a.status else "active",
+            "lines_of_code": a.lines_of_code,
+            "tech_stack": a.tech_stack or [],
+            "financeability_score": a.financeability_score,
+            "risk_score": a.risk_score,
+            "strategic_value": a.strategic_value,
+            "risks": [{"category": r.category, "severity": r.severity, "reason": r.reason} for r in a.risks],
+        }
+        try:
+            suggestions = await generate_improvements(asset_dict, prefer_local=prefer_local)
+        except Exception as e:
+            return {"error": str(e), "note": "LLM service unavailable. Set GROQ_API_KEY or run Ollama."}
+        created = 0
+        for s in suggestions:
+            t = ImprovementTask(
+                asset_id=asset_id,
+                title=s.get("title", "Untitled"),
+                category=s.get("category", "general"),
+                impact_estimate=s.get("impact_estimate", 0),
+                effort_estimate=s.get("effort_estimate", "medium"),
+                priority=min(10, max(0, s.get("impact_estimate", 0))),
+            )
+            session.add(t)
+            created += 1
+        session.commit()
+        return {"generated": len(suggestions), "persisted": created, "suggestions": suggestions}
+
+
+# ─── Seed Demo Data ─────────────────────────────────────────────
+
+@router.post("/seed")
+def seed_demo_data():
+    with get_session() as session:
+        count = session.query(Asset).count()
+        if count > 0:
+            return {"message": "Database already seeded", "assets": count}
+        demos = [
+            Asset(name="neural-router", type=AssetType.REPO, status=AssetStatus.ACTIVE,
+                  strategic_value=480000, buyer_today_value=320000, liquidation_value=95000,
+                  collateral_support=175000, financeability_score=78.5, risk_score=22.0,
+                  lines_of_code=12400, tech_stack=["Python", "PyTorch", "FastAPI"],
+                  repo_url="https://github.com/acme/neural-router", owner="acme"),
+            Asset(name="collateral-engine", type=AssetType.API, status=AssetStatus.ACTIVE,
+                  strategic_value=850000, buyer_today_value=620000, liquidation_value=210000,
+                  collateral_support=410000, financeability_score=91.0, risk_score=9.0,
+                  lines_of_code=8900, tech_stack=["Rust", "Solana", "WebAssembly"],
+                  repo_url="https://github.com/acme/collateral-engine", owner="acme"),
+            Asset(name="membra-backing-token", type=AssetType.REPO, status=AssetStatus.RISK_BLOCKED,
+                  strategic_value=120000, buyer_today_value=80000, liquidation_value=15000,
+                  collateral_support=35000, financeability_score=34.0, risk_score=66.0,
+                  lines_of_code=3200, tech_stack=["Solidity", "Hardhat"],
+                  repo_url="https://github.com/acme/membra-token", owner="acme"),
+            Asset(name="data-pipeline", type=AssetType.DATASET, status=AssetStatus.IMPROVING,
+                  strategic_value=210000, buyer_today_value=140000, liquidation_value=42000,
+                  collateral_support=78000, financeability_score=62.0, risk_score=38.0,
+                  lines_of_code=5600, tech_stack=["Python", "Apache Spark", "dbt"],
+                  repo_url="https://github.com/acme/data-pipeline", owner="acme"),
+            Asset(name="llm-gateway", type=AssetType.API, status=AssetStatus.ACTIVE,
+                  strategic_value=390000, buyer_today_value=260000, liquidation_value=68000,
+                  collateral_support=135000, financeability_score=74.0, risk_score=26.0,
+                  lines_of_code=7800, tech_stack=["Go", "gRPC", "Redis"],
+                  repo_url="https://github.com/acme/llm-gateway", owner="acme"),
+            Asset(name="frontend-dashboard", type=AssetType.MODULE, status=AssetStatus.REVIEW,
+                  strategic_value=85000, buyer_today_value=55000, liquidation_value=12000,
+                  collateral_support=28000, financeability_score=48.0, risk_score=52.0,
+                  lines_of_code=15600, tech_stack=["TypeScript", "React", "Tailwind"],
+                  repo_url="https://github.com/acme/frontend-dashboard", owner="acme"),
+        ]
+        for a in demos:
+            session.add(a)
+        session.commit()
+
+        first = session.query(Asset).filter(Asset.name == "neural-router").first()
+        if first:
+            sections = [
+                ("01", "Executive Summary & Asset Description"),
+                ("02", "IP Ownership & Chain of Title"),
+                ("03", "License & Compliance Matrix"),
+                ("04", "Source Code Inventory & Build Provenance"),
+                ("05", "Dependency & SBOM Analysis"),
+                ("06", "Vulnerability & Security Assessment"),
+                ("07", "Financial Traceability & Cost Basis"),
+                ("08", "Market Comparable & Buyer Universe"),
+                ("09", "Technical Architecture & Scalability"),
+                ("10", "Operational Runbook & Supportability"),
+                ("11", "Data Protection & Privacy Compliance"),
+                ("12", "Business Continuity & Escrow"),
+                ("13", "Valuation Methodology & Assumptions"),
+                ("14", "Risk Matrix & Mitigation"),
+                ("15", "Agent Work Accounting & Build Logs"),
+                ("16", "Improvement Queue & Post-Closing Plan"),
+                ("17", "Legal Opinion & Lender Reliance Letter"),
+            ]
+            for key, title in sections:
+                s = PacketSection(asset_id=first.id, section_key=key, title=title,
+                                  is_complete=key in ("01", "03", "13"),
+                                  completeness=100.0 if key in ("01", "03", "13") else 0.0)
+                session.add(s)
+            session.commit()
+
+        dp = session.query(Asset).filter(Asset.name == "data-pipeline").first()
+        if dp:
+            tasks = [
+                ImprovementTask(asset_id=dp.id, title="Add comprehensive API documentation", category="documentation", impact_estimate=8.5, effort_estimate="medium", priority=8),
+                ImprovementTask(asset_id=dp.id, title="Increase test coverage to >80%", category="testing", impact_estimate=12.0, effort_estimate="large", priority=10),
+                ImprovementTask(asset_id=dp.id, title="Add LICENSE and CONTRIBUTING files", category="legal", impact_estimate=6.0, effort_estimate="small", priority=6),
+                ImprovementTask(asset_id=dp.id, title="Generate SBOM for all dependencies", category="security", impact_estimate=7.0, effort_estimate="small", priority=7),
+            ]
+            for t in tasks:
+                session.add(t)
+            session.commit()
+
+        return {"seeded": len(demos), "message": "Demo data loaded"}

@@ -15,7 +15,7 @@ from typing import Optional
 import csv
 import io
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
 
@@ -837,6 +837,15 @@ def rescan():
         return {"status": "index_mode", "note": "Rescan not available in deployed mode. Rebuild index locally and redeploy."}
     _scan_live()
     return {"status": "rescanned", "total_projects": len(_projects)}
+
+
+# ── WebSocket Real-Time Updates (T28) ─────────────────────────────
+
+from websocket_endpoint import websocket_handler
+
+@app.websocket("/ws")
+async def ws_endpoint(websocket: WebSocket):
+    await websocket_handler(websocket)
 
 
 # ── Pages ──────────────────────────────────────────────────────────
