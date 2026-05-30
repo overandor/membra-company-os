@@ -28,16 +28,16 @@
 - [x] **T18** — Liquidation route calculator with recovery percentage estimates
 - [x] **T19** — Recovery value estimation using comparable transaction data
 - [x] **T20** — Term sheet generator API (loan-to-value, covenants, collateral release)
-- [ ] **T21** — Due diligence checklist API with completion tracking
-- [ ] **T22** — NDA and access control for external lender/buyer parties
+- [x] **T21** — Due diligence checklist API with completion tracking
+- [x] **T22** — NDA and access control for external lender/buyer parties
 
 ## Phase 4: Agent & Automation
 
 - [x] **T23** — LLM agent for asset improvement recommendations (uses Groq/Ollama)
-- [ ] **T24** — Automated collateral packet assembly from scanned repo data
+- [x] **T24** — Automated collateral packet assembly from scanned repo data
 - [x] **T25** — Agent work accounting API with time/cost tracking per asset
 - [x] **T26** — Improvement queue auto-prioritization by financeability impact
-- [ ] **T27** — Scheduled re-appraisal cron job with delta alerting
+- [x] **T27** — Scheduled re-appraisal cron job with delta alerting
 
 ## Phase 5: Platform, Security & Real-Time
 
