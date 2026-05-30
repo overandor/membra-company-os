@@ -61,6 +61,14 @@ body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-pri
 .tier-card.tier-4 .tc-count{color:var(--orange)}
 .tier-card.archive .tc-count{color:var(--text-muted)}
 
+/* Filter bar */
+.filter-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.filter-select{background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:8px;padding:8px 12px;color:var(--text-primary);font-size:11px;font-family:var(--font-mono);cursor:pointer;transition:border-color 0.2s}
+.filter-select:focus{outline:none;border-color:var(--cyan)}
+.filter-input{flex:1;min-width:200px;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:8px;padding:8px 12px;color:var(--text-primary);font-size:11px;font-family:var(--font-mono);transition:border-color 0.2s}
+.filter-input:focus{outline:none;border-color:var(--cyan)}
+.filter-input::placeholder{color:var(--text-muted)}
+
 /* Asset list */
 .asset-list{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
 .asset-row{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:16px;display:flex;align-items:center;gap:16px;transition:border-color 0.2s}
@@ -135,6 +143,28 @@ body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-pri
         <div class="loading"><div class="spinner"></div><div style="margin-top:12px">Loading prioritization...</div></div>
       </div>
       
+      <div class="filter-bar">
+        <select id="filter-tier" class="filter-select">
+          <option value="">All Tiers</option>
+          <option value="Tier 1">Tier 1 - Core Asset</option>
+          <option value="Tier 2">Tier 2 - High Potential</option>
+          <option value="Tier 3">Tier 3 - Medium Potential</option>
+          <option value="Tier 4">Tier 4 - Low Potential</option>
+          <option value="Archive">Archive Candidate</option>
+        </select>
+        <select id="filter-type" class="filter-select">
+          <option value="">All Types</option>
+        </select>
+        <select id="sort-by" class="filter-select">
+          <option value="potential">Revival Potential</option>
+          <option value="value">Replacement Cost</option>
+          <option value="financeability">Financeability</option>
+          <option value="effort">Effort (weeks)</option>
+          <option value="roi">ROI</option>
+        </select>
+        <input id="search-input" type="text" placeholder="Search assets..." class="filter-input">
+      </div>
+      
       <div class="asset-list" id="asset-list">
         <div class="loading"><div class="spinner"></div><div style="margin-top:12px">Loading assets...</div></div>
       </div>
@@ -145,6 +175,11 @@ body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-pri
 <script>
 const BASE='';
 let prioritizedData=null;
+let filteredAssets=[];
+
+function $(v){return typeof v==='number'?'$'+v.toLocaleString(undefined,{maximumFractionDigits:0}):v}
+function scoreColor(v){return v>=70?'var(--green)':v>=50?'var(--gold)':v>=30?'var(--orange)':v(--red)}
+function fmt$(v){return typeof v==='number'?'$'+v.toLocaleString(undefined,{maximumFractionDigits:0}):v}
 
 function $(v){return typeof v==='number'?'$'+v.toLocaleString(undefined,{maximumFractionDigits:0}):v}
 function scoreColor(v){return v>=70?'var(--green)':v>=50?'var(--gold)':v>=30?'var(--orange)':v(--red)'}
@@ -154,6 +189,7 @@ async function boot(){
   try{
     const data=await fetch(BASE+'/api/catacomb/prioritization').then(r=>r.json());
     prioritizedData=data;
+    filteredAssets=data.prioritized_assets;
     
     // Tier summary
     const ts=data.tiers;
@@ -180,53 +216,99 @@ async function boot(){
       </div>
     `;
     
-    // Asset list
-    const list=document.getElementById('asset-list');
-    list.innerHTML='';
-    data.prioritized_assets.forEach((asset,i)=>{
-      const tierClass=asset.tier.toLowerCase().replace(' ','-');
-      list.innerHTML+=`
-        <div class="asset-row ${tierClass}">
-          <div class="asset-info">
-            <div class="asset-name">${asset.name}</div>
-            <div class="asset-meta">
-              <span>${asset.asset_type.replace(/_/g,' ')}</span>
-              <span>•</span>
-              <span>${asset.total_src.toLocaleString()} src</span>
-              <span>•</span>
-              <span>Proof ${asset.proof_level}/7</span>
-              <span>•</span>
-              <span>FS ${asset.financeability_score}/100</span>
-            </div>
-          </div>
-          <div class="asset-score" style="color:${scoreColor(asset.revival_potential_score)}">${asset.revival_potential_score}</div>
-          <div class="asset-tier ${tierClass}">${asset.tier}</div>
-          <div class="asset-roi">${asset.roi_estimate>0?'ROI '+Math.round(asset.roi_estimate):'—'}</div>
-        </div>
-        <div class="asset-detail" id="detail-${i}">
-          <div class="detail-row"><span class="detail-label">Replacement Cost</span><span class="detail-value">${$(asset.replacement_cost_usd)}</span></div>
-          <div class="detail-row"><span class="detail-label">Collateral Support</span><span class="detail-value">${$(asset.collateral_support_value_usd)}</span></div>
-          <div class="detail-row"><span class="detail-label">Conversion Gap</span><span class="detail-value">${asset.conversion_gap_pct.toFixed(1)}%</span></div>
-          <div class="detail-row"><span class="detail-label">Financeability</span><span class="detail-value">${asset.financeability_score}/100</span></div>
-          <div class="detail-row"><span class="detail-label">Proof Level</span><span class="detail-value">${asset.proof_level}/7</span></div>
-          <div class="detail-row"><span class="detail-label">Revival Potential</span><span class="detail-value" style="color:${scoreColor(asset.revival_potential_score)}">${asset.revival_potential_score}</span></div>
-          <div class="detail-row"><span class="detail-label">Est. Effort</span><span class="detail-value">${asset.estimated_effort_weeks} weeks</span></div>
-          <div class="detail-row"><span class="detail-label">Critical Actions</span><span class="detail-value">${asset.critical_actions}</span></div>
-          <div class="detail-row"><span class="detail-label">High Priority Actions</span><span class="detail-value">${asset.high_actions}</span></div>
-          <div class="detail-row"><span class="detail-label">Total Actions</span><span class="detail-value">${asset.total_actions}</span></div>
-        </div>
-      `;
+    // Populate asset type filter
+    const types=[...new Set(data.prioritized_assets.map(a=>a.asset_type))].sort();
+    const typeFilter=document.getElementById('filter-type');
+    types.forEach(t=>{
+      const o=document.createElement('option');
+      o.value=t;o.textContent=t.replace(/_/g,' ');
+      typeFilter.appendChild(o);
     });
     
-    // Add click handlers to expand details
-    document.querySelectorAll('.asset-row').forEach((row,i)=>{
-      row.addEventListener('click',()=>{
-        document.getElementById(`detail-${i}`).classList.toggle('open');
-      });
-    });
+    // Render initial list
+    renderAssetList(filteredAssets);
+    
+    // Add filter event listeners
+    document.getElementById('filter-tier').addEventListener('change',applyFilters);
+    document.getElementById('filter-type').addEventListener('change',applyFilters);
+    document.getElementById('sort-by').addEventListener('change',applyFilters);
+    let deb;
+    document.getElementById('search-input').addEventListener('input',()=>{clearTimeout(deb);deb=setTimeout(applyFilters,200)});
   }catch(e){
     document.getElementById('asset-list').innerHTML=`<div class="loading" style="color:var(--red)">Error: ${e.message}</div>`;
   }
+}
+
+function applyFilters(){
+  const tier=document.getElementById('filter-tier').value;
+  const type=document.getElementById('filter-type').value;
+  const sort=document.getElementById('sort-by').value;
+  const q=document.getElementById('search-input').value.toLowerCase().trim();
+  
+  filteredAssets=prioritizedData.prioritized_assets.filter(a=>{
+    if(tier&&!a.tier.includes(tier))return false;
+    if(type&&a.asset_type!==type)return false;
+    if(q&&!a.name.toLowerCase().includes(q))return false;
+    return true;
+  });
+  
+  // Sort
+  filteredAssets.sort((a,b)=>{
+    if(sort==='potential')return b.revival_potential_score-a.revival_potential_score;
+    if(sort==='value')return b.replacement_cost_usd-a.replacement_cost_usd;
+    if(sort==='financeability')return b.financeability_score-a.financeability_score;
+    if(sort==='effort')return a.estimated_effort_weeks-b.estimated_effort_weeks;
+    if(sort==='roi')return (b.roi_estimate||0)-(a.roi_estimate||0);
+    return 0;
+  });
+  
+  renderAssetList(filteredAssets);
+}
+
+function renderAssetList(assets){
+  const list=document.getElementById('asset-list');
+  list.innerHTML='';
+  assets.forEach((asset,i)=>{
+    const tierClass=asset.tier.toLowerCase().replace(' ','-');
+    list.innerHTML+=`
+      <div class="asset-row ${tierClass}">
+        <div class="asset-info">
+          <div class="asset-name">${asset.name}</div>
+          <div class="asset-meta">
+            <span>${asset.asset_type.replace(/_/g,' ')}</span>
+            <span>•</span>
+            <span>${asset.total_src.toLocaleString()} src</span>
+            <span>•</span>
+            <span>Proof ${asset.proof_level}/7</span>
+            <span>•</span>
+            <span>FS ${asset.financeability_score}/100</span>
+          </div>
+        </div>
+        <div class="asset-score" style="color:${scoreColor(asset.revival_potential_score)}">${asset.revival_potential_score}</div>
+        <div class="asset-tier ${tierClass}">${asset.tier}</div>
+        <div class="asset-roi">${asset.roi_estimate>0?'ROI '+Math.round(asset.roi_estimate):'—'}</div>
+      </div>
+      <div class="asset-detail" id="detail-${i}">
+        <div class="detail-row"><span class="detail-label">Replacement Cost</span><span class="detail-value">${$(asset.replacement_cost_usd)}</span></div>
+        <div class="detail-row"><span class="detail-label">Collateral Support</span><span class="detail-value">${$(asset.collateral_support_value_usd)}</span></div>
+        <div class="detail-row"><span class="detail-label">Conversion Gap</span><span class="detail-value">${asset.conversion_gap_pct.toFixed(1)}%</span></div>
+        <div class="detail-row"><span class="detail-label">Financeability</span><span class="detail-value">${asset.financeability_score}/100</span></div>
+        <div class="detail-row"><span class="detail-label">Proof Level</span><span class="detail-value">${asset.proof_level}/7</span></div>
+        <div class="detail-row"><span class="detail-label">Revival Potential</span><span class="detail-value" style="color:${scoreColor(asset.revival_potential_score)}">${asset.revival_potential_score}</span></div>
+        <div class="detail-row"><span class="detail-label">Est. Effort</span><span class="detail-value">${asset.estimated_effort_weeks} weeks</span></div>
+        <div class="detail-row"><span class="detail-label">Critical Actions</span><span class="detail-value">${asset.critical_actions}</span></div>
+        <div class="detail-row"><span class="detail-label">High Priority Actions</span><span class="detail-value">${asset.high_actions}</span></div>
+        <div class="detail-row"><span class="detail-label">Total Actions</span><span class="detail-value">${asset.total_actions}</span></div>
+      </div>
+    `;
+  });
+  
+  // Add click handlers to expand details
+  document.querySelectorAll('.asset-row').forEach((row,i)=>{
+    row.addEventListener('click',()=>{
+      document.getElementById(`detail-${i}`).classList.toggle('open');
+    });
+  });
 }
 
 // Particle canvas

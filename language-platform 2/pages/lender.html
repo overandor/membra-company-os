@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lender View — CollateralOps</title>
+<style>
+:root{--bg:#0a0a0a;--card:#141414;--accent:#ff6b00;--text:#e0e0e0;--dim:#777;--border:#262626;--green:#22c55e;--red:#ef4444;--blue:#6b8aff;--yellow:#eab308}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'SF Mono','Fira Code',monospace;background:var(--bg);color:var(--text);min-height:100vh}
+nav{background:#0f0f0f;border-bottom:1px solid var(--border);padding:.6rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100}
+nav .logo{color:var(--accent);font-weight:bold;font-size:1rem;margin-right:auto}
+nav a{color:var(--dim);text-decoration:none;font-size:.7rem;padding:4px 10px;border-radius:6px;transition:all .2s}
+nav a:hover,nav a.active{color:var(--accent);background:#1a1200}
+.wrap{max-width:1000px;margin:0 auto;padding:1.5rem}
+h1{color:#fff;font-size:1.2rem;margin-bottom:.15rem}
+.sub{color:var(--dim);font-size:.7rem;margin-bottom:1.5rem}
+.disclaimer{background:#1a0a0a;border:1px solid #3a1a1a;border-radius:8px;padding:.75rem;font-size:.6rem;color:var(--red);margin-bottom:1.5rem}
+.lender-card{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:.75rem;overflow:hidden}
+.lc-header{padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;cursor:pointer;transition:all .2s}
+.lc-header:hover{background:#1a1a1a}
+.lc-name{flex:1;font-weight:bold;font-size:.8rem;color:var(--accent)}
+.lc-csv{font-size:.85rem;font-weight:bold;color:var(--green);min-width:80px;text-align:right}
+.lc-risk{font-size:.55rem;padding:2px 6px;border-radius:4px}
+.lc-risk.low{background:#0a1a0a;color:var(--green)}.lc-risk.medium{background:#1a1a00;color:var(--yellow)}.lc-risk.high{background:#1a0a0a;color:var(--red)}
+.lc-body{display:none;padding:.75rem 1rem;background:#0f0f0f;font-size:.65rem;border-top:1px solid var(--border)}
+.lc-body.open{display:block}
+.lr{display:flex;justify-content:space-between;padding:.2rem 0;border-bottom:1px solid #111}
+.lr .k{color:var(--dim)}.lr .v{color:var(--text)}
+.section-title{font-size:.65rem;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin:1rem 0 .5rem;padding-bottom:.2rem;border-bottom:1px solid #1a1a1a}
+.agg{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.6rem;margin-bottom:1.5rem}
+.agg-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem;text-align:center}
+.agg-card .v{font-size:1.3rem;font-weight:bold;color:#fff}
+.agg-card .l{font-size:.5rem;color:var(--dim);text-transform:uppercase;margin-top:.15rem}
+.loading{color:var(--dim);text-align:center;padding:2rem}
+</style>
+</head>
+<body>
+<nav>
+  <span class="logo">COLLATERALOPS</span>
+  <a href="/">Balance Sheet</a>
+  <a href="/lender" class="active">Lender View</a>
+  <a href="/explorer">Collateral</a>
+</nav>
+<div class="wrap">
+<h1>Lender Dashboard</h1>
+<p class="sub">Conservative collateral assessment — no developer jargon, no hype</p>
+<div class="disclaimer">Appraisal is not liquidity. Values shown are risk-adjusted estimates based on observed evidence. They are not guarantees of sale price, loan value, or market demand. Human review recommended for any financing decision.</div>
+<div class="agg" id="agg"><div class="loading">Loading...</div></div>
+<div class="section-title">Asset Collateral Schedule</div>
+<div id="assets"><div class="loading">Loading lender summaries...</div></div>
+</div>
+<script>
+function $(v){return typeof v==='number'?'$'+v.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0}):v}
+async function boot(){
+  try{
+    const bs=await(await fetch('/api/balance-sheet')).json();
+    const assets=bs.assets.filter(a=>!['junk','scaffold','duplicate'].includes(a.asset_type));
+    const s=bs.summary;
+    document.getElementById('agg').innerHTML=`
+      <div class="agg-card"><div class="v">${$(s.collateral_support_value_usd)}</div><div class="l">Total Collateral Support</div></div>
+      <div class="agg-card"><div class="v">${$(s.liquidation_value_usd)}</div><div class="l">Total Liquidation Value</div></div>
+      <div class="agg-card"><div class="v">${s.sale_candidates}</div><div class="l">Financeable Candidates</div></div>
+      <div class="agg-card"><div class="v">${s.financeability_score_avg}/100</div><div class="l">Avg Financeability</div></div>
+    `;
+    // Load lender summaries for top assets
+    let html='';
+    const sorted=assets.sort((a,b)=>b.collateral_support_value_usd-a.collateral_support_value_usd);
+    for(let i=0;i<sorted.length;i++){
+      const a=sorted[i];
+      try{
+        const ls=await fetch('/api/asset/'+a.name+'/lender').then(r=>r.json());
+        const riskLevel=a.financeability_score>=50?'low':a.financeability_score>=30?'medium':'high';
+        html+=`<div class="lender-card">
+          <div class="lc-header" onclick="document.getElementById('lb-${i}').classList.toggle('open')">
+            <span class="lc-name">${a.name}</span>
+            <span class="lc-risk ${riskLevel}">${riskLevel} risk</span>
+            <span class="lc-csv">${$(a.collateral_support_value_usd)}</span>
+          </div>
+          <div class="lc-body" id="lb-${i}">
+            <div class="lr"><span class="k">Asset Type</span><span class="v">${ls.asset_type||a.asset_type}</span></div>
+            <div class="lr"><span class="k">Collateral Description</span><span class="v">${ls.collateral_description||''}</span></div>
+            <div class="lr"><span class="k">Proof Level</span><span class="v">${ls.proof_level||a.proof_level+'/7'}</span></div>
+            <div class="lr"><span class="k">Ownership Risk</span><span class="v">${ls.ownership_risk||'unknown'}</span></div>
+            <div class="lr"><span class="k">Build Verification</span><span class="v">${ls.build_verification||'not_verified'}</span></div>
+            <div class="lr"><span class="k">License Risk</span><span class="v">${ls.license_risk||'unknown'}</span></div>
+            <div class="lr"><span class="k">Secret Risk</span><span class="v">${ls.secret_risk||'unknown'}</span></div>
+            <div class="lr"><span class="k">Revenue Evidence</span><span class="v">${ls.revenue_evidence||'none'}</span></div>
+            <div class="lr"><span class="k">Estimated Recovery</span><span class="v">${$(ls.estimated_recovery_usd||0)}</span></div>
+            <div class="lr"><span class="k">Collateral Support</span><span class="v">${$(ls.collateral_support_usd||0)}</span></div>
+            <div class="lr"><span class="k">Recommended LTV</span><span class="v">${ls.recommended_ltv?.min_pct||0}%–${ls.recommended_ltv?.max_pct||0}%</span></div>
+            <div class="lr"><span class="k">Monitoring</span><span class="v">${ls.monitoring||''}</span></div>
+            <div class="lr"><span class="k">Default Action</span><span class="v">${ls.default_action||''}</span></div>
+          </div>
+        </div>`;
+      }catch(e){}
+    }
+    document.getElementById('assets').innerHTML=html||'<div class="loading">No financeable assets found</div>';
+  }catch(e){document.getElementById('assets').innerHTML=`<div class="loading" style="color:var(--red)">${e.message}</div>`}
+}
+boot();
+</script>
+</body>
+</html>

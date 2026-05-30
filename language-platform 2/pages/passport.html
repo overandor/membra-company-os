@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platform Passport - MEMBRA Language Platform</title>
+<meta property="og:title" content="MEMBRA Language Platform Passport">
+<meta property="og:description" content="Verified collateral provenance across language-protocol, language-surfaces, and language-runtime">
+<meta property="og:type" content="website">
+<style>
+:root{--bg:#0d0d0d;--card:#1a1a1a;--accent:#ff6b00;--text:#e0e0e0;--dim:#888;--border:#333;--green:#4caf50;--blue:#6b8aff;--purple:#ce93d8}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'SF Mono','Fira Code',monospace;background:var(--bg);color:var(--text);min-height:100vh}
+nav{background:#111;border-bottom:1px solid var(--border);padding:0.75rem 2rem;display:flex;align-items:center;gap:1.5rem}
+nav a{color:var(--dim);text-decoration:none;font-size:0.8rem;transition:color .2s}
+nav a:hover,nav a.active{color:var(--accent)}
+nav .logo{color:var(--accent);font-weight:bold;font-size:1rem;margin-right:auto}
+.passport-wrap{max-width:860px;margin:2rem auto;padding:0 1.5rem}
+.passport{border:2px solid var(--accent);border-radius:16px;overflow:hidden;background:var(--card);box-shadow:0 0 60px rgba(255,107,0,0.08),8px 8px 24px #080808,-6px -6px 18px #222}
+.passport-top{background:linear-gradient(135deg,#1a1200 0%,#0d0d0d 50%,#0d1a0d 100%);padding:2.5rem 2.5rem 2rem;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.passport-top::before{content:'';position:absolute;top:-50%;right:-20%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,0,0.06) 0%,transparent 70%)}
+.passport-title{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.2em;color:var(--accent);margin-bottom:0.5rem}
+.passport-name{font-size:1.8rem;color:#fff;font-weight:bold;margin-bottom:0.25rem}
+.passport-sub{color:var(--dim);font-size:0.8rem;margin-bottom:1.5rem}
+.passport-id{display:inline-block;background:#0d0d0d;border:1px solid var(--border);border-radius:8px;padding:0.5rem 1rem;font-size:0.7rem;color:var(--dim)}
+.passport-id strong{color:var(--accent)}
+.stamp{position:absolute;top:1.5rem;right:2rem;width:80px;height:80px;border:3px solid var(--green);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-12deg);opacity:0.8}
+.stamp .check{font-size:1.5rem;line-height:1}
+.stamp .label{font-size:0.5rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--green);font-weight:bold}
+.passport-body{padding:2rem 2.5rem}
+.section{margin-bottom:1.5rem}
+.section-title{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--accent);margin-bottom:0.75rem;padding-bottom:0.4rem;border-bottom:1px solid #222}
+.systems-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem}
+.sys-card{background:#111;border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;transition:border-color .3s}
+.sys-card:hover{border-color:var(--accent)}
+.sys-card .sys-name{font-size:0.75rem;color:var(--accent);margin-bottom:0.5rem;font-weight:bold}
+.sys-card .sys-count{font-size:1.6rem;color:#fff;font-weight:bold}
+.sys-card .sys-label{font-size:0.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:0.05em}
+.ws-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.5rem}
+.ws-row{display:flex;justify-content:space-between;align-items:center;background:#111;border:1px solid var(--border);border-radius:8px;padding:0.6rem 1rem}
+.ws-row .ws-name{font-size:0.75rem;color:var(--text)}
+.ws-row .ws-count{font-size:0.75rem;color:var(--accent);font-weight:bold}
+.integrity-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem}
+.int-card{background:#111;border:1px solid var(--border);border-radius:10px;padding:1rem;display:flex;align-items:center;gap:0.75rem}
+.int-icon{font-size:1.2rem;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+.int-icon.ok{background:#0d1a0d;border:1px solid #1a3a1a}
+.int-icon.info{background:#0d0d1a;border:1px solid #1a1a3a}
+.int-text .int-val{font-size:0.85rem;color:#fff;font-weight:bold}
+.int-text .int-label{font-size:0.65rem;color:var(--dim)}
+.hash-section{background:#111;border:1px solid var(--border);border-radius:10px;padding:1rem;font-size:0.65rem;color:var(--dim);word-break:break-all;line-height:1.8}
+.hash-section .hash-label{color:var(--accent);font-weight:bold}
+.hash-section .hash-val{color:var(--blue)}
+.passport-footer{background:#111;border-top:1px solid var(--border);padding:1.5rem 2.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.passport-footer .ts{font-size:0.7rem;color:var(--dim)}
+.share-row{display:flex;gap:0.5rem}
+.share-btn{background:none;border:1px solid var(--border);color:var(--dim);padding:6px 14px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.7rem;transition:all .2s;display:flex;align-items:center;gap:0.4rem}
+.share-btn:hover{border-color:var(--accent);color:var(--accent)}
+.share-btn.copied{border-color:var(--green);color:var(--green)}
+.print-only{display:none}
+@media print{
+  nav,.share-row{display:none!important}
+  .print-only{display:block}
+  body{background:#fff;color:#111}
+  .passport{border-color:#111;box-shadow:none}
+  .passport-top{background:#f5f5f5!important}
+  .passport-top::before{display:none}
+  .passport-name{color:#111}
+  .sys-card,.ws-row,.int-card,.hash-section{background:#f9f9f9;border-color:#ddd}
+  .passport-footer{background:#f5f5f5;border-color:#ddd}
+}
+@media(max-width:600px){
+  .systems-grid{grid-template-columns:1fr}
+  .ws-grid,.integrity-grid{grid-template-columns:1fr}
+  .passport-top{padding:1.5rem}
+  .passport-body{padding:1.5rem}
+  .stamp{width:60px;height:60px;top:1rem;right:1rem}
+  .stamp .check{font-size:1.1rem}
+}
+</style>
+</head>
+<body>
+<nav>
+  <span class="logo">MEMBRA</span>
+  <a href="/">Dashboard</a>
+  <a href="/explorer">Explorer</a>
+  <a href="/passport" class="active">Passport</a>
+  <a href="/docs">API Docs</a>
+</nav>
+<div class="passport-wrap">
+  <div class="passport" id="passport">
+    <div class="passport-top">
+      <div class="passport-title">Platform Provenance Passport</div>
+      <div class="passport-name">MEMBRA Language Platform</div>
+      <div class="passport-sub">Unified collateral registry for language-protocol, language-surfaces, and language-runtime</div>
+      <div class="passport-id">Passport ID: <strong id="pp-id">...</strong></div>
+      <div class="stamp"><span class="check">&#10003;</span><span class="label">Verified</span></div>
+    </div>
+    <div class="passport-body">
+      <div class="section">
+        <div class="section-title">Systems</div>
+        <div class="systems-grid" id="sys-grid"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Workstream Coverage</div>
+        <div class="ws-grid" id="ws-grid"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Integrity Summary</div>
+        <div class="integrity-grid" id="int-grid"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Provenance Anchors</div>
+        <div class="hash-section" id="anchor-section"></div>
+      </div>
+    </div>
+    <div class="passport-footer">
+      <div>
+        <div class="ts" id="pp-ts">Generated ...</div>
+        <div class="ts">MEMBRA Language Platform v1.0.0</div>
+      </div>
+      <div class="share-row">
+        <button class="share-btn" id="btn-copy" onclick="copyLink()">&#128279; Copy Link</button>
+        <button class="share-btn" onclick="window.print()">&#128424; Print</button>
+        <button class="share-btn" id="btn-json" onclick="copyJSON()">{ } Copy JSON</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const BASE='';
+let passportData={};
+
+async function boot(){
+  const [stats,systems,workstreams,collateral]=await Promise.all([
+    fetch(BASE+'/api/stats').then(r=>r.json()),
+    fetch(BASE+'/api/systems').then(r=>r.json()),
+    fetch(BASE+'/api/workstreams').then(r=>r.json()),
+    fetch(BASE+'/api/collateral?limit=500').then(r=>r.json())
+  ]);
+
+  // Passport ID from a hash of the stats
+  const raw=JSON.stringify(stats);
+  let hash=0;for(let i=0;i<raw.length;i++){hash=((hash<<5)-hash)+raw.charCodeAt(i);hash|=0}
+  const ppId='MBR-PP-'+Math.abs(hash).toString(16).toUpperCase().slice(0,8)+'-'+stats.total_files;
+  document.getElementById('pp-id').textContent=ppId;
+  document.getElementById('pp-ts').textContent='Generated '+new Date().toISOString().slice(0,19)+'Z';
+
+  // Systems grid
+  const sysGrid=document.getElementById('sys-grid');
+  systems.systems.forEach(s=>{
+    sysGrid.innerHTML+=`<div class="sys-card"><div class="sys-name">${s.system.replace('language-','')}</div><div class="sys-count">${s.total_files}</div><div class="sys-label">files</div></div>`;
+  });
+
+  // Workstreams
+  const wsGrid=document.getElementById('ws-grid');
+  workstreams.workstreams.forEach(w=>{
+    wsGrid.innerHTML+=`<div class="ws-row"><span class="ws-name">${w.workstream}</span><span class="ws-count">${w.file_count}</span></div>`;
+  });
+
+  // Integrity summary
+  const items=collateral.items;
+  const allHashed=items.every(i=>i.raw_file_hash);
+  const allAnchored=items.every(i=>i.solana_tx_short);
+  const noContentExposed=items.every(i=>!i.content_exposed);
+  const noIdentityExposed=items.every(i=>!i.identity_exposed);
+  const uniqueHashes=new Set(items.map(i=>i.raw_file_hash)).size;
+  const gitCommits=[...new Set(items.map(i=>i.git_commit_short))];
+
+  const intGrid=document.getElementById('int-grid');
+  intGrid.innerHTML=`
+    <div class="int-card"><div class="int-icon ok">&#128274;</div><div class="int-text"><div class="int-val">${allHashed?'All Files Hashed':'Partial'}</div><div class="int-label">${uniqueHashes} unique SHA-256 hashes</div></div></div>
+    <div class="int-card"><div class="int-icon ok">&#9875;</div><div class="int-text"><div class="int-val">${allAnchored?'All Anchored':'Partial'}</div><div class="int-label">Solana transaction references</div></div></div>
+    <div class="int-card"><div class="int-icon ok">&#128737;</div><div class="int-text"><div class="int-val">${noContentExposed?'No Content Exposed':'Content Exposed'}</div><div class="int-label">Zero raw file contents in metadata</div></div></div>
+    <div class="int-card"><div class="int-icon ok">&#128100;</div><div class="int-text"><div class="int-val">${noIdentityExposed?'No Identity Exposed':'Identity Exposed'}</div><div class="int-label">PII redacted via PID hashing</div></div></div>
+    <div class="int-card"><div class="int-icon info">&#128200;</div><div class="int-text"><div class="int-val">${stats.total_files} Files</div><div class="int-label">${(stats.total_bytes/1024).toFixed(1)} KB total metadata</div></div></div>
+    <div class="int-card"><div class="int-icon info">&#128279;</div><div class="int-text"><div class="int-val">${gitCommits.length} Git Commit${gitCommits.length>1?'s':''}</div><div class="int-label">${gitCommits.join(', ')}</div></div></div>
+  `;
+
+  // Provenance anchors - sample hashes from each system
+  const anchorSection=document.getElementById('anchor-section');
+  let anchorHtml='';
+  systems.systems.forEach(s=>{
+    const sysItems=items.filter(i=>i._system===s.system);
+    if(sysItems.length>0){
+      const first=sysItems[0];
+      anchorHtml+=`<div style="margin-bottom:0.75rem"><span class="hash-label">${s.system}</span><br>`;
+      anchorHtml+=`manifest: <span class="hash-val">${first.manifest_hash}</span><br>`;
+      anchorHtml+=`solana_tx: <span class="hash-val">${first.solana_tx_short}</span> &middot; git: <span class="hash-val">${first.git_commit_short}</span></div>`;
+    }
+  });
+  anchorSection.innerHTML=anchorHtml;
+
+  // Build export data
+  passportData={
+    passport_id:ppId,
+    generated_at:new Date().toISOString(),
+    platform:'MEMBRA Language Platform',
+    version:'1.0.0',
+    stats,
+    systems:systems.systems,
+    workstreams:workstreams.workstreams,
+    integrity:{all_hashed:allHashed,all_anchored:allAnchored,no_content_exposed:noContentExposed,no_identity_exposed:noIdentityExposed,unique_hashes:uniqueHashes,git_commits:gitCommits}
+  };
+}
+
+function copyLink(){
+  const btn=document.getElementById('btn-copy');
+  navigator.clipboard.writeText(window.location.href).then(()=>{btn.innerHTML='&#10003; Copied';btn.classList.add('copied');setTimeout(()=>{btn.innerHTML='&#128279; Copy Link';btn.classList.remove('copied')},2000)});
+}
+function copyJSON(){
+  const btn=document.getElementById('btn-json');
+  navigator.clipboard.writeText(JSON.stringify(passportData,null,2)).then(()=>{btn.innerHTML='&#10003; Copied';btn.classList.add('copied');setTimeout(()=>{btn.innerHTML='{ } Copy JSON';btn.classList.remove('copied')},2000)});
+}
+
+boot();
+</script>
+</body>
+</html>
