@@ -27,6 +27,10 @@ app = FastAPI(
 )
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
+# Register execution desk API routes
+from api_routes import router as api_router
+app.include_router(api_router)
+
 PAGES = Path(__file__).parent / "pages"
 INDEX_PATH = Path(__file__).parent / "data" / "index.json"
 INDEX_DEPLOY_PATH = Path(__file__).parent / "data" / "index_deploy.json"
