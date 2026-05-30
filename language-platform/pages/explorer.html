@@ -2,100 +2,141 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>File Explorer - MEMBRA Language Platform</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>File Explorer — CollateralOps</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0d0d0d;--card:#1a1a1a;--accent:#ff6b00;--text:#e0e0e0;--dim:#888;--border:#333;--hover:#222}
+:root{--bg-deep:#020204;--bg-surface:#0a0a0f;--bg-elevated:#12121a;--glass:rgba(255,255,255,0.03);--glass-border:rgba(255,255,255,0.06);--text-primary:#f0f0f8;--text-secondary:#8a8a9e;--text-muted:#4a4a5e;--cyan:#00f0ff;--cyan-dim:rgba(0,240,255,0.12);--orange:#ff6b35;--orange-dim:rgba(255,107,53,0.12);--purple:#c084fc;--purple-dim:rgba(192,132,252,0.12);--green:#34d399;--green-dim:rgba(52,211,153,0.12);--gold:#fbbf24;--red:#f87171;--font-sans:'Space Grotesk',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'SF Mono','Fira Code',monospace;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
-nav{background:#111;border-bottom:1px solid var(--border);padding:0.75rem 2rem;display:flex;align-items:center;gap:1.5rem}
-nav a{color:var(--dim);text-decoration:none;font-size:0.8rem;transition:color .2s}
-nav a:hover,nav a.active{color:var(--accent)}
-nav .logo{color:var(--accent);font-weight:bold;font-size:1rem;margin-right:auto}
-.shell{display:flex;flex:1;overflow:hidden}
-.sidebar{width:340px;min-width:280px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:#111}
-.sidebar-header{padding:1rem;border-bottom:1px solid var(--border)}
-.sidebar-header h2{color:var(--accent);font-size:0.85rem;margin-bottom:0.75rem}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-primary);line-height:1.5;min-height:100vh}
+#particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.35}
+
+/* App shell */
+.app-shell{display:grid;grid-template-rows:48px 1fr;grid-template-columns:64px 1fr;height:100vh}
+.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--bg-surface);border-bottom:1px solid var(--glass-border);z-index:100}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.topbar-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;letter-spacing:0.05em}
+.topbar-logo span{color:var(--cyan)}
+.topbar-logo-mark{width:24px;height:24px;border:1.5px solid var(--cyan);border-radius:6px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 12px var(--cyan-dim)}
+.topbar-logo-mark::before{content:'';position:absolute;width:8px;height:8px;background:var(--cyan);border-radius:2px;transform:rotate(45deg)}
+.topbar-btn{padding:6px 14px;border-radius:6px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-secondary);font-size:12px;font-family:var(--font-mono);cursor:pointer;transition:all 0.2s;text-decoration:none}
+.topbar-btn:hover{border-color:var(--cyan);color:var(--text-primary)}
+
+/* Sidebar */
+.sidebar{background:var(--bg-surface);border-right:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:8px;z-index:10}
+.sidebar-item{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;color:var(--text-muted);font-size:18px;cursor:pointer;transition:all 0.2s;position:relative;text-decoration:none}
+.sidebar-item:hover,.sidebar-item.active{background:var(--cyan-dim);color:var(--cyan)}
+.sidebar-item.active::after{content:'';position:absolute;left:-1px;top:50%;transform:translateY(-50%);width:2px;height:20px;background:var(--cyan);border-radius:1px}
+
+/* Main */
+.main{overflow:hidden;display:flex;flex-direction:column;z-index:1}
+.explorer-shell{display:flex;flex:1;overflow:hidden}
+.explorer-sidebar{width:340px;min-width:280px;border-right:1px solid var(--glass-border);display:flex;flex-direction:column;background:var(--bg-surface)}
+.sidebar-header{padding:1rem;border-bottom:1px solid var(--glass-border)}
+.sidebar-header h2{color:var(--cyan);font-size:13px;margin-bottom:0.75rem;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em}
 .filter-row{display:flex;gap:0.5rem;margin-bottom:0.5rem}
-.filter-row select,.filter-row input{flex:1;padding:0.4rem 0.6rem;background:#1a1a1a;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:0.75rem}
-.filter-row select:focus,.filter-row input:focus{outline:none;border-color:var(--accent)}
+.filter-row select,.filter-row input{flex:1;padding:0.4rem 0.6rem;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:6px;color:var(--text-primary);font-family:var(--font-mono);font-size:11px}
+.filter-row select:focus,.filter-row input:focus{outline:none;border-color:var(--cyan)}
 .tree{flex:1;overflow-y:auto;padding:0.5rem 0}
 .tree-group{margin-bottom:0.25rem}
-.tree-group-header{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 1rem;cursor:pointer;font-size:0.75rem;color:var(--dim);user-select:none;transition:background .15s}
-.tree-group-header:hover{background:var(--hover)}
+.tree-group-header{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 1rem;cursor:pointer;font-size:11px;color:var(--text-muted);user-select:none;transition:background .15s}
+.tree-group-header:hover{background:var(--glass)}
 .tree-group-header .arrow{transition:transform .2s;font-size:0.6rem}
 .tree-group-header.open .arrow{transform:rotate(90deg)}
-.tree-group-header .count{margin-left:auto;background:#222;padding:1px 6px;border-radius:8px;font-size:0.65rem;color:var(--accent)}
+.tree-group-header .count{margin-left:auto;background:var(--bg-deep);padding:1px 6px;border-radius:8px;font-size:10px;color:var(--cyan);font-family:var(--font-mono)}
 .tree-items{display:none}
 .tree-group-header.open+.tree-items{display:block}
-.tree-item{display:flex;align-items:center;gap:0.5rem;padding:0.35rem 1rem 0.35rem 2rem;cursor:pointer;font-size:0.75rem;transition:background .15s;border-left:2px solid transparent}
-.tree-item:hover{background:var(--hover)}
-.tree-item.selected{background:#1f1500;border-left-color:var(--accent)}
+.tree-item{display:flex;align-items:center;gap:0.5rem;padding:0.35rem 1rem 0.35rem 2rem;cursor:pointer;font-size:11px;transition:background .15s;border-left:2px solid transparent}
+.tree-item:hover{background:var(--glass)}
+.tree-item.selected{background:var(--cyan-dim);border-left-color:var(--cyan)}
 .tree-item .icon{width:16px;text-align:center;flex-shrink:0}
 .tree-item .fname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.tree-item .ext{color:var(--dim);font-size:0.65rem;flex-shrink:0}
-.main{flex:1;overflow-y:auto;padding:2rem}
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--dim);gap:1rem}
+.tree-item .ext{color:var(--text-muted);font-size:10px;flex-shrink:0}
+.content{flex:1;overflow-y:auto;padding:2rem}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);gap:1rem}
 .empty-state .big{font-size:3rem;opacity:0.3}
 .detail{max-width:800px}
 .detail-header{margin-bottom:2rem}
-.detail-header h1{font-size:1.2rem;color:#fff;margin-bottom:0.25rem;word-break:break-all}
+.detail-header h1{font-size:16px;color:var(--text-primary);margin-bottom:0.25rem;word-break:break-all;font-weight:600}
 .detail-header .meta{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem}
-.pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:bold}
-.pill-system{background:#1a1200;color:var(--accent);border:1px solid #3a2800}
-.pill-ws{background:#0d1a0d;color:#4caf50;border:1px solid #1a3a1a}
-.pill-ext{background:#0d0d1a;color:#6b8aff;border:1px solid #1a1a3a}
-.pill-stage{background:#1a0d1a;color:#ce93d8;border:1px solid #3a1a3a}
-.section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1rem;box-shadow:4px 4px 12px #080808,-3px -3px 8px #222}
-.section h3{color:var(--accent);font-size:0.8rem;margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.05em}
-.field{display:flex;justify-content:space-between;align-items:flex-start;padding:0.4rem 0;border-bottom:1px solid #1a1a1a;gap:1rem}
+.pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;font-family:var(--font-mono)}
+.pill-system{background:var(--orange-dim);color:var(--orange);border:1px solid var(--orange)}
+.pill-ws{background:var(--green-dim);color:var(--green);border:1px solid var(--green)}
+.pill-ext{background:var(--cyan-dim);color:var(--cyan);border:1px solid var(--cyan)}
+.pill-stage{background:var(--purple-dim);color:var(--purple);border:1px solid var(--purple)}
+.section{background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;padding:1.25rem;margin-bottom:1rem;position:relative}
+.section::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.3}
+.section h3{color:var(--cyan);font-size:11px;margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.05em;font-family:var(--font-mono)}
+.field{display:flex;justify-content:space-between;align-items:flex-start;padding:0.4rem 0;border-bottom:1px solid var(--glass-border);gap:1rem}
 .field:last-child{border-bottom:none}
-.field .label{color:var(--dim);font-size:0.75rem;flex-shrink:0;width:180px}
-.field .value{font-size:0.75rem;color:var(--text);word-break:break-all;text-align:right;flex:1}
-.field .value.hash{font-size:0.65rem;color:#6b8aff}
-.field .value.bool-true{color:#4caf50}
-.field .value.bool-false{color:#ef5350}
-.copy-btn{background:none;border:1px solid var(--border);color:var(--dim);padding:2px 8px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:0.65rem;transition:all .2s}
-.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
-.copy-btn.copied{border-color:#4caf50;color:#4caf50}
-.status-bar{background:#111;border-top:1px solid var(--border);padding:0.4rem 2rem;font-size:0.7rem;color:var(--dim);display:flex;gap:2rem}
+.field .label{color:var(--text-muted);font-size:11px;flex-shrink:0;width:180px;font-family:var(--font-mono)}
+.field .value{font-size:11px;color:var(--text-primary);word-break:break-all;text-align:right;flex:1;font-family:var(--font-mono)}
+.field .value.hash{font-size:10px;color:var(--cyan)}
+.field .value.bool-true{color:var(--green)}
+.field .value.bool-false{color:var(--red)}
+.copy-btn{background:none;border:1px solid var(--glass-border);color:var(--text-muted);padding:2px 8px;border-radius:4px;cursor:pointer;font-family:var(--font-mono);font-size:10px;transition:all .2s}
+.copy-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.copy-btn.copied{border-color:var(--green);color:var(--green)}
+.status-bar{background:var(--bg-surface);border-top:1px solid var(--glass-border);padding:0.4rem 2rem;font-size:10px;color:var(--text-muted);display:flex;gap:2rem;font-family:var(--font-mono)}
+@media(max-width:600px){
+  .explorer-shell{flex-direction:column}
+  .explorer-sidebar{width:100%;height:300px}
+}
 </style>
 </head>
 <body>
-<nav>
-  <span class="logo">MEMBRA</span>
-  <a href="/">Dashboard</a>
-  <a href="/explorer" class="active">Explorer</a>
-  <a href="/passport">Passport</a>
-  <a href="/docs">API Docs</a>
-</nav>
-<div class="shell">
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <h2>File Explorer</h2>
-      <div class="filter-row">
-        <select id="f-system"><option value="">All Systems</option></select>
-        <select id="f-ws"><option value="">All Workstreams</option></select>
-      </div>
-      <div class="filter-row">
-        <select id="f-ext"><option value="">All Types</option></select>
-        <input id="f-search" type="text" placeholder="Filter files...">
-      </div>
+<canvas id="particle-canvas"></canvas>
+<div class="app-shell">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo"><div class="topbar-logo-mark"></div>Collateral<span>Ops</span></div>
     </div>
-    <div class="tree" id="tree"></div>
-  </div>
-  <div class="main" id="main">
-    <div class="empty-state">
-      <div class="big">&#128194;</div>
-      <div>Select a file from the tree to view its metadata</div>
-      <div style="font-size:0.75rem">315 collateral files across 3 systems</div>
+    <div style="display:flex;gap:12px">
+      <a href="/dashboard" class="topbar-btn">Dashboard</a>
+      <a href="/" class="topbar-btn">Home</a>
+      <a href="/compare" class="topbar-btn">Compare</a>
     </div>
   </div>
+
+  <nav class="sidebar">
+    <a href="/dashboard" class="sidebar-item" title="Dashboard">&#128200;</a>
+    <a href="/compare" class="sidebar-item" title="Compare">&#8646;</a>
+    <a href="/passport" class="sidebar-item" title="Passport">&#128196;</a>
+    <a href="/explorer" class="sidebar-item active" title="Explorer">&#128194;</a>
+  </nav>
+
+  <main class="main">
+    <div class="explorer-shell">
+      <div class="explorer-sidebar">
+        <div class="sidebar-header">
+          <h2>File Explorer</h2>
+          <div class="filter-row">
+            <select id="f-system"><option value="">All Systems</option></select>
+            <select id="f-ws"><option value="">All Workstreams</option></select>
+          </div>
+          <div class="filter-row">
+            <select id="f-ext"><option value="">All Types</option></select>
+            <input id="f-search" type="text" placeholder="Filter files...">
+          </div>
+        </div>
+        <div class="tree" id="tree"></div>
+      </div>
+      <div class="content" id="main">
+        <div class="empty-state">
+          <div class="big">&#128194;</div>
+          <div>Select a file from the tree to view its metadata</div>
+          <div style="font-size:11px;font-family:var(--font-mono)">Collateral files across multiple systems</div>
+        </div>
+      </div>
+    </div>
+    <div class="status-bar">
+      <span id="sb-total">Loading...</span>
+      <span id="sb-filter"></span>
+    </div>
+  </main>
 </div>
-<div class="status-bar">
-  <span id="sb-total">Loading...</span>
-  <span id="sb-filter"></span>
-</div>
+
 <script>
 const BASE='';
 let allItems=[], filtered=[], selectedSku=null;
@@ -111,7 +152,7 @@ async function boot(){
   ]);
   allItems=collateral.items;
   const fSys=document.getElementById('f-system');
-  systems.systems.forEach(s=>{const o=document.createElement('option');o.value=s.system;o.textContent=s.system.replace('language-','');fSys.appendChild(o)});
+  systems.systems.forEach(s=>{const o=document.createElement('option');o.value=s.system.name;o.textContent=s.system.name;fSys.appendChild(o)});
   const fWs=document.getElementById('f-ws');
   workstreams.workstreams.forEach(w=>{const o=document.createElement('option');o.value=w.workstream;o.textContent=w.workstream;fWs.appendChild(o)});
   const exts=[...new Set(allItems.map(i=>i.extension))].sort();
@@ -131,10 +172,10 @@ function applyFilters(){
   const ext=document.getElementById('f-ext').value;
   const q=document.getElementById('f-search').value.toLowerCase().trim();
   filtered=allItems.filter(i=>{
-    if(sys&&i._system!==sys)return false;
+    if(sys&&i._repo!==sys)return false;
     if(ws&&i.workstream!==ws)return false;
     if(ext&&i.extension!==ext)return false;
-    if(q&&!i.filename_hint.toLowerCase().includes(q)&&!(i.sku||'').toLowerCase().includes(q))return false;
+    if(q&&!i.file_path.toLowerCase().includes(q)&&!(i.sku||'').toLowerCase().includes(q))return false;
     return true;
   });
   renderTree();
@@ -159,106 +200,70 @@ function renderTree(){
     hdr.className='tree-group-header open';
     hdr.innerHTML=`<span class="arrow">▶</span> ${ws} <span class="count">${items.length}</span>`;
     hdr.addEventListener('click',()=>hdr.classList.toggle('open'));
-    grp.appendChild(hdr);
-    const list=document.createElement('div');
-    list.className='tree-items';
-    items.sort((a,b)=>a.filename_hint.localeCompare(b.filename_hint)).forEach(i=>{
+    const its=document.createElement('div');
+    its.className='tree-items';
+    items.sort((a,b)=>(a.file_path||'').localeCompare(b.file_path||'')).forEach(item=>{
       const row=document.createElement('div');
-      row.className='tree-item'+(selectedSku===i.sku?' selected':'');
-      row.innerHTML=`<span class="icon">${icon(i.extension)}</span><span class="fname" title="${i.filename_hint}">${i.filename_hint}</span><span class="ext">${i._system.replace('language-','')}</span>`;
-      row.addEventListener('click',()=>selectItem(i));
-      list.appendChild(row);
+      row.className='tree-item'+(selectedSku===item.sku?' selected':'');
+      row.innerHTML=`<span class="icon">${icon(item.extension)}</span><span class="fname">${item.file_path||item.filename_hint||item.sku}</span><span class="ext">${item.extension}</span>`;
+      row.addEventListener('click',()=>selectItem(item));
+      its.appendChild(row);
     });
-    grp.appendChild(list);
+    grp.appendChild(hdr);
+    grp.appendChild(its);
     tree.appendChild(grp);
   });
 }
 
 function selectItem(item){
   selectedSku=item.sku;
-  document.querySelectorAll('.tree-item').forEach(el=>el.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
-  renderDetail(item);
-}
-
-function copyText(text,btn){
-  navigator.clipboard.writeText(text).then(()=>{btn.textContent='copied';btn.classList.add('copied');setTimeout(()=>{btn.textContent='copy';btn.classList.remove('copied')},1500)});
-}
-
-function field(label,value,cls){
-  if(value===undefined||value===null)return'';
-  let vclass='value'+(cls?' '+cls:'');
-  let display=value;
-  if(typeof value==='boolean')display=value?'Yes':'No',vclass+=' '+(value?'bool-true':'bool-false');
-  return`<div class="field"><span class="label">${label}</span><span class="${vclass}">${display}</span></div>`;
-}
-
-function hashField(label,value){
-  if(!value)return'';
-  const short=value.length>20?value.slice(0,12)+'...'+value.slice(-8):value;
-  return`<div class="field"><span class="label">${label}</span><span class="value hash" title="${value}">${short} <button class="copy-btn" onclick="copyText('${value}',this)">copy</button></span></div>`;
-}
-
-function renderDetail(r){
+  renderTree();
   const main=document.getElementById('main');
-  const stageLabels={3:'LC3 – Catalogued',5:'LC5 – Scanned',7:'LC7 – Verified',9:'LC9 – Sealed'};
-  const stageLabel=stageLabels[r.lifecycle_stage]||`LC${r.lifecycle_stage}`;
-  main.innerHTML=`<div class="detail">
-    <div class="detail-header">
-      <h1>${icon(r.extension)} ${r.filename_hint}</h1>
-      <div class="meta">
-        <span class="pill pill-system">${r._system}</span>
-        <span class="pill pill-ws">${r.workstream}</span>
-        <span class="pill pill-ext">${r.extension}</span>
-        <span class="pill pill-stage">${stageLabel}</span>
+  main.innerHTML=`
+    <div class="detail">
+      <div class="detail-header">
+        <h1>${item.file_path||item.filename_hint||item.sku}</h1>
+        <div class="meta">
+          <span class="pill pill-system">${item._repo||'Unknown'}</span>
+          <span class="pill pill-ws">${item.workstream||'Unknown'}</span>
+          <span class="pill pill-ext">${item.extension}</span>
+        </div>
+      </div>
+      <div class="section">
+        <h3>File Metadata</h3>
+        ${renderField('SKU',item.sku,true)}
+        ${renderField('File Path',item.file_path)}
+        ${renderField('Extension',item.extension)}
+        ${renderField('Workstream',item.workstream)}
+        ${renderField('Size',item.size_bytes?item.size_bytes.toLocaleString()+' bytes':'-')}
+      </div>
+      <div class="section">
+        <h3>Collateral Info</h3>
+        ${renderField('Value Estimate',item.value_estimate?'$'+item.value_estimate.toLocaleString():'-')}
+        ${renderField('Stage',item.stage)}
+        ${renderField('Created',item.created_at)}
+        ${renderField('Modified',item.modified_at)}
       </div>
     </div>
-    <div class="section">
-      <h3>Identity</h3>
-      ${field('SKU',r.sku)}
-      ${field('Row ID',r.row_id)}
-      ${field('Object Type',r.object_type)}
-      ${field('Category',r.category)}
-      ${field('Subcategory',r.subcategory)}
-      ${field('Kind',r.kind)}
-      ${field('Version',r.version)}
-      ${field('Jurisdiction',r.jurisdiction)}
-    </div>
-    <div class="section">
-      <h3>Classification</h3>
-      ${field('System',r.system_name)}
-      ${field('Workstream',r.workstream)}
-      ${field('Sub-workstream',r.sub_workstream)}
-      ${field('Extension',r.extension)}
-      ${field('File Size',r.file_size_bytes+' bytes')}
-      ${field('Lifecycle Stage',stageLabel)}
-    </div>
-    <div class="section">
-      <h3>Provenance Hashes</h3>
-      ${hashField('Raw File Hash',r.raw_file_hash)}
-      ${hashField('Base64 Hash',r.base64_hash)}
-      ${hashField('SKU Hash',r.sku_hash)}
-      ${hashField('Manifest Hash',r.manifest_hash)}
-      ${hashField('Subject PID Hash',r.subject_pid_hash)}
-    </div>
-    <div class="section">
-      <h3>Privacy</h3>
-      ${field('Content Exposed',r.content_exposed)}
-      ${field('Identity Exposed',r.identity_exposed)}
-      ${field('Subject PID',r.subject_pid)}
-    </div>
-    <div class="section">
-      <h3>Anchoring</h3>
-      ${field('Git Commit',r.git_commit_short)}
-      ${field('Solana TX',r.solana_tx_short)}
-      ${field('Created',r.created_at)}
-      ${field('Updated',r.updated_at)}
-    </div>
-    <div style="margin-top:1rem;text-align:right">
-      <button class="copy-btn" style="padding:6px 14px;font-size:0.75rem" onclick="copyText(JSON.stringify(${JSON.stringify(JSON.stringify(r))},null,2),this)">Copy Full JSON</button>
-    </div>
-  </div>`;
+  `;
 }
+
+function renderField(label,value,hash=false){
+  if(value===undefined||value===null||value==='')return '';
+  const cls=hash?'hash':'';
+  return`<div class="field"><span class="label">${label}</span><span class="value ${cls}">${value}</span></div>`;
+}
+
+// Particle canvas
+const canvas=document.getElementById('particle-canvas');
+const ctx=canvas.getContext('2d');
+let W,H,particles=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+window.addEventListener('resize',resize);resize();
+class P{constructor(){this.reset()}reset(){this.x=Math.random()*W;this.y=Math.random()*H;this.vx=(Math.random()-0.5)*0.3;this.vy=(Math.random()-0.5)*0.3;this.s=Math.random()*1.5+0.5;this.a=Math.random()*0.4+0.1}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset()}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,Math.PI*2);ctx.fillStyle=`rgba(0,240,255,${this.a})`;ctx.fill()}}
+for(let i=0;i<60;i++)particles.push(new P);
+function anim(){ctx.clearRect(0,0,W,H);for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<140){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle=`rgba(0,240,255,${0.04*(1-d/140)})`;ctx.stroke()}}}particles.forEach(p=>{p.update();p.draw()});requestAnimationFrame(anim)}
+anim();
 
 boot();
 </script>

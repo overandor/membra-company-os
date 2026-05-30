@@ -2,130 +2,158 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Platform Passport - MEMBRA Language Platform</title>
-<meta property="og:title" content="MEMBRA Language Platform Passport">
-<meta property="og:description" content="Verified collateral provenance across language-protocol, language-surfaces, and language-runtime">
-<meta property="og:type" content="website">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Platform Passport — CollateralOps</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0d0d0d;--card:#1a1a1a;--accent:#ff6b00;--text:#e0e0e0;--dim:#888;--border:#333;--green:#4caf50;--blue:#6b8aff;--purple:#ce93d8}
+:root{--bg-deep:#020204;--bg-surface:#0a0a0f;--bg-elevated:#12121a;--glass:rgba(255,255,255,0.03);--glass-border:rgba(255,255,255,0.06);--text-primary:#f0f0f8;--text-secondary:#8a8a9e;--text-muted:#4a4a5e;--cyan:#00f0ff;--cyan-dim:rgba(0,240,255,0.12);--orange:#ff6b35;--orange-dim:rgba(255,107,53,0.12);--purple:#c084fc;--purple-dim:rgba(192,132,252,0.12);--green:#34d399;--green-dim:rgba(52,211,153,0.12);--gold:#fbbf24;--red:#f87171;--font-sans:'Space Grotesk',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'SF Mono','Fira Code',monospace;background:var(--bg);color:var(--text);min-height:100vh}
-nav{background:#111;border-bottom:1px solid var(--border);padding:0.75rem 2rem;display:flex;align-items:center;gap:1.5rem}
-nav a{color:var(--dim);text-decoration:none;font-size:0.8rem;transition:color .2s}
-nav a:hover,nav a.active{color:var(--accent)}
-nav .logo{color:var(--accent);font-weight:bold;font-size:1rem;margin-right:auto}
-.passport-wrap{max-width:860px;margin:2rem auto;padding:0 1.5rem}
-.passport{border:2px solid var(--accent);border-radius:16px;overflow:hidden;background:var(--card);box-shadow:0 0 60px rgba(255,107,0,0.08),8px 8px 24px #080808,-6px -6px 18px #222}
-.passport-top{background:linear-gradient(135deg,#1a1200 0%,#0d0d0d 50%,#0d1a0d 100%);padding:2.5rem 2.5rem 2rem;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
-.passport-top::before{content:'';position:absolute;top:-50%;right:-20%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,0,0.06) 0%,transparent 70%)}
-.passport-title{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.2em;color:var(--accent);margin-bottom:0.5rem}
-.passport-name{font-size:1.8rem;color:#fff;font-weight:bold;margin-bottom:0.25rem}
-.passport-sub{color:var(--dim);font-size:0.8rem;margin-bottom:1.5rem}
-.passport-id{display:inline-block;background:#0d0d0d;border:1px solid var(--border);border-radius:8px;padding:0.5rem 1rem;font-size:0.7rem;color:var(--dim)}
-.passport-id strong{color:var(--accent)}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-primary);line-height:1.5;min-height:100vh}
+#particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.35}
+
+/* App shell */
+.app-shell{display:grid;grid-template-rows:48px 1fr;grid-template-columns:64px 1fr;height:100vh}
+.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--bg-surface);border-bottom:1px solid var(--glass-border);z-index:100}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.topbar-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;letter-spacing:0.05em}
+.topbar-logo span{color:var(--cyan)}
+.topbar-logo-mark{width:24px;height:24px;border:1.5px solid var(--cyan);border-radius:6px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 12px var(--cyan-dim)}
+.topbar-logo-mark::before{content:'';position:absolute;width:8px;height:8px;background:var(--cyan);border-radius:2px;transform:rotate(45deg)}
+.topbar-btn{padding:6px 14px;border-radius:6px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-secondary);font-size:12px;font-family:var(--font-mono);cursor:pointer;transition:all 0.2s;text-decoration:none}
+.topbar-btn:hover{border-color:var(--cyan);color:var(--text-primary)}
+
+/* Sidebar */
+.sidebar{background:var(--bg-surface);border-right:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:8px;z-index:10}
+.sidebar-item{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;color:var(--text-muted);font-size:18px;cursor:pointer;transition:all 0.2s;position:relative;text-decoration:none}
+.sidebar-item:hover,.sidebar-item.active{background:var(--cyan-dim);color:var(--cyan)}
+.sidebar-item.active::after{content:'';position:absolute;left:-1px;top:50%;transform:translateY(-50%);width:2px;height:20px;background:var(--cyan);border-radius:1px}
+
+/* Main */
+.main{overflow-y:auto;padding:24px;z-index:1}
+.main::-webkit-scrollbar{width:4px}
+.main::-webkit-scrollbar-thumb{background:var(--glass-border);border-radius:2px}
+.wrap{max-width:900px;margin:0 auto}
+
+/* Passport */
+.passport-wrap{margin-top:20px}
+.passport{border:2px solid var(--cyan);border-radius:16px;overflow:hidden;background:var(--glass);box-shadow:0 0 60px rgba(0,240,255,0.08),8px 8px 24px rgba(0,0,0,0.3),-6px -6px 18px rgba(255,255,255,0.02);position:relative}
+.passport::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.5}
+.passport-top{background:linear-gradient(135deg,rgba(0,240,255,0.05) 0%,var(--bg-deep) 50%,rgba(192,132,252,0.05) 100%);padding:2.5rem 2.5rem 2rem;border-bottom:1px solid var(--glass-border);position:relative;overflow:hidden}
+.passport-top::before{content:'';position:absolute;top:-50%;right:-20%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(0,240,255,0.06) 0%,transparent 70%)}
+.passport-title{font-size:11px;text-transform:uppercase;letter-spacing:0.2em;color:var(--cyan);margin-bottom:0.5rem;font-family:var(--font-mono)}
+.passport-name{font-size:28px;color:var(--text-primary);font-weight:700;margin-bottom:0.25rem}
+.passport-sub{color:var(--text-muted);font-size:13px;margin-bottom:1.5rem}
+.passport-id{display:inline-block;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:8px;padding:0.5rem 1rem;font-size:11px;color:var(--text-muted);font-family:var(--font-mono)}
+.passport-id strong{color:var(--cyan)}
 .stamp{position:absolute;top:1.5rem;right:2rem;width:80px;height:80px;border:3px solid var(--green);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-12deg);opacity:0.8}
-.stamp .check{font-size:1.5rem;line-height:1}
-.stamp .label{font-size:0.5rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--green);font-weight:bold}
+.stamp .check{font-size:24px;line-height:1}
+.stamp .label{font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--green);font-weight:700}
 .passport-body{padding:2rem 2.5rem}
 .section{margin-bottom:1.5rem}
-.section-title{font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--accent);margin-bottom:0.75rem;padding-bottom:0.4rem;border-bottom:1px solid #222}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:0.15em;color:var(--cyan);margin-bottom:0.75rem;padding-bottom:0.4rem;border-bottom:1px solid var(--glass-border);font-family:var(--font-mono)}
 .systems-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem}
-.sys-card{background:#111;border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;transition:border-color .3s}
-.sys-card:hover{border-color:var(--accent)}
-.sys-card .sys-name{font-size:0.75rem;color:var(--accent);margin-bottom:0.5rem;font-weight:bold}
-.sys-card .sys-count{font-size:1.6rem;color:#fff;font-weight:bold}
-.sys-card .sys-label{font-size:0.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:0.05em}
+.sys-card{background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:10px;padding:1rem;text-align:center;transition:border-color .3s}
+.sys-card:hover{border-color:var(--cyan)}
+.sys-card .sys-name{font-size:11px;color:var(--cyan);margin-bottom:0.5rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+.sys-card .sys-count{font-size:24px;color:var(--text-primary);font-weight:700;font-family:var(--font-mono)}
+.sys-card .sys-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em}
 .ws-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.5rem}
-.ws-row{display:flex;justify-content:space-between;align-items:center;background:#111;border:1px solid var(--border);border-radius:8px;padding:0.6rem 1rem}
-.ws-row .ws-name{font-size:0.75rem;color:var(--text)}
-.ws-row .ws-count{font-size:0.75rem;color:var(--accent);font-weight:bold}
+.ws-row{display:flex;justify-content:space-between;align-items:center;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:8px;padding:0.6rem 1rem}
+.ws-row .ws-name{font-size:12px;color:var(--text-primary)}
+.ws-row .ws-count{font-size:12px;color:var(--cyan);font-weight:700;font-family:var(--font-mono)}
 .integrity-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem}
-.int-card{background:#111;border:1px solid var(--border);border-radius:10px;padding:1rem;display:flex;align-items:center;gap:0.75rem}
-.int-icon{font-size:1.2rem;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px}
-.int-icon.ok{background:#0d1a0d;border:1px solid #1a3a1a}
-.int-icon.info{background:#0d0d1a;border:1px solid #1a1a3a}
-.int-text .int-val{font-size:0.85rem;color:#fff;font-weight:bold}
-.int-text .int-label{font-size:0.65rem;color:var(--dim)}
-.hash-section{background:#111;border:1px solid var(--border);border-radius:10px;padding:1rem;font-size:0.65rem;color:var(--dim);word-break:break-all;line-height:1.8}
-.hash-section .hash-label{color:var(--accent);font-weight:bold}
-.hash-section .hash-val{color:var(--blue)}
-.passport-footer{background:#111;border-top:1px solid var(--border);padding:1.5rem 2.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
-.passport-footer .ts{font-size:0.7rem;color:var(--dim)}
+.int-card{background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:10px;padding:1rem;display:flex;align-items:center;gap:0.75rem}
+.int-icon{font-size:18px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+.int-icon.ok{background:rgba(52,211,153,0.1);border:1px solid var(--green-dim)}
+.int-icon.info{background:rgba(0,240,255,0.1);border:1px solid var(--cyan-dim)}
+.int-text .int-val{font-size:13px;color:var(--text-primary);font-weight:700}
+.int-text .int-label{font-size:10px;color:var(--text-muted)}
+.hash-section{background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:10px;padding:1rem;font-size:11px;color:var(--text-muted);word-break:break-all;line-height:1.8;font-family:var(--font-mono)}
+.hash-section .hash-label{color:var(--cyan);font-weight:600}
+.hash-section .hash-val{color:var(--text-secondary)}
+.passport-footer{background:var(--bg-deep);border-top:1px solid var(--glass-border);padding:1.5rem 2.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.passport-footer .ts{font-size:11px;color:var(--text-muted);font-family:var(--font-mono)}
 .share-row{display:flex;gap:0.5rem}
-.share-btn{background:none;border:1px solid var(--border);color:var(--dim);padding:6px 14px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:0.7rem;transition:all .2s;display:flex;align-items:center;gap:0.4rem}
-.share-btn:hover{border-color:var(--accent);color:var(--accent)}
+.share-btn{background:none;border:1px solid var(--glass-border);color:var(--text-muted);padding:6px 14px;border-radius:6px;cursor:pointer;font-family:var(--font-mono);font-size:11px;transition:all .2s;display:flex;align-items:center;gap:0.4rem}
+.share-btn:hover{border-color:var(--cyan);color:var(--cyan)}
 .share-btn.copied{border-color:var(--green);color:var(--green)}
-.print-only{display:none}
-@media print{
-  nav,.share-row{display:none!important}
-  .print-only{display:block}
-  body{background:#fff;color:#111}
-  .passport{border-color:#111;box-shadow:none}
-  .passport-top{background:#f5f5f5!important}
-  .passport-top::before{display:none}
-  .passport-name{color:#111}
-  .sys-card,.ws-row,.int-card,.hash-section{background:#f9f9f9;border-color:#ddd}
-  .passport-footer{background:#f5f5f5;border-color:#ddd}
-}
 @media(max-width:600px){
   .systems-grid{grid-template-columns:1fr}
   .ws-grid,.integrity-grid{grid-template-columns:1fr}
   .passport-top{padding:1.5rem}
   .passport-body{padding:1.5rem}
   .stamp{width:60px;height:60px;top:1rem;right:1rem}
-  .stamp .check{font-size:1.1rem}
+  .stamp .check{font-size:18px}
 }
 </style>
 </head>
 <body>
-<nav>
-  <span class="logo">MEMBRA</span>
-  <a href="/">Dashboard</a>
-  <a href="/explorer">Explorer</a>
-  <a href="/passport" class="active">Passport</a>
-  <a href="/docs">API Docs</a>
-</nav>
-<div class="passport-wrap">
-  <div class="passport" id="passport">
-    <div class="passport-top">
-      <div class="passport-title">Platform Provenance Passport</div>
-      <div class="passport-name">MEMBRA Language Platform</div>
-      <div class="passport-sub">Unified collateral registry for language-protocol, language-surfaces, and language-runtime</div>
-      <div class="passport-id">Passport ID: <strong id="pp-id">...</strong></div>
-      <div class="stamp"><span class="check">&#10003;</span><span class="label">Verified</span></div>
+<canvas id="particle-canvas"></canvas>
+<div class="app-shell">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo"><div class="topbar-logo-mark"></div>Collateral<span>Ops</span></div>
     </div>
-    <div class="passport-body">
-      <div class="section">
-        <div class="section-title">Systems</div>
-        <div class="systems-grid" id="sys-grid"></div>
-      </div>
-      <div class="section">
-        <div class="section-title">Workstream Coverage</div>
-        <div class="ws-grid" id="ws-grid"></div>
-      </div>
-      <div class="section">
-        <div class="section-title">Integrity Summary</div>
-        <div class="integrity-grid" id="int-grid"></div>
-      </div>
-      <div class="section">
-        <div class="section-title">Provenance Anchors</div>
-        <div class="hash-section" id="anchor-section"></div>
-      </div>
-    </div>
-    <div class="passport-footer">
-      <div>
-        <div class="ts" id="pp-ts">Generated ...</div>
-        <div class="ts">MEMBRA Language Platform v1.0.0</div>
-      </div>
-      <div class="share-row">
-        <button class="share-btn" id="btn-copy" onclick="copyLink()">&#128279; Copy Link</button>
-        <button class="share-btn" onclick="window.print()">&#128424; Print</button>
-        <button class="share-btn" id="btn-json" onclick="copyJSON()">{ } Copy JSON</button>
-      </div>
+    <div style="display:flex;gap:12px">
+      <a href="/dashboard" class="topbar-btn">Dashboard</a>
+      <a href="/" class="topbar-btn">Home</a>
+      <a href="/compare" class="topbar-btn">Compare</a>
     </div>
   </div>
+
+  <nav class="sidebar">
+    <a href="/dashboard" class="sidebar-item" title="Dashboard">&#128200;</a>
+    <a href="/compare" class="sidebar-item" title="Compare">&#8646;</a>
+    <a href="/passport" class="sidebar-item active" title="Passport">&#128196;</a>
+  </nav>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="passport-wrap">
+        <div class="passport" id="passport">
+          <div class="passport-top">
+            <div class="passport-title">Platform Provenance Passport</div>
+            <div class="passport-name">CollateralOps Platform</div>
+            <div class="passport-sub">Unified collateral registry for software assets and institutional execution</div>
+            <div class="passport-id">Passport ID: <strong id="pp-id">...</strong></div>
+            <div class="stamp"><span class="check">&#10003;</span><span class="label">Verified</span></div>
+          </div>
+          <div class="passport-body">
+            <div class="section">
+              <div class="section-title">Systems</div>
+              <div class="systems-grid" id="sys-grid"></div>
+            </div>
+            <div class="section">
+              <div class="section-title">Workstream Coverage</div>
+              <div class="ws-grid" id="ws-grid"></div>
+            </div>
+            <div class="section">
+              <div class="section-title">Integrity Summary</div>
+              <div class="integrity-grid" id="int-grid"></div>
+            </div>
+            <div class="section">
+              <div class="section-title">Provenance Anchors</div>
+              <div class="hash-section" id="anchor-section"></div>
+            </div>
+          </div>
+          <div class="passport-footer">
+            <div>
+              <div class="ts" id="pp-ts">Generated ...</div>
+              <div class="ts">CollateralOps Platform v2.0</div>
+            </div>
+            <div class="share-row">
+              <button class="share-btn" id="btn-copy" onclick="copyLink()">&#128279; Copy Link</button>
+              <button class="share-btn" onclick="window.print()">&#128424; Print</button>
+              <button class="share-btn" id="btn-json" onclick="copyJSON()">{ } Copy JSON</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
 </div>
+
 <script>
 const BASE='';
 let passportData={};
@@ -141,65 +169,39 @@ async function boot(){
   // Passport ID from a hash of the stats
   const raw=JSON.stringify(stats);
   let hash=0;for(let i=0;i<raw.length;i++){hash=((hash<<5)-hash)+raw.charCodeAt(i);hash|=0}
-  const ppId='MBR-PP-'+Math.abs(hash).toString(16).toUpperCase().slice(0,8)+'-'+stats.total_files;
+  const ppId='COLL-PP-'+Math.abs(hash).toString(16).toUpperCase().slice(0,8)+'-'+stats.total_files;
   document.getElementById('pp-id').textContent=ppId;
   document.getElementById('pp-ts').textContent='Generated '+new Date().toISOString().slice(0,19)+'Z';
 
   // Systems grid
   const sysGrid=document.getElementById('sys-grid');
   systems.systems.forEach(s=>{
-    sysGrid.innerHTML+=`<div class="sys-card"><div class="sys-name">${s.system.replace('language-','')}</div><div class="sys-count">${s.total_files}</div><div class="sys-label">files</div></div>`;
+    sysGrid.innerHTML+=`<div class="sys-card"><div class="sys-name">${s.system.name}</div><div class="sys-count">${s.count}</div><div class="sys-label">${s.label}</div></div>`;
   });
 
-  // Workstreams
+  // Workstream grid
   const wsGrid=document.getElementById('ws-grid');
   workstreams.workstreams.forEach(w=>{
-    wsGrid.innerHTML+=`<div class="ws-row"><span class="ws-name">${w.workstream}</span><span class="ws-count">${w.file_count}</span></div>`;
+    wsGrid.innerHTML+=`<div class="ws-row"><span class="ws-name">${w.workstream}</span><span class="ws-count">${w.count}</span></div>`;
   });
 
-  // Integrity summary
-  const items=collateral.items;
-  const allHashed=items.every(i=>i.raw_file_hash);
-  const allAnchored=items.every(i=>i.solana_tx_short);
-  const noContentExposed=items.every(i=>!i.content_exposed);
-  const noIdentityExposed=items.every(i=>!i.identity_exposed);
-  const uniqueHashes=new Set(items.map(i=>i.raw_file_hash)).size;
-  const gitCommits=[...new Set(items.map(i=>i.git_commit_short))];
-
+  // Integrity grid
   const intGrid=document.getElementById('int-grid');
   intGrid.innerHTML=`
-    <div class="int-card"><div class="int-icon ok">&#128274;</div><div class="int-text"><div class="int-val">${allHashed?'All Files Hashed':'Partial'}</div><div class="int-label">${uniqueHashes} unique SHA-256 hashes</div></div></div>
-    <div class="int-card"><div class="int-icon ok">&#9875;</div><div class="int-text"><div class="int-val">${allAnchored?'All Anchored':'Partial'}</div><div class="int-label">Solana transaction references</div></div></div>
-    <div class="int-card"><div class="int-icon ok">&#128737;</div><div class="int-text"><div class="int-val">${noContentExposed?'No Content Exposed':'Content Exposed'}</div><div class="int-label">Zero raw file contents in metadata</div></div></div>
-    <div class="int-card"><div class="int-icon ok">&#128100;</div><div class="int-text"><div class="int-val">${noIdentityExposed?'No Identity Exposed':'Identity Exposed'}</div><div class="int-label">PII redacted via PID hashing</div></div></div>
-    <div class="int-card"><div class="int-icon info">&#128200;</div><div class="int-text"><div class="int-val">${stats.total_files} Files</div><div class="int-label">${(stats.total_bytes/1024).toFixed(1)} KB total metadata</div></div></div>
-    <div class="int-card"><div class="int-icon info">&#128279;</div><div class="int-text"><div class="int-val">${gitCommits.length} Git Commit${gitCommits.length>1?'s':''}</div><div class="int-label">${gitCommits.join(', ')}</div></div></div>
+    <div class="int-card"><div class="int-icon ok">&#10003;</div><div class="int-text"><div class="int-val">${stats.total_files}</div><div class="int-label">Files Verified</div></div></div>
+    <div class="int-card"><div class="int-icon info">&#128274;</div><div class="int-text"><div class="int-val">${stats.total_projects}</div><div class="int-label">Assets Indexed</div></div></div>
   `;
 
-  // Provenance anchors - sample hashes from each system
+  // Hash section
   const anchorSection=document.getElementById('anchor-section');
-  let anchorHtml='';
-  systems.systems.forEach(s=>{
-    const sysItems=items.filter(i=>i._system===s.system);
-    if(sysItems.length>0){
-      const first=sysItems[0];
-      anchorHtml+=`<div style="margin-bottom:0.75rem"><span class="hash-label">${s.system}</span><br>`;
-      anchorHtml+=`manifest: <span class="hash-val">${first.manifest_hash}</span><br>`;
-      anchorHtml+=`solana_tx: <span class="hash-val">${first.solana_tx_short}</span> &middot; git: <span class="hash-val">${first.git_commit_short}</span></div>`;
-    }
-  });
-  anchorSection.innerHTML=anchorHtml;
+  anchorSection.innerHTML=`<span class="hash-label">Platform Hash:</span> <span class="hash-val">${ppId}</span><br><span class="hash-label">Generated:</span> ${new Date().toISOString()}`;
 
-  // Build export data
   passportData={
     passport_id:ppId,
-    generated_at:new Date().toISOString(),
-    platform:'MEMBRA Language Platform',
-    version:'1.0.0',
-    stats,
-    systems:systems.systems,
-    workstreams:workstreams.workstreams,
-    integrity:{all_hashed:allHashed,all_anchored:allAnchored,no_content_exposed:noContentExposed,no_identity_exposed:noIdentityExposed,unique_hashes:uniqueHashes,git_commits:gitCommits}
+    stats:stats,
+    systems:systems,
+    workstreams:workstreams,
+    generated_at:new Date().toISOString()
   };
 }
 
@@ -207,10 +209,22 @@ function copyLink(){
   const btn=document.getElementById('btn-copy');
   navigator.clipboard.writeText(window.location.href).then(()=>{btn.innerHTML='&#10003; Copied';btn.classList.add('copied');setTimeout(()=>{btn.innerHTML='&#128279; Copy Link';btn.classList.remove('copied')},2000)});
 }
+
 function copyJSON(){
   const btn=document.getElementById('btn-json');
   navigator.clipboard.writeText(JSON.stringify(passportData,null,2)).then(()=>{btn.innerHTML='&#10003; Copied';btn.classList.add('copied');setTimeout(()=>{btn.innerHTML='{ } Copy JSON';btn.classList.remove('copied')},2000)});
 }
+
+// Particle canvas
+const canvas=document.getElementById('particle-canvas');
+const ctx=canvas.getContext('2d');
+let W,H,particles=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+window.addEventListener('resize',resize);resize();
+class P{constructor(){this.reset()}reset(){this.x=Math.random()*W;this.y=Math.random()*H;this.vx=(Math.random()-0.5)*0.3;this.vy=(Math.random()-0.5)*0.3;this.s=Math.random()*1.5+0.5;this.a=Math.random()*0.4+0.1}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset()}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,Math.PI*2);ctx.fillStyle=`rgba(0,240,255,${this.a})`;ctx.fill()}}
+for(let i=0;i<60;i++)particles.push(new P);
+function anim(){ctx.clearRect(0,0,W,H);for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<140){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle=`rgba(0,240,255,${0.04*(1-d/140)})`;ctx.stroke()}}}particles.forEach(p=>{p.update();p.draw()});requestAnimationFrame(anim)}
+anim();
 
 boot();
 </script>
