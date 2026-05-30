@@ -2,6 +2,7 @@
 CollateralOps — SQLAlchemy models for the software collateral execution desk.
 """
 import enum
+import os
 import uuid
 from datetime import datetime
 from typing import List, Optional
@@ -205,13 +206,15 @@ class AuditLog(Base):
 _engine: Optional[object] = None
 
 
-def get_engine(db_path: str = "collateralops.db"):
+def get_engine(db_path: str = ""):
     global _engine
     if _engine is None:
-        _engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
+        is_serverless = os.environ.get("VERCEL") == "1" or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") is not None
+        path = db_path or ("/tmp/collateralops.db" if is_serverless else "collateralops.db")
+        _engine = create_engine(f"sqlite:///{path}", connect_args={"check_same_thread": False})
         Base.metadata.create_all(_engine)
     return _engine
 
 
-def get_session(db_path: str = "collateralops.db") -> Session:
+def get_session(db_path: str = "") -> Session:
     return Session(get_engine(db_path))
