@@ -885,3 +885,162 @@ def seed_demo_data():
             session.commit()
 
         return {"seeded": len(demos), "message": "Demo data loaded"}
+
+
+# ─── Code Quality (T11) ─────────────────────────────────────────
+
+@router.post("/assets/{asset_id}/quality/scan")
+def scan_code_quality(asset_id: str, repo_path: Optional[str] = Query(None)):
+    from code_quality import scan_repo_quality
+    with get_session() as session:
+        a = session.query(Asset).filter(Asset.id == asset_id).first()
+        if not a:
+            raise HTTPException(status_code=404, detail="Asset not found")
+        path = repo_path or a.repo_url or ""
+        if path.startswith("http"):
+            return {"error": "Provide a local repo_path for code quality scanning"}
+        result = scan_repo_quality(path) if path else {"error": "No repo path available"}
+        return {"asset_id": asset_id, "quality": result}
+
+
+# ─── Lender Portal (T16-T18) ────────────────────────────────────
+
+@router.get("/lender/assets")
+def lender_assets(
+    min_score: float = Query(40.0),
+    max_risk: float = Query(50.0),
+    limit: int = Query(100),
+):
+    """Lender-filtered asset view: only financeable, low-risk assets."""
+    with get_session() as session:
+        q = session.query(Asset).filter(
+            Asset.financeability_score >= min_score,
+            Asset.risk_score <= max_risk,
+            Asset.status != AssetStatus.RISK_BLOCKED,
+        ).order_by(Asset.financeability_score.desc())
+        items = q.limit(limit).all()
+        return {
+            "filter": {"min_score": min_score, "max_risk": max_risk},
+            "assets": [_asset_to_dict(a) for a in items],
+            "count": len(items),
+        }
+
+
+@router.get("/lender/assets/{asset_id}/term-sheet")
+def generate_term_sheet(asset_id: str):
+    """Generate a draft term sheet for an asset."""
+    with get_session() as session:
+        a = session.query(Asset).filter(Asset.id == asset_id).first()
+        if not a:
+            raise HTTPException(status_code=404, detail="Asset not found")
+        ltv = min(0.65, a.financeability_score / 150)
+        max_loan = a.collateral_support * ltv
+        return {
+            "asset_id": asset_id,
+            "asset_name": a.name,
+            "ltv_ratio": round(ltv, 2),
+            "max_loan_amount": round(max_loan, 2),
+            "collateral_support": a.collateral_support,
+            "financeability_score": a.financeability_score,
+            "risk_score": a.risk_score,
+            "covenants": [
+                "Maintain financeability score >= current",
+                "No new unvetted dependencies without SBOM update",
+                "Quarterly re-appraisal required",
+            ],
+            "release_triggers": [
+                "Loan repaid in full",
+                "Asset sold to qualified buyer",
+                "Replacement collateral of equal or greater support value",
+            ],
+        }
+
+
+# ─── Buyer Universe & Matching (T17-T19) ────────────────────────
+
+@router.get("/buyer/universe")
+def buyer_universe_global():
+    """Global buyer universe across all assets."""
+    with get_session() as session:
+        buyers = session.query(BuyerTarget).order_by(BuyerTarget.probability.desc()).all()
+        return {
+            "total_targets": len(buyers),
+            "high_probability": sum(1 for b in buyers if b.probability >= 0.7),
+            "medium_probability": sum(1 for b in buyers if 0.3 <= b.probability < 0.7),
+            "low_probability": sum(1 for b in buyers if b.probability < 0.3),
+            "buyers": [{"id": b.id, "name": b.name, "category": b.category,
+                        "probability": b.probability, "estimated_recovery": b.estimated_recovery,
+                        "contact_status": b.contact_status} for b in buyers],
+        }
+
+
+@router.get("/buyer/match/{asset_id}")
+def buyer_match(asset_id: str):
+    """Find best buyer matches for an asset based on tech stack and category."""
+    with get_session() as session:
+        a = session.query(Asset).filter(Asset.id == asset_id).first()
+        if not a:
+            raise HTTPException(status_code=404, detail="Asset not found")
+        buyers = session.query(BuyerTarget).filter(BuyerTarget.asset_id == asset_id).order_by(BuyerTarget.probability.desc()).all()
+        return {
+            "asset_id": asset_id,
+            "asset_name": a.name,
+            "tech_stack": a.tech_stack,
+            "matches": [{"id": b.id, "name": b.name, "category": b.category,
+                         "probability": b.probability, "estimated_recovery": b.estimated_recovery,
+                         "rationale": b.rationale} for b in buyers],
+        }
+
+
+# ─── Liquidation Calculator (T18) ───────────────────────────────
+
+@router.get("/assets/{asset_id}/liquidation")
+def liquidation_analysis(asset_id: str):
+    """Calculate liquidation route and recovery value."""
+    with get_session() as session:
+        a = session.query(Asset).filter(Asset.id == asset_id).first()
+        if not a:
+            raise HTTPException(status_code=404, detail="Asset not found")
+        buyers = session.query(BuyerTarget).filter(BuyerTarget.asset_id == asset_id).all()
+        total_recovery = sum(b.estimated_recovery * b.probability for b in buyers)
+        recovery_pct = (total_recovery / max(1, a.liquidation_value)) * 100
+        return {
+            "asset_id": asset_id,
+            "asset_name": a.name,
+            "liquidation_value": a.liquidation_value,
+            "buyer_count": len(buyers),
+            "expected_recovery": round(total_recovery, 2),
+            "recovery_percentage": round(recovery_pct, 1),
+            "route_recommendation": "Auction to strategic buyers" if recovery_pct > 70 else "Private sale to financial buyer" if recovery_pct > 40 else "Acqui-hire or component sale",
+        }
+
+
+# ─── Authentication (T29) ───────────────────────────────────────
+
+@router.post("/auth/login")
+def login(user_id: str, role: str = "builder"):
+    from auth import create_access_token
+    token = create_access_token(user_id, role)
+    return {"access_token": token, "token_type": "bearer", "role": role}
+
+
+@router.get("/auth/me")
+def me(request: Request):
+    from auth import require_auth
+    payload = require_auth(request)
+    return {"user_id": payload.get("sub"), "role": payload.get("role", "builder")}
+
+
+# ─── Health & Diagnostics ───────────────────────────────────────
+
+@router.get("/health")
+def api_health():
+    from models import get_engine
+    try:
+        engine = get_engine()
+        with engine.connect() as conn:
+            conn.execute("SELECT 1")
+        db_status = "ok"
+    except Exception as e:
+        db_status = f"error: {e}"
+    return {"status": "ok", "database": db_status, "version": "2.1.0"}
