@@ -723,6 +723,103 @@ def liquidation_route(name: str):
     }
 
 
+# ── Catacomb Prioritization ───────────────────────────────────────────
+
+@app.get("/api/catacomb/prioritization")
+def catacomb_prioritization():
+    """Catacomb-style prioritization: ranks assets by revival potential."""
+    
+    prioritized = []
+    
+    for name, cls in _classifications.items():
+        apr = _appraisals.get(name, {})
+        sigs = cls.get("signals", cls.get("signals_summary", {}))
+        
+        at = cls.get("asset_type", "")
+        fs = apr.get("financeability_score", 0)
+        rc = apr.get("replacement_cost_usd", 0)
+        csv = apr.get("collateral_support_value_usd", 0)
+        pl = cls.get("proof_level", 0)
+        src = sigs.get("total_src", 0)
+        
+        # Skip junk/scaffold/duplicate
+        if at in ("junk", "scaffold", "duplicate"):
+            continue
+        
+        # Calculate revival potential score (Catacomb algorithm)
+        # Higher replacement cost = higher potential value
+        # Higher financeability = easier to realize value
+        # Higher proof level = better foundation
+        # More source code = more substance
+        
+        value_score = min(100, (rc / 100000) * 10) if rc > 0 else 0  # Scale by $100k
+        financeability_score = fs
+        proof_score = (pl / 7) * 100
+        substance_score = min(100, (src / 1000) * 20) if src > 0 else 0
+        
+        # Weighted revival potential (Catacomb thesis)
+        revival_potential = (
+            value_score * 0.4 +           # 40% - raw value
+            financeability_score * 0.3 +     # 30% - ease of realization
+            proof_score * 0.2 +             # 20% - foundation
+            substance_score * 0.1           # 10% - substance
+        )
+        
+        # Calculate collateral conversion gap
+        conversion_gap_pct = ((rc - csv) / rc * 100) if rc > 0 else 0
+        
+        # Estimate effort to reach financeable (FS >= 70)
+        actions = apr.get("next_actions", [])
+        critical_actions = [a for a in actions if a.get("priority") == "critical"]
+        high_actions = [a for a in actions if a.get("priority") == "high"]
+        estimated_effort_weeks = len(critical_actions) * 2 + len(high_actions) * 1
+        
+        # Catacomb tier classification
+        if revival_potential >= 70 and rc > 1000000:
+            tier = "Tier 1 - Core Asset"
+        elif revival_potential >= 50 and rc > 500000:
+            tier = "Tier 2 - High Potential"
+        elif revival_potential >= 30:
+            tier = "Tier 3 - Medium Potential"
+        elif revival_potential >= 15:
+            tier = "Tier 4 - Low Potential"
+        else:
+            tier = "Archive Candidate"
+        
+        prioritized.append({
+            "name": name,
+            "asset_type": at,
+            "replacement_cost_usd": rc,
+            "collateral_support_usd": csv,
+            "financeability_score": fs,
+            "proof_level": pl,
+            "total_src": src,
+            "revival_potential_score": round(revival_potential, 1),
+            "conversion_gap_pct": round(conversion_gap_pct, 1),
+            "tier": tier,
+            "estimated_effort_weeks": estimated_effort_weeks,
+            "critical_actions": len(critical_actions),
+            "high_actions": len(high_actions),
+            "total_actions": len(actions),
+            "roi_estimate": round((csv * (100 / max(1, 100 - conversion_gap_pct))) / max(1, estimated_effort_weeks)) if estimated_effort_weeks > 0 else 0
+        })
+    
+    # Sort by revival potential descending
+    prioritized.sort(key=lambda x: -x["revival_potential_score"])
+    
+    return {
+        "total_assets": len(prioritized),
+        "tiers": {
+            "tier_1": len([p for p in prioritized if "Tier 1" in p["tier"]]),
+            "tier_2": len([p for p in prioritized if "Tier 2" in p["tier"]]),
+            "tier_3": len([p for p in prioritized if "Tier 3" in p["tier"]]),
+            "tier_4": len([p for p in prioritized if "Tier 4" in p["tier"]]),
+            "archive": len([p for p in prioritized if "Archive" in p["tier"]])
+        },
+        "prioritized_assets": prioritized
+    }
+
+
 # ── Rescan (local mode only) ──────────────────────────────────────
 
 @app.post("/api/rescan")
@@ -756,6 +853,9 @@ def lender_page():
 def explorer():
     return (PAGES / "explorer.html").read_text()
 
+@app.get("/prioritization", response_class=HTMLResponse)
+def prioritization_page():
+    return (PAGES / "prioritization.html").read_text()
 
 @app.get("/compare", response_class=HTMLResponse)
 def compare_page():
@@ -909,6 +1009,11 @@ def export_asset(name: str, format: str = Query("json", enum=["json", "csv"])):
         media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="collateralops-{name}.csv"'}
     )
+
+
+@app.exception_handler(404)
+async def not_found_handler(request, exc):
+    return HTMLResponse(content=(PAGES / "404.html").read_text(), status_code=404)
 
 
 if __name__ == "__main__":
