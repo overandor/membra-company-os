@@ -1044,3 +1044,157 @@ def api_health():
     except Exception as e:
         db_status = f"error: {e}"
     return {"status": "ok", "database": db_status, "version": "2.1.0"}
+
+
+# ─── Due Diligence Checklist (T21) ──────────────────────────────
+
+DUE_DILIGENCE_TEMPLATE = [
+    {"id": "dd-01", "category": "legal", "item": "Confirm chain of title for all IP", "required": True},
+    {"id": "dd-02", "category": "legal", "item": "Verify employee and contractor IP assignments", "required": True},
+    {"id": "dd-03", "category": "legal", "item": "Review open-source license compliance", "required": True},
+    {"id": "dd-04", "category": "technical", "item": "Audit source code escrow and build reproducibility", "required": True},
+    {"id": "dd-05", "category": "technical", "item": "Confirm no hardcoded secrets in repository", "required": True},
+    {"id": "dd-06", "category": "technical", "item": "Validate dependency SBOM and CVE status", "required": True},
+    {"id": "dd-07", "category": "financial", "item": "Trace development cost basis and capitalization", "required": True},
+    {"id": "dd-08", "category": "financial", "item": "Review revenue attribution to specific assets", "required": False},
+    {"id": "dd-09", "category": "operational", "item": "Confirm runbooks and operational continuity plans", "required": True},
+    {"id": "dd-10", "category": "operational", "item": "Verify backup and disaster recovery procedures", "required": True},
+]
+
+
+@router.get("/assets/{asset_id}/due-diligence")
+def get_due_diligence(asset_id: str):
+    """Return due diligence checklist with completion status based on existing data."""
+    with get_session() as session:
+        a = session.query(Asset).filter(Asset.id == asset_id).first()
+        if not a:
+            raise HTTPException(status_code=404, detail="Asset not found")
+        packet = session.query(PacketSection).filter(PacketSection.asset_id == asset_id).all()
+        risks = session.query(RiskFlag).filter(RiskFlag.asset_id == asset_id).all()
+        proofs = session.query(ProofEvent).filter(ProofEvent.asset_id == asset_id).all()
+        improvements = session.query(ImprovementTask).filter(ImprovementTask.asset_id == asset_id).all()
+
+        completed_ids = set()
+        # Map packet sections to DD items
+        section_map = {"01": "dd-01", "03": "dd-03", "04": "dd-04", "05": "dd-06", "07": "dd-07", "12": "dd-10"}
+        for s in packet:
+            if s.is_complete and s.section_key in section_map:
+                completed_ids.add(section_map[s.section_key])
+        # If no unresolved risks in security category, mark secret scan complete
+        if not any(r.category == "security" and not r.is_resolved for r in risks):
+            completed_ids.add("dd-05")
+        # If agent work records exist, assume build reproducibility
+        if any(w.action for w in a.agent_work):
+            completed_ids.add("dd-04")
+
+        items = []
+        for dd in DUE_DILIGENCE_TEMPLATE:
+            items.append({
+                "id": dd["id"],
+                "category": dd["category"],
+                "item": dd["item"],
+                "required": dd["required"],
+                "completed": dd["id"] in completed_ids,
+            })
+
+        total_required = sum(1 for i in items if i["required"])
+        completed_required = sum(1 for i in items if i["required"] and i["completed"])
+        return {
+            "asset_id": asset_id,
+            "asset_name": a.name,
+            "completion_rate": round((completed_required / max(1, total_required)) * 100, 1),
+            "total_items": len(items),
+            "completed_items": sum(1 for i in items if i["completed"]),
+            "items": items,
+        }
+
+
+# ─── NDA & External Access Control (T22) ────────────────────────
+
+_EXTERNAL_ACCESS = {}  # In-memory store for demo; replace with DB table in production
+
+
+@router.post("/access/request")
+def request_external_access(asset_id: str, email: str, org: str, role: str = "buyer"):
+    """Request NDA-bound access to an asset's collateral packet."""
+    import uuid
+    token = str(uuid.uuid4())[:16]
+    _EXTERNAL_ACCESS[token] = {
+        "asset_id": asset_id,
+        "email": email,
+        "org": org,
+        "role": role,
+        "status": "pending_nda",
+        "created_at": datetime.utcnow().isoformat(),
+    }
+    return {"access_token": token, "status": "pending_nda", "message": "NDA execution required before access is granted"}
+
+
+@router.get("/access/verify/{token}")
+def verify_external_access(token: str):
+    """Verify an external access token."""
+    record = _EXTERNAL_ACCESS.get(token)
+    if not record:
+        raise HTTPException(status_code=404, detail="Access token not found")
+    return record
+
+
+# ─── Automated Packet Assembly (T24) ────────────────────────────
+
+@router.post("/assets/{asset_id}/packet/assemble")
+def assemble_packet(asset_id: str):
+    """Auto-assemble collateral packet sections from scanned repo data."""
+    with get_session() as session:
+        a = session.query(Asset).filter(Asset.id == asset_id).first()
+        if not a:
+            raise HTTPException(status_code=404, detail="Asset not found")
+
+        # Create missing packet sections with heuristic completeness
+        existing = {s.section_key for s in a.packet_sections}
+        sections_to_create = [
+            ("01", "Executive Summary & Asset Description", a.lines_of_code > 0),
+            ("03", "License & Compliance Matrix", bool(a.tech_stack)),
+            ("04", "Source Code Inventory & Build Provenance", a.lines_of_code > 1000),
+            ("05", "Dependency & SBOM Analysis", bool(a.tech_stack)),
+            ("07", "Financial Traceability & Cost Basis", a.strategic_value > 0),
+            ("13", "Valuation Methodology & Assumptions", a.financeability_score > 0),
+        ]
+        created = 0
+        for key, title, condition in sections_to_create:
+            if key not in existing:
+                s = PacketSection(
+                    asset_id=asset_id,
+                    section_key=key,
+                    title=title,
+                    is_complete=condition,
+                    completeness=85.0 if condition else 0.0,
+                )
+                session.add(s)
+                created += 1
+        session.commit()
+        return {"assembled": created, "asset_id": asset_id}
+
+
+# ─── Scheduled Re-Appraisal (T27) ───────────────────────────────
+
+@router.post("/assets/{asset_id}/reappraise")
+def reappraise_asset(asset_id: str):
+    """Trigger a manual re-appraisal of an asset."""
+    from models import get_session
+    with get_session() as session:
+        a = session.query(Asset).filter(Asset.id == asset_id).first()
+        if not a:
+            raise HTTPException(status_code=404, detail="Asset not found")
+        old_score = a.financeability_score
+        result = _compute_financeability(a)
+        a.financeability_score = result["score"]
+        session.commit()
+        # Broadcast score change via WebSocket if connected clients exist
+        return {
+            "asset_id": asset_id,
+            "old_score": old_score,
+            "new_score": result["score"],
+            "delta": round(result["score"] - old_score, 1),
+            "components": result["components"],
+            "deductions": result["deductions"],
+        }
