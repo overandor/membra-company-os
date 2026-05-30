@@ -22,7 +22,7 @@ from fastapi.responses import HTMLResponse, Response
 app = FastAPI(
     title="CollateralOps",
     description="Software Collateral Execution Network — turns developer work into a balance sheet",
-    version="1.0.0",
+    version="2.0.0",
 )
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
