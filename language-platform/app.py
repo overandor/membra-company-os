@@ -28,6 +28,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 PAGES = Path(__file__).parent / "pages"
 INDEX_PATH = Path(__file__).parent / "data" / "index.json"
+INDEX_DEPLOY_PATH = Path(__file__).parent / "data" / "index_deploy.json"
 IS_VERCEL = os.environ.get("VERCEL") == "1" or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") is not None
 
 # State
@@ -43,9 +44,13 @@ _last_scan: float = 0
 def _load_from_index():
     """Load pre-built index for Vercel deployment."""
     global _projects, _classifications, _appraisals, _collateral, _lender_summaries, _buyer_summaries, _last_scan
-    if not INDEX_PATH.exists():
+    
+    # Use deployment-optimized index if deployed, otherwise use full index
+    index_path = INDEX_DEPLOY_PATH if IS_VERCEL and INDEX_DEPLOY_PATH.exists() else INDEX_PATH
+    
+    if not index_path.exists():
         return False
-    with open(INDEX_PATH) as f:
+    with open(index_path) as f:
         idx = json.load(f)
     _projects = []
     for entry in idx.get("projects", []):
@@ -55,7 +60,7 @@ def _load_from_index():
         # Rebuild signals from summary for compatibility
         if "signals_summary" in cls and "signals" not in cls:
             cls["signals"] = cls["signals_summary"]
-        _projects.append({"name": name, "has_collateral": bool(entry.get("collateral_records"))})
+        _projects.append({"name": name, "has_collateral": bool(entry.get("collateral_records", entry.get("collateral_records_count", 0) > 0))})
         _classifications[name] = cls
         _appraisals[name] = apr
         _collateral[name] = entry.get("collateral_records", [])
@@ -857,6 +862,10 @@ def explorer():
 def prioritization_page():
     return (PAGES / "prioritization.html").read_text()
 
+@app.get("/improvement", response_class=HTMLResponse)
+def improvement_page():
+    return (PAGES / "improvement.html").read_text()
+
 @app.get("/compare", response_class=HTMLResponse)
 def compare_page():
     return (PAGES / "compare.html").read_text()
@@ -1009,6 +1018,44 @@ def export_asset(name: str, format: str = Query("json", enum=["json", "csv"])):
         media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="collateralops-{name}.csv"'}
     )
+
+
+@app.get("/api/export/prioritization")
+def export_prioritization(format: str = Query("json", enum=["json", "csv"])):
+    """Export Catacomb prioritization data in JSON or CSV format."""
+    data = catacomb_prioritization()
+    
+    if format == "json":
+        return Response(
+            content=json.dumps(data, indent=2, default=str),
+            media_type="application/json",
+            headers={"Content-Disposition": 'attachment; filename="catacomb_prioritization.json"'}
+        )
+    
+    elif format == "csv":
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        writer.writerow([
+            "name", "asset_type", "tier", "revival_potential_score",
+            "replacement_cost_usd", "collateral_support_value_usd", "conversion_gap_pct",
+            "financeability_score", "proof_level", "total_src",
+            "estimated_effort_weeks", "critical_actions", "high_actions", "total_actions", "roi_estimate"
+        ])
+        
+        for asset in data["prioritized_assets"]:
+            writer.writerow([
+                asset["name"], asset["asset_type"], asset["tier"], asset["revival_potential_score"],
+                asset["replacement_cost_usd"], asset["collateral_support_value_usd"], asset["conversion_gap_pct"],
+                asset["financeability_score"], asset["proof_level"], asset["total_src"],
+                asset["estimated_effort_weeks"], asset["critical_actions"], asset["high_actions"], asset["total_actions"], asset["roi_estimate"]
+            ])
+        
+        return Response(
+            content=output.getvalue(),
+            media_type="text/csv",
+            headers={"Content-Disposition": 'attachment; filename="catacomb_prioritization.csv"'}
+        )
 
 
 @app.exception_handler(404)
