@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lender View — CollateralOps 2040</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg-deep:#020204;--bg-surface:#0a0a0f;--bg-elevated:#12121a;--glass:rgba(255,255,255,0.03);--glass-border:rgba(255,255,255,0.06);--text-primary:#f0f0f8;--text-secondary:#8a8a9e;--text-muted:#4a4a5e;--cyan:#00f0ff;--cyan-dim:rgba(0,240,255,0.12);--orange:#ff6b35;--orange-dim:rgba(255,107,53,0.12);--purple:#c084fc;--purple-dim:rgba(192,132,252,0.12);--green:#34d399;--green-dim:rgba(52,211,153,0.12);--gold:#fbbf24;--red:#f87171;--font-sans:'Space Grotesk',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-primary);line-height:1.5;min-height:100vh}
+#particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.35}
+.app-shell{display:grid;grid-template-rows:48px 1fr;grid-template-columns:64px 1fr;height:100vh}
+.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--bg-surface);border-bottom:1px solid var(--glass-border);z-index:100}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.topbar-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;letter-spacing:0.05em}
+.topbar-logo span{color:var(--cyan)}
+.topbar-logo-mark{width:24px;height:24px;border:1.5px solid var(--cyan);border-radius:6px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 12px var(--cyan-dim)}
+.topbar-logo-mark::before{content:'';position:absolute;width:8px;height:8px;background:var(--cyan);border-radius:2px;transform:rotate(45deg)}
+.topbar-status{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted);padding:4px 12px;border-radius:6px;background:var(--glass);border:1px solid var(--glass-border)}
+.topbar-btn{padding:6px 14px;border-radius:6px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-secondary);font-size:12px;font-family:var(--font-mono);cursor:pointer;transition:all 0.2s;text-decoration:none}
+.topbar-btn:hover{border-color:var(--cyan);color:var(--text-primary)}
+.sidebar{background:var(--bg-surface);border-right:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:8px;z-index:10}
+.sidebar-item{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;color:var(--text-muted);font-size:18px;cursor:pointer;transition:all 0.2s;position:relative;text-decoration:none}
+.sidebar-item:hover,.sidebar-item.active{background:var(--cyan-dim);color:var(--cyan)}
+.sidebar-item.active::after{content:'';position:absolute;left:-1px;top:50%;transform:translateY(-50%);width:2px;height:20px;background:var(--cyan);border-radius:1px}
+.main{overflow-y:auto;padding:24px;z-index:1}
+.wrap{max-width:1100px;margin:0 auto}
+h1{font-size:24px;font-weight:700;margin-bottom:4px}
+.sub{color:var(--text-secondary);font-size:13px;margin-bottom:20px}
+.disclaimer{background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.15);border-radius:12px;padding:16px;font-size:12px;color:var(--red);margin-bottom:24px;line-height:1.6}
+.card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:24px;position:relative;overflow:hidden;margin-bottom:20px}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.3}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.card-title{font-size:13px;font-weight:600;color:var(--text-secondary);letter-spacing:0.05em;text-transform:uppercase}
+.card-subtitle{font-size:11px;color:var(--text-muted);margin-top:2px}
+.agg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.agg-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:20px;text-align:center;position:relative;overflow:hidden}
+.agg-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.3}
+.agg-card .v{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--text-primary);margin-bottom:6px}
+.agg-card .l{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em}
+.agg-card.green::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.agg-card.orange::before{background:linear-gradient(90deg,transparent,var(--orange),transparent)}
+.agg-card.purple::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.agg-card.cyan::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.lender-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;margin-bottom:16px;overflow:hidden;transition:all 0.2s}
+.lender-card:hover{border-color:rgba(0,240,255,0.15)}
+.lc-header{padding:16px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.2s}
+.lc-header:hover{background:var(--bg-elevated)}
+.lc-name{flex:1;font-weight:600;font-size:14px;color:var(--text-primary)}
+.lc-csv{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--green);min-width:100px;text-align:right}
+.lc-risk{font-size:10px;padding:3px 10px;border-radius:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+.lc-risk.low{background:var(--green-dim);color:var(--green);border:1px solid rgba(52,211,153,0.2)}
+.lc-risk.medium{background:rgba(251,191,36,0.12);color:var(--gold);border:1px solid rgba(251,191,36,0.2)}
+.lc-risk.high{background:rgba(248,113,113,0.12);color:var(--red);border:1px solid rgba(248,113,113,0.2)}
+.lc-body{display:none;padding:20px;background:var(--bg-deep);border-top:1px solid var(--glass-border)}
+.lc-body.open{display:block}
+.lr{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--glass-border);gap:12px;font-size:12px}
+.lr:last-child{border-bottom:none}
+.lr .k{color:var(--text-muted);font-family:var(--font-mono);flex-shrink:0;width:200px}
+.lr .v{color:var(--text-primary);text-align:right;flex:1;word-break:break-word}
+.loading{color:var(--text-muted);text-align:center;padding:3rem}
+.spinner{width:20px;height:20px;border:2px solid var(--glass-border);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
+.badge-green{background:var(--green-dim);color:var(--green)}.badge-orange{background:var(--orange-dim);color:var(--orange)}.badge-red{background:rgba(248,113,113,0.12);color:var(--red)}
+</style>
+</head>
+<body>
+<canvas id="particle-canvas"></canvas>
+<div class="app-shell">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo"><div class="topbar-logo-mark"></div>Collateral<span>Ops</span></div>
+      <div class="topbar-status">LENDER COLLATERAL ASSESSMENT</div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <a href="/dashboard" class="topbar-btn">Dashboard</a>
+      <a href="/" class="topbar-btn">Home</a>
+      <a href="/compare" class="topbar-btn">Compare</a>
+    </div>
+  </div>
+
+  <nav class="sidebar">
+    <a href="/dashboard" class="sidebar-item" title="Dashboard">&#128200;</a>
+    <a href="/compare" class="sidebar-item" title="Compare">&#8646;</a>
+    <a href="#" class="sidebar-item active" title="Lender View">&#128176;</a>
+    <a href="/explorer" class="sidebar-item" title="Explorer">&#128194;</a>
+  </nav>
+
+  <main class="main">
+    <div class="wrap">
+      <h1>Lender Dashboard</h1>
+      <p class="sub">Conservative collateral assessment — no developer jargon, no hype</p>
+
+      <div class="disclaimer">
+        <strong>Disclaimer:</strong> Appraisal is not liquidity. Values shown are risk-adjusted estimates based on observed evidence. They are not guarantees of sale price, loan value, or market demand. Human review recommended for any financing decision.
+      </div>
+
+      <div class="agg" id="agg"><div class="loading"><div class="spinner"></div></div></div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Asset Collateral Schedule</div><div class="card-subtitle">Risk-adjusted collateral assessment per asset</div></div>
+        <div id="assets"><div class="loading"><div class="spinner"></div><div style="margin-top:12px">Loading lender summaries...</div></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function $(v){return typeof v==='number'?'$'+v.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0}):v}
+async function boot(){
+  try{
+    const bs=await(await fetch('/api/balance-sheet')).json();
+    const assets=bs.assets.filter(a=>!['junk','scaffold','duplicate'].includes(a.asset_type));
+    const s=bs.summary;
+    document.getElementById('agg').innerHTML=`
+      <div class="agg-card cyan"><div class="v">${$(s.collateral_support_value_usd)}</div><div class="l">Total Collateral Support</div></div>
+      <div class="agg-card orange"><div class="v">${$(s.liquidation_value_usd)}</div><div class="l">Total Liquidation Value</div></div>
+      <div class="agg-card purple"><div class="v">${s.sale_candidates}</div><div class="l">Financeable Candidates</div></div>
+      <div class="agg-card green"><div class="v">${s.financeability_score_avg}/100</div><div class="l">Avg Financeability</div></div>
+    `;
+    let html='';
+    const sorted=assets.sort((a,b)=>b.collateral_support_value_usd-a.collateral_support_value_usd);
+    for(let i=0;i<sorted.length;i++){
+      const a=sorted[i];
+      try{
+        const ls=await fetch('/api/asset/'+a.name+'/lender').then(r=>r.json());
+        const riskLevel=a.financeability_score>=50?'low':a.financeability_score>=30?'medium':'high';
+        html+=`<div class="lender-card">
+          <div class="lc-header" onclick="document.getElementById('lb-'+${i}).classList.toggle('open')">
+            <span class="lc-name">${a.name}</span>
+            <span class="lc-risk ${riskLevel}">${riskLevel} risk</span>
+            <span class="lc-csv">${$(a.collateral_support_value_usd)}</span>
+          </div>
+          <div class="lc-body" id="lb-${i}">
+            <div class="lr"><span class="k">Asset Type</span><span class="v">${ls.asset_type||a.asset_type}</span></div>
+            <div class="lr"><span class="k">Collateral Description</span><span class="v">${ls.collateral_description||'—'}</span></div>
+            <div class="lr"><span class="k">Proof Level</span><span class="v">${ls.proof_level||a.proof_level+'/7'}</span></div>
+            <div class="lr"><span class="k">Ownership Risk</span><span class="v">${ls.ownership_risk||'unknown'}</span></div>
+            <div class="lr"><span class="k">Build Verification</span><span class="v">${ls.build_verification||'not_verified'}</span></div>
+            <div class="lr"><span class="k">License Risk</span><span class="v">${ls.license_risk||'unknown'}</span></div>
+            <div class="lr"><span class="k">Secret Risk</span><span class="v">${ls.secret_risk||'unknown'}</span></div>
+            <div class="lr"><span class="k">Revenue Evidence</span><span class="v">${ls.revenue_evidence||'none'}</span></div>
+            <div class="lr"><span class="k">Estimated Recovery</span><span class="v">${$(ls.estimated_recovery_usd||0)}</span></div>
+            <div class="lr"><span class="k">Collateral Support</span><span class="v">${$(ls.collateral_support_usd||0)}</span></div>
+            <div class="lr"><span class="k">Recommended LTV</span><span class="v">${ls.recommended_ltv?.min_pct||0}%–${ls.recommended_ltv?.max_pct||0}%</span></div>
+            <div class="lr"><span class="k">Monitoring</span><span class="v">${ls.monitoring||'—'}</span></div>
+            <div class="lr"><span class="k">Default Action</span><span class="v">${ls.default_action||'—'}</span></div>
+          </div>
+        </div>`;
+      }catch(e){}
+    }
+    document.getElementById('assets').innerHTML=html||'<div class="loading">No financeable assets found</div>';
+  }catch(e){document.getElementById('assets').innerHTML=`<div class="loading" style="color:var(--red)">${e.message}</div>`}
+}
+boot();
+
+// Particle canvas
+const canvas=document.getElementById('particle-canvas');
+const ctx=canvas.getContext('2d');
+let W,H,particles=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+window.addEventListener('resize',resize);resize();
+class P{constructor(){this.reset()}reset(){this.x=Math.random()*W;this.y=Math.random()*H;this.vx=(Math.random()-0.5)*0.3;this.vy=(Math.random()-0.5)*0.3;this.s=Math.random()*1.5+0.5;this.a=Math.random()*0.4+0.1}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset()}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,Math.PI*2);ctx.fillStyle=`rgba(0,240,255,${this.a})`;ctx.fill()}}
+for(let i=0;i<60;i++)particles.push(new P);
+function anim(){ctx.clearRect(0,0,W,H);for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<140){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle=`rgba(0,240,255,${0.04*(1-d/140)})`;ctx.stroke()}}}particles.forEach(p=>{p.update();p.draw()});requestAnimationFrame(anim)}
+anim();
+</script>
+</body>
+</html>
