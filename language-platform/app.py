@@ -1,5 +1,14 @@
+"""
+CollateralOps — Software Collateral Execution Network
+Turns developer work into a balance sheet.
+
+Runs in two modes:
+  LOCAL: scans ~/Downloads live (python app.py)
+  VERCEL: reads from pre-built data/index.json (deployed)
+"""
 import json
 import os
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -8,364 +17,361 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
 app = FastAPI(
-    title="MEMBRA Language Platform",
-    description="Unified API for language-protocol, language-surfaces, and language-runtime collateral",
+    title="CollateralOps",
+    description="Software Collateral Execution Network — turns developer work into a balance sheet",
     version="1.0.0",
 )
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-PAGES_DIR = Path(__file__).parent / "pages"
+PAGES = Path(__file__).parent / "pages"
+INDEX_PATH = Path(__file__).parent / "data" / "index.json"
+IS_VERCEL = os.environ.get("VERCEL") == "1" or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") is not None
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-SYSTEMS = ["language-protocol", "language-surfaces", "language-runtime"]
-DATA_DIR = Path(__file__).parent / "data"
-
-_index: list[dict] = []
+# State
+_projects: list = []
+_classifications: dict = {}
+_appraisals: dict = {}
+_collateral: dict = {}
+_lender_summaries: dict = {}
+_buyer_summaries: dict = {}
+_last_scan: float = 0
 
 
-def load_index():
-    global _index
-    if _index:
-        return _index
-    for system in SYSTEMS:
-        system_dir = DATA_DIR / system
-        if not system_dir.exists():
-            continue
-        for fp in sorted(system_dir.glob("*.filelife.json")):
-            with open(fp) as f:
-                rec = json.load(f)
-            rec["_system"] = system
-            _index.append(rec)
-    return _index
+def _load_from_index():
+    """Load pre-built index for Vercel deployment."""
+    global _projects, _classifications, _appraisals, _collateral, _lender_summaries, _buyer_summaries, _last_scan
+    if not INDEX_PATH.exists():
+        return False
+    with open(INDEX_PATH) as f:
+        idx = json.load(f)
+    _projects = []
+    for entry in idx.get("projects", []):
+        name = entry["name"]
+        cls = entry.get("classification", {})
+        apr = entry.get("appraisal", {})
+        # Rebuild signals from summary for compatibility
+        if "signals_summary" in cls and "signals" not in cls:
+            cls["signals"] = cls["signals_summary"]
+        _projects.append({"name": name, "has_collateral": bool(entry.get("collateral_records"))})
+        _classifications[name] = cls
+        _appraisals[name] = apr
+        _collateral[name] = entry.get("collateral_records", [])
+        _lender_summaries[name] = entry.get("lender_summary", {})
+        _buyer_summaries[name] = entry.get("buyer_summary", {})
+    _last_scan = idx.get("generated_at", time.time())
+    return True
+
+
+def _scan_live():
+    """Scan local folders live."""
+    global _projects, _classifications, _appraisals, _collateral, _lender_summaries, _buyer_summaries, _last_scan
+    from scanner import discover_projects, scan_collateral
+    from classifier import classify_repo
+    try:
+        from appraiser_v2 import appraise_v2 as appraise
+    except ImportError:
+        from appraiser import appraise
+    from packet import generate_packet, generate_lender_summary, generate_buyer_summary
+
+    scan_root = Path(os.environ.get("SCAN_ROOT", str(Path.home() / "Downloads")))
+    _projects = discover_projects(scan_root)
+    _classifications = {}
+    _appraisals = {}
+    _collateral = {}
+    _lender_summaries = {}
+    _buyer_summaries = {}
+
+    for proj in _projects:
+        name = proj["name"]
+        records = scan_collateral(proj["path"])
+        cls = classify_repo(proj["path"], name, records)
+        apr = appraise(cls)
+        pkt = generate_packet(cls, apr, records)
+        _classifications[name] = cls
+        _appraisals[name] = apr
+        _collateral[name] = records
+        _lender_summaries[name] = generate_lender_summary(pkt)
+        _buyer_summaries[name] = generate_buyer_summary(pkt)
+    _last_scan = time.time()
+
+
+# Load data immediately
+if INDEX_PATH.exists():
+    _load_from_index()
 
 
 @app.on_event("startup")
 async def startup():
-    load_index()
+    if not _projects and not IS_VERCEL:
+        _scan_live()
 
 
-# ── Health ──────────────────────────────────────────────────────────────────
+# ── Health ──────────────────────────────────────────────────────────
 
 @app.get("/health")
 def health():
-    idx = load_index()
-    return {"status": "ok", "total_records": len(idx), "systems": SYSTEMS}
-
-
-# ── Systems overview ────────────────────────────────────────────────────────
-
-@app.get("/api/systems")
-def list_systems():
-    idx = load_index()
-    out = []
-    for s in SYSTEMS:
-        items = [r for r in idx if r["_system"] == s]
-        workstreams = sorted({r.get("workstream", "unknown") for r in items})
-        out.append({
-            "system": s,
-            "total_files": len(items),
-            "workstreams": workstreams,
-        })
-    return {"systems": out}
-
-
-# ── Collateral list / filter ────────────────────────────────────────────────
-
-@app.get("/api/collateral")
-def list_collateral(
-    system: Optional[str] = Query(None, description="Filter by system name"),
-    workstream: Optional[str] = Query(None, description="Filter by workstream"),
-    extension: Optional[str] = Query(None, description="Filter by file extension (.pdf, .csv, .zip)"),
-    lifecycle_stage: Optional[int] = Query(None, description="Filter by lifecycle stage"),
-    limit: int = Query(50, ge=1, le=500),
-    offset: int = Query(0, ge=0),
-):
-    idx = load_index()
-    results = idx
-    if system:
-        results = [r for r in results if r["_system"] == system]
-    if workstream:
-        wl = workstream.lower()
-        results = [r for r in results if wl in r.get("workstream", "").lower()]
-    if extension:
-        ext = extension if extension.startswith(".") else f".{extension}"
-        results = [r for r in results if r.get("extension") == ext]
-    if lifecycle_stage is not None:
-        results = [r for r in results if r.get("lifecycle_stage") == lifecycle_stage]
-    total = len(results)
-    page = results[offset : offset + limit]
-    return {"total": total, "offset": offset, "limit": limit, "items": page}
-
-
-# ── Single item by SKU ──────────────────────────────────────────────────────
-
-@app.get("/api/collateral/sku/{sku}")
-def get_by_sku(sku: str):
-    idx = load_index()
-    for r in idx:
-        if r.get("sku") == sku:
-            return r
-    raise HTTPException(404, detail="SKU not found")
-
-
-# ── Single system's collateral ──────────────────────────────────────────────
-
-@app.get("/api/collateral/{system}")
-def list_system_collateral(
-    system: str,
-    workstream: Optional[str] = Query(None),
-    limit: int = Query(50, ge=1, le=500),
-    offset: int = Query(0, ge=0),
-):
-    if system not in SYSTEMS:
-        raise HTTPException(404, detail=f"Unknown system: {system}")
-    idx = load_index()
-    results = [r for r in idx if r["_system"] == system]
-    if workstream:
-        wl = workstream.lower()
-        results = [r for r in results if wl in r.get("workstream", "").lower()]
-    total = len(results)
-    page = results[offset : offset + limit]
-    return {"system": system, "total": total, "offset": offset, "limit": limit, "items": page}
-
-
-# ── Single file metadata ───────────────────────────────────────────────────
-
-@app.get("/api/collateral/{system}/{filename}")
-def get_file_metadata(system: str, filename: str):
-    if system not in SYSTEMS:
-        raise HTTPException(404, detail=f"Unknown system: {system}")
-    idx = load_index()
-    for r in idx:
-        if r["_system"] == system and r.get("filename_hint") == filename:
-            return r
-    raise HTTPException(404, detail=f"File not found in {system}")
-
-
-# ── Search ──────────────────────────────────────────────────────────────────
-
-@app.get("/api/search")
-def search(
-    q: str = Query(..., min_length=1, description="Search query"),
-    limit: int = Query(50, ge=1, le=500),
-):
-    idx = load_index()
-    ql = q.lower()
-    hits = []
-    for r in idx:
-        searchable = " ".join([
-            r.get("filename_hint", ""),
-            r.get("workstream", ""),
-            r.get("sub_workstream", ""),
-            r.get("system_name", ""),
-            r.get("sku", ""),
-            r.get("row_id", ""),
-        ]).lower()
-        if ql in searchable:
-            hits.append(r)
-    return {"query": q, "total": len(hits), "items": hits[:limit]}
-
-
-# ── Workstreams ─────────────────────────────────────────────────────────────
-
-@app.get("/api/workstreams")
-def list_workstreams():
-    idx = load_index()
-    ws_map: dict[str, dict] = {}
-    for r in idx:
-        ws = r.get("workstream", "unknown")
-        if ws not in ws_map:
-            ws_map[ws] = {"workstream": ws, "sub_workstreams": set(), "file_count": 0, "systems": set()}
-        ws_map[ws]["sub_workstreams"].add(r.get("sub_workstream", ""))
-        ws_map[ws]["file_count"] += 1
-        ws_map[ws]["systems"].add(r["_system"])
-    out = []
-    for ws in sorted(ws_map):
-        entry = ws_map[ws]
-        out.append({
-            "workstream": entry["workstream"],
-            "sub_workstreams": sorted(entry["sub_workstreams"]),
-            "file_count": entry["file_count"],
-            "systems": sorted(entry["systems"]),
-        })
-    return {"workstreams": out}
-
-
-# ── Stats ───────────────────────────────────────────────────────────────────
-
-@app.get("/api/stats")
-def stats():
-    idx = load_index()
-    by_system: dict[str, int] = {}
-    by_ext: dict[str, int] = {}
-    by_stage: dict[int, int] = {}
-    by_workstream: dict[str, int] = {}
-    total_bytes = 0
-    for r in idx:
-        s = r["_system"]
-        by_system[s] = by_system.get(s, 0) + 1
-        ext = r.get("extension", "unknown")
-        by_ext[ext] = by_ext.get(ext, 0) + 1
-        stage = r.get("lifecycle_stage", -1)
-        by_stage[stage] = by_stage.get(stage, 0) + 1
-        ws = r.get("workstream", "unknown")
-        by_workstream[ws] = by_workstream.get(ws, 0) + 1
-        total_bytes += r.get("file_size_bytes", 0)
+    total_rc = sum(a.get("replacement_cost_usd", 0) for a in _appraisals.values())
+    total_csv = sum(a.get("collateral_support_value_usd", 0) for a in _appraisals.values())
+    total_market = sum(a.get("market_comparable_value_usd", 0) for a in _appraisals.values())
+    financeable = sum(1 for a in _appraisals.values() if a.get("financeability_score", 0) >= 40)
+    avg_fs = sum(a.get("financeability_score", 0) for a in _appraisals.values()) / max(1, len(_appraisals))
     return {
-        "total_files": len(idx),
-        "total_bytes": total_bytes,
-        "by_system": by_system,
-        "by_extension": by_ext,
-        "by_lifecycle_stage": {str(k): v for k, v in sorted(by_stage.items())},
-        "by_workstream": by_workstream,
+        "status": "ok",
+        "product": "CollateralOps v2.0",
+        "mode": "index" if INDEX_PATH.exists() else "live_scan",
+        "total_projects": len(_projects),
+        "total_replacement_value_usd": round(total_rc, 2),
+        "total_collateral_support_usd": round(total_csv, 2),
+        "total_market_comparable_usd": round(total_market, 2),
+        "financeable_assets": financeable,
+        "avg_financeability": round(avg_fs, 1),
+        "last_scan": _last_scan,
     }
 
 
-# ── Dashboard ───────────────────────────────────────────────────────────────
+# ── Balance Sheet ──────────────────────────────────────────────────
 
-DASHBOARD_HTML = """<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MEMBRA Language Platform</title>
-<style>
-  :root { --bg: #0d0d0d; --card: #1a1a1a; --accent: #ff6b00; --text: #e0e0e0; --dim: #888; --border: #333; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'SF Mono', 'Fira Code', monospace; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem; }
-  h1 { color: var(--accent); font-size: 1.6rem; margin-bottom: 0.5rem; }
-  .subtitle { color: var(--dim); margin-bottom: 2rem; font-size: 0.85rem; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.2rem; margin-bottom: 2rem; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;
-          box-shadow: 6px 6px 16px #080808, -4px -4px 12px #222; }
-  .card h2 { color: var(--accent); font-size: 1rem; margin-bottom: 1rem; }
-  .stat { font-size: 2rem; font-weight: bold; color: #fff; }
-  .stat-label { color: var(--dim); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; }
-  .bar-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
-  .bar-label { width: 120px; font-size: 0.75rem; color: var(--dim); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .bar { height: 18px; background: var(--accent); border-radius: 4px; min-width: 4px; transition: width 0.6s ease; }
-  .bar-val { font-size: 0.75rem; color: var(--text); min-width: 30px; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-  th { text-align: left; color: var(--accent); padding: 0.5rem; border-bottom: 1px solid var(--border); }
-  td { padding: 0.5rem; border-bottom: 1px solid #222; color: var(--text); }
-  tr:hover td { background: #222; }
-  .endpoint { background: #222; border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
-  .endpoint code { color: var(--accent); font-size: 0.85rem; }
-  .endpoint .method { background: var(--accent); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
-  .endpoint .desc { color: var(--dim); font-size: 0.75rem; }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  #search { width: 100%; padding: 0.75rem 1rem; background: #222; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; font-size: 0.9rem; margin-bottom: 1rem; }
-  #search:focus { outline: none; border-color: var(--accent); }
-  #results { max-height: 400px; overflow-y: auto; }
-  .pill { display: inline-block; background: #333; color: var(--accent); padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; margin-right: 4px; }
-</style>
-</head>
-<body>
-<nav style="background:#111;border-bottom:1px solid #333;padding:0.75rem 2rem;display:flex;align-items:center;gap:1.5rem;margin:-2rem -2rem 2rem -2rem;font-size:0.8rem">
-  <span style="color:#ff6b00;font-weight:bold;font-size:1rem;margin-right:auto">MEMBRA</span>
-  <a href="/" style="color:#ff6b00;text-decoration:none">Dashboard</a>
-  <a href="/explorer" style="color:#888;text-decoration:none">Explorer</a>
-  <a href="/passport" style="color:#888;text-decoration:none">Passport</a>
-  <a href="/docs" style="color:#888;text-decoration:none">API Docs</a>
-</nav>
-<h1>MEMBRA Language Platform</h1>
-<p class="subtitle">Unified collateral API &mdash; language-protocol &bull; language-surfaces &bull; language-runtime</p>
+@app.get("/api/balance-sheet")
+def balance_sheet():
+    assets = []
+    for proj in _projects:
+        name = proj["name"]
+        cls = _classifications.get(name, {})
+        apr = _appraisals.get(name, {})
+        sigs = cls.get("signals", cls.get("signals_summary", {}))
+        assets.append({
+            "name": name,
+            "asset_type": cls.get("asset_type", "unknown"),
+            "proof_level": cls.get("proof_level", 0),
+            "proof_level_name": cls.get("proof_level_name", "Unknown"),
+            "capital_readiness": apr.get("capital_readiness", "Unknown"),
+            "replacement_cost_usd": apr.get("replacement_cost_usd", 0),
+            "as_is_sale_value_usd": apr.get("as_is_sale_value_usd", 0),
+            "productized_value_usd": apr.get("productized_value_usd", 0),
+            "liquidation_value_usd": apr.get("liquidation_value_usd", 0),
+            "collateral_support_value_usd": apr.get("collateral_support_value_usd", 0),
+            "market_comparable_value_usd": apr.get("market_comparable_value_usd", 0),
+            "network_effect_value_usd": apr.get("network_effect_value_usd", 0),
+            "complexity_adjusted_value_usd": apr.get("complexity_adjusted_value_usd", 0),
+            "financeability_score": apr.get("financeability_score", 0),
+            "confidence_score": apr.get("confidence_score", 0),
+            "subscores": apr.get("subscores", {}),
+            "risk_matrix": apr.get("risk_matrix", {}),
+            "risk_flags": cls.get("risk_flags", []),
+            "collateral_files": cls.get("collateral_files", 0),
+            "primary_language": sigs.get("primary_language", "none"),
+            "total_src": sigs.get("total_src", 0),
+        })
+    assets.sort(key=lambda a: -a["replacement_cost_usd"])
 
-<div class="grid">
-  <div class="card">
-    <h2>Overview</h2>
-    <div id="overview">Loading...</div>
-  </div>
-  <div class="card">
-    <h2>By System</h2>
-    <div id="by-system"></div>
-  </div>
-  <div class="card">
-    <h2>By Extension</h2>
-    <div id="by-ext"></div>
-  </div>
-  <div class="card">
-    <h2>By Workstream</h2>
-    <div id="by-ws"></div>
-  </div>
-</div>
+    total_rc = sum(a["replacement_cost_usd"] for a in assets)
+    total_as_is = sum(a["as_is_sale_value_usd"] for a in assets)
+    total_liq = sum(a["liquidation_value_usd"] for a in assets)
+    total_csv = sum(a["collateral_support_value_usd"] for a in assets)
+    total_prod = sum(a.get("productized_value_usd", 0) for a in assets)
+    total_market = sum(a.get("market_comparable_value_usd", 0) for a in assets)
+    avg_fs = sum(a["financeability_score"] for a in assets) / max(1, len(assets))
+    sale_cands = sum(1 for a in assets if a["financeability_score"] >= 40 and a["asset_type"] not in ("junk", "scaffold", "duplicate"))
+    needs_cleanup = sum(1 for a in assets if a["risk_flags"])
+    junk = sum(1 for a in assets if a["asset_type"] in ("junk", "scaffold", "duplicate"))
 
-<div class="card" style="margin-bottom:2rem">
-  <h2>Search Collateral</h2>
-  <input id="search" type="text" placeholder="Search by filename, workstream, SKU...">
-  <div id="results"></div>
-</div>
+    actionable = [a for a in assets if 20 < a["financeability_score"] < 70 and a["asset_type"] not in ("junk", "scaffold")]
+    top3 = sorted(actionable, key=lambda a: -a["replacement_cost_usd"])[:3]
+    unlock = f"Add tests, deployment proof, and license to: {', '.join(a['name'] for a in top3)}" if top3 else "Review and classify all projects"
 
-<div class="card" style="margin-bottom:2rem">
-  <h2>API Endpoints</h2>
-  <div class="endpoint"><div><span class="method">GET</span> <code>/health</code></div><span class="desc">Health check + record count</span></div>
-  <div class="endpoint"><div><span class="method">GET</span> <code>/api/systems</code></div><span class="desc">List all systems with workstreams</span></div>
-  <div class="endpoint"><div><span class="method">GET</span> <code>/api/collateral</code></div><span class="desc">List/filter all collateral (system, workstream, extension, stage)</span></div>
-  <div class="endpoint"><div><span class="method">GET</span> <code>/api/collateral/sku/{sku}</code></div><span class="desc">Lookup by SKU</span></div>
-  <div class="endpoint"><div><span class="method">GET</span> <code>/api/collateral/{system}</code></div><span class="desc">Collateral for a single system</span></div>
-  <div class="endpoint"><div><span class="method">GET</span> <code>/api/collateral/{system}/{filename}</code></div><span class="desc">Single file metadata</span></div>
-  <div class="endpoint"><div><span class="method">GET</span> <code>/api/search?q=...</code></div><span class="desc">Full-text search</span></div>
-  <div class="endpoint"><div><span class="method">GET</span> <code>/api/workstreams</code></div><span class="desc">All workstreams with counts</span></div>
-  <div class="endpoint"><div><span class="method">GET</span> <code>/api/stats</code></div><span class="desc">Aggregate statistics</span></div>
-  <div class="endpoint"><div><span class="method">GET</span> <code>/docs</code></div><span class="desc">Interactive OpenAPI docs (Swagger)</span></div>
-</div>
+    return {
+        "summary": {
+            "total_strategic_value_usd": round(total_rc, 2),
+            "buyer_today_value_usd": round(total_as_is, 2),
+            "liquidation_value_usd": round(total_liq, 2),
+            "collateral_support_value_usd": round(total_csv, 2),
+            "productized_value_usd": round(total_prod, 2),
+            "market_comparable_value_usd": round(total_market, 2),
+            "financeability_score_avg": round(avg_fs),
+            "total_projects": len(assets),
+            "sale_candidates": sale_cands,
+            "needs_cleanup": needs_cleanup,
+            "junk_scaffold": junk,
+            "next_value_unlock": unlock,
+        },
+        "assets": assets,
+    }
 
-<script>
-const BASE = '';
-function makeBar(label, val, max) {
-  const pct = max > 0 ? (val / max * 100) : 0;
-  return `<div class="bar-row"><span class="bar-label" title="${label}">${label}</span><div class="bar" style="width:${pct}%"></div><span class="bar-val">${val}</span></div>`;
-}
-async function init() {
-  const stats = await (await fetch(BASE + '/api/stats')).json();
-  document.getElementById('overview').innerHTML = `
-    <div class="stat">${stats.total_files}</div><div class="stat-label">Total Files</div>
-    <div style="margin-top:1rem"><span class="stat">${(stats.total_bytes/1024).toFixed(1)}</span> <span class="stat-label">KB total</span></div>
-    <div style="margin-top:1rem"><span class="stat">${Object.keys(stats.by_workstream).length}</span> <span class="stat-label">Workstreams</span></div>`;
-  const sysMax = Math.max(...Object.values(stats.by_system));
-  document.getElementById('by-system').innerHTML = Object.entries(stats.by_system).map(([k,v]) => makeBar(k.replace('language-',''),v,sysMax)).join('');
-  const extMax = Math.max(...Object.values(stats.by_extension));
-  document.getElementById('by-ext').innerHTML = Object.entries(stats.by_extension).sort((a,b)=>b[1]-a[1]).map(([k,v]) => makeBar(k,v,extMax)).join('');
-  const wsMax = Math.max(...Object.values(stats.by_workstream));
-  document.getElementById('by-ws').innerHTML = Object.entries(stats.by_workstream).sort((a,b)=>b[1]-a[1]).map(([k,v]) => makeBar(k,v,wsMax)).join('');
-}
-let debounce;
-document.getElementById('search').addEventListener('input', e => {
-  clearTimeout(debounce);
-  debounce = setTimeout(async () => {
-    const q = e.target.value.trim();
-    if (!q) { document.getElementById('results').innerHTML = ''; return; }
-    const data = await (await fetch(BASE + '/api/search?q=' + encodeURIComponent(q))).json();
-    if (!data.items.length) { document.getElementById('results').innerHTML = '<p style="color:#888">No results</p>'; return; }
-    document.getElementById('results').innerHTML = '<table><tr><th>File</th><th>System</th><th>Workstream</th><th>Ext</th></tr>' +
-      data.items.slice(0,30).map(r => `<tr><td>${r.filename_hint}</td><td><span class="pill">${r._system.replace('language-','')}</span></td><td>${r.workstream||''}</td><td>${r.extension}</td></tr>`).join('') + '</table>';
-  }, 300);
-});
-init();
-</script>
-</body>
-</html>"""
 
+# ── Individual Asset ───────────────────────────────────────────────
+
+@app.get("/api/asset/{name}")
+def asset_detail(name: str):
+    if name not in _classifications:
+        raise HTTPException(404, f"Asset not found: {name}")
+    return {"classification": _classifications[name], "appraisal": _appraisals[name]}
+
+
+@app.get("/api/asset/{name}/lender")
+def lender_view(name: str):
+    if name not in _lender_summaries:
+        raise HTTPException(404)
+    return _lender_summaries[name]
+
+
+@app.get("/api/asset/{name}/buyer")
+def buyer_view(name: str):
+    if name not in _buyer_summaries:
+        raise HTTPException(404)
+    return _buyer_summaries[name]
+
+
+# ── Collateral Records ─────────────────────────────────────────────
+
+@app.get("/api/collateral")
+def list_collateral(
+    repo: Optional[str] = Query(None),
+    workstream: Optional[str] = Query(None),
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
+):
+    records = []
+    for name, recs in _collateral.items():
+        for r in recs:
+            r["_repo"] = name
+            records.append(r)
+    if repo:
+        records = [r for r in records if r.get("_repo") == repo]
+    if workstream:
+        wl = workstream.lower()
+        records = [r for r in records if wl in r.get("workstream", "").lower()]
+    total = len(records)
+    return {"total": total, "offset": offset, "limit": limit, "items": records[offset:offset + limit]}
+
+
+@app.get("/api/collateral/stats")
+def collateral_stats():
+    from collections import Counter
+    all_recs = [r for recs in _collateral.values() for r in recs]
+    by_ws = Counter(r.get("workstream", "?") for r in all_recs)
+    by_ext = Counter(r.get("extension", "?") for r in all_recs)
+    by_repo = {name: len(recs) for name, recs in _collateral.items() if recs}
+    return {
+        "total_files": len(all_recs),
+        "total_repos_with_collateral": len(by_repo),
+        "by_workstream": dict(by_ws.most_common()),
+        "by_extension": dict(by_ext.most_common()),
+        "by_repo": dict(sorted(by_repo.items(), key=lambda x: -x[1])),
+    }
+
+
+@app.get("/api/collateral/{repo_name}")
+def repo_collateral(repo_name: str, limit: int = Query(200)):
+    records = _collateral.get(repo_name, [])
+    if not records:
+        raise HTTPException(404, f"No collateral for: {repo_name}")
+    return {"repo": repo_name, "total": len(records), "items": records[:limit]}
+
+
+@app.get("/api/collateral/{repo_name}/{sku}")
+def collateral_by_sku(repo_name: str, sku: str):
+    records = _collateral.get(repo_name, [])
+    for r in records:
+        if r.get("sku") == sku:
+            return r
+    raise HTTPException(404, "SKU not found")
+
+
+# ── Search ─────────────────────────────────────────────────────────
+
+@app.get("/api/search")
+def search(q: str = Query(..., min_length=1), limit: int = Query(50)):
+    ql = q.lower()
+    hits = []
+    for name, cls in _classifications.items():
+        apr = _appraisals.get(name, {})
+        sigs = cls.get("signals", cls.get("signals_summary", {}))
+        searchable = f"{name} {cls.get('asset_type', '')} {sigs.get('primary_language', '')}"
+        if ql in searchable.lower():
+            hits.append({
+                "name": name, "asset_type": cls.get("asset_type"),
+                "financeability": apr.get("financeability_score", 0),
+                "replacement_cost": apr.get("replacement_cost_usd", 0),
+            })
+    return {"query": q, "total": len(hits), "items": hits[:limit]}
+
+
+# ── Portfolio Views ────────────────────────────────────────────────
+
+@app.get("/api/portfolio/by-type")
+def by_type():
+    from collections import Counter
+    types = Counter(cls.get("asset_type", "?") for cls in _classifications.values())
+    return {"by_type": dict(types.most_common())}
+
+
+@app.get("/api/portfolio/risk-blocked")
+def risk_blocked():
+    blocked = []
+    for name, cls in _classifications.items():
+        risks = cls.get("risk_flags", [])
+        critical = [r for r in risks if r in ("env_file_detected", "no_license", "no_version_control")]
+        if critical:
+            blocked.append({"name": name, "critical_risks": critical, "financeability": _appraisals.get(name, {}).get("financeability_score", 0)})
+    return {"total": len(blocked), "items": blocked}
+
+
+@app.get("/api/portfolio/improvement-queue")
+def improvement_queue():
+    queue = []
+    for name, apr in _appraisals.items():
+        fs = apr.get("financeability_score", 0)
+        at = _classifications.get(name, {}).get("asset_type", "")
+        if fs < 80 and at not in ("junk", "scaffold", "duplicate"):
+            actions = apr.get("next_actions", [])
+            queue.append({"name": name, "current_financeability": fs, "replacement_cost": apr.get("replacement_cost_usd", 0), "top_action": actions[0] if actions else None})
+    queue.sort(key=lambda q: (-q["replacement_cost"], q["current_financeability"]))
+    return {"total": len(queue), "items": queue}
+
+
+# ── Rescan (local mode only) ──────────────────────────────────────
+
+@app.post("/api/rescan")
+def rescan():
+    if IS_VERCEL:
+        return {"status": "index_mode", "note": "Rescan not available in deployed mode. Rebuild index locally and redeploy."}
+    _scan_live()
+    return {"status": "rescanned", "total_projects": len(_projects)}
+
+
+# ── Pages ──────────────────────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse)
 def dashboard():
-    return DASHBOARD_HTML
+    return (PAGES / "dashboard.html").read_text()
 
+@app.get("/asset/{name}", response_class=HTMLResponse)
+def asset_page(name: str):
+    return (PAGES / "asset.html").read_text()
+
+@app.get("/lender", response_class=HTMLResponse)
+def lender_page():
+    return (PAGES / "lender.html").read_text()
 
 @app.get("/explorer", response_class=HTMLResponse)
 def explorer():
-    return (PAGES_DIR / "explorer.html").read_text()
+    return (PAGES / "explorer.html").read_text()
 
 
-@app.get("/passport", response_class=HTMLResponse)
-def passport():
-    return (PAGES_DIR / "passport.html").read_text()
+@app.get("/compare", response_class=HTMLResponse)
+def compare_page():
+    return (PAGES / "compare.html").read_text()
+
+
+@app.get("/api/compare")
+def compare_api(a: str, b: str):
+    """Side-by-side comparison of two assets."""
+    if a not in _classifications or b not in _classifications:
+        raise HTTPException(404, "Asset not found")
+    return {
+        "asset_a": {"name": a, "classification": _classifications[a], "appraisal": _appraisals[a]},
+        "asset_b": {"name": b, "classification": _classifications[b], "appraisal": _appraisals[b]},
+    }
 
 
 if __name__ == "__main__":

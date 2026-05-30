@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Asset Review — CollateralOps 2040</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg-deep:#020204;--bg-surface:#0a0a0f;--bg-elevated:#12121a;--glass:rgba(255,255,255,0.03);--glass-border:rgba(255,255,255,0.06);--text-primary:#f0f0f8;--text-secondary:#8a8a9e;--text-muted:#4a4a5e;--cyan:#00f0ff;--cyan-dim:rgba(0,240,255,0.12);--orange:#ff6b35;--orange-dim:rgba(255,107,53,0.12);--purple:#c084fc;--purple-dim:rgba(192,132,252,0.12);--green:#34d399;--green-dim:rgba(52,211,153,0.12);--gold:#fbbf24;--red:#f87171;--font-sans:'Space Grotesk',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-primary);line-height:1.5;min-height:100vh}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--bg-surface);border-bottom:1px solid var(--glass-border);height:48px;position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.topbar-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;letter-spacing:0.05em}
+.topbar-logo span{color:var(--cyan)}
+.topbar-logo-mark{width:24px;height:24px;border:1.5px solid var(--cyan);border-radius:6px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 12px var(--cyan-dim)}
+.topbar-logo-mark::before{content:'';position:absolute;width:8px;height:8px;background:var(--cyan);border-radius:2px;transform:rotate(45deg)}
+.topbar-btn{padding:6px 14px;border-radius:6px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-secondary);font-size:12px;font-family:var(--font-mono);cursor:pointer;transition:all 0.2s;text-decoration:none}
+.topbar-btn:hover{border-color:var(--cyan);color:var(--text-primary)}
+
+.wrap{max-width:1200px;margin:0 auto;padding:24px}
+
+/* Cards */
+.card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:24px;position:relative;overflow:hidden;margin-bottom:20px}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.3}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:13px;font-weight:600;color:var(--text-secondary);letter-spacing:0.05em;text-transform:uppercase}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px}
+.span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-8{grid-column:span 8}
+@media(max-width:900px){.span-3,.span-4{grid-column:span 6}.span-6,.span-8{grid-column:span 12}}
+@media(max-width:600px){.span-3,.span-4,.span-6,.span-8{grid-column:span 12}}
+
+/* Score ring */
+.score-ring{width:100px;height:100px;position:relative;margin:0 auto}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring .track{stroke:var(--glass-border);stroke-width:8;fill:none}
+.score-ring .progress{stroke:var(--cyan);stroke-width:8;fill:none;stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:314;transition:stroke-dashoffset 1.5s ease-out}
+.score-ring .score-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-ring .score-num{font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--cyan)}
+.score-ring .score-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em}
+
+/* Metric */
+.metric{text-align:center;padding:12px}
+.metric .mv{font-family:var(--font-mono);font-size:20px;font-weight:700}
+.metric .ml{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px}
+
+/* Val bars */
+.val-bar{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px}
+.val-bar-label{color:var(--text-muted);min-width:140px;text-transform:uppercase;letter-spacing:0.05em;font-size:10px}
+.val-bar-track{flex:1;height:6px;background:var(--glass);border-radius:3px;overflow:hidden}
+.val-bar-fill{height:100%;border-radius:3px;transition:width 1s ease-out}
+.val-bar-value{font-family:var(--font-mono);color:var(--text-secondary);min-width:80px;text-align:right}
+
+/* Subscore bars */
+.q-bar{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px}
+.q-bar-label{color:var(--text-muted);min-width:120px;text-align:right}
+.q-bar-track{flex:1;height:6px;background:var(--glass);border-radius:3px;overflow:hidden}
+.q-bar-fill{height:100%;border-radius:3px;transition:width 1s ease-out}
+.q-bar-value{font-family:var(--font-mono);color:var(--text-secondary);min-width:30px;text-align:right;font-size:11px}
+
+/* Deductions */
+.ded{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:8px;margin-bottom:6px;font-size:12px}
+.ded .impact{color:var(--red);font-weight:700;min-width:50px;font-family:var(--font-mono)}
+.ded .reason{flex:1}
+.ded .cat{color:var(--text-muted);font-size:10px;text-transform:uppercase}
+.ded .sev{font-size:9px;padding:2px 6px;border-radius:4px;text-transform:uppercase;font-weight:600}
+.sev-critical{background:rgba(248,113,113,0.15);color:var(--red)}
+.sev-high{background:rgba(255,107,53,0.15);color:var(--orange)}
+.sev-medium{background:rgba(251,191,36,0.15);color:var(--gold)}
+
+/* Actions */
+.action{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:8px;margin-bottom:6px;font-size:12px}
+.action .pri{font-size:9px;padding:2px 8px;border-radius:4px;text-transform:uppercase;font-weight:600}
+.pri-critical{background:rgba(248,113,113,0.15);color:var(--red)}
+.pri-high{background:rgba(255,107,53,0.15);color:var(--orange)}
+.pri-medium{background:rgba(251,191,36,0.15);color:var(--gold)}
+.action .desc{flex:1}.action .imp{color:var(--green);font-family:var(--font-mono);font-size:11px;white-space:nowrap}
+.action .effort{color:var(--text-muted);font-size:10px}
+
+/* Risk matrix */
+.risk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:600px){.risk-grid{grid-template-columns:1fr}}
+.risk-card{background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:10px;padding:14px}
+.risk-card .rc-title{font-size:11px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px}
+.risk-card .rc-score{font-family:var(--font-mono);font-size:20px;font-weight:700}
+.risk-card .rc-sev{font-size:10px;padding:2px 8px;border-radius:4px;display:inline-block;margin-top:6px;text-transform:uppercase}
+
+/* Badges */
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
+.badge-green{background:var(--green-dim);color:var(--green)}.badge-orange{background:var(--orange-dim);color:var(--orange)}.badge-purple{background:var(--purple-dim);color:var(--purple)}.badge-red{background:rgba(248,113,113,0.12);color:var(--red)}.badge-cyan{background:var(--cyan-dim);color:var(--cyan)}
+
+/* Loading */
+.loading{color:var(--text-muted);text-align:center;padding:3rem}
+.spinner{width:18px;height:18px;border:2px solid var(--glass-border);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Links */
+.links{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.links a{padding:6px 14px;border:1px solid var(--glass-border);border-radius:8px;color:var(--text-secondary);font-size:12px;text-decoration:none;transition:all 0.2s}
+.links a:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* Header */
+.asset-header{margin-bottom:24px}
+.asset-header h1{font-size:28px;font-weight:700;margin-bottom:4px}
+.asset-header .meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo"><div class="topbar-logo-mark"></div>Collateral<span>Ops</span></div>
+  </div>
+  <div style="display:flex;gap:12px">
+    <a href="/" class="topbar-btn">Dashboard</a>
+    <a href="/explorer" class="topbar-btn">Explorer</a>
+    <a href="/lender" class="topbar-btn">Lender</a>
+  </div>
+</div>
+<div class="wrap" id="content"><div class="loading"><div class="spinner"></div><div style="margin-top:12px">Loading asset review...</div></div></div>
+
+<script>
+const name=window.location.pathname.split('/').pop();
+function fmt$(v){return typeof v==='number'?'$'+v.toLocaleString(undefined,{maximumFractionDigits:0}):v}
+function scoreColor(v){return v>=70?'var(--green)':v>=50?'var(--gold)':v>=30?'var(--orange)':'var(--red)'}
+function qbar(label,val){const c=scoreColor(val);return`<div class="q-bar"><span class="q-bar-label">${label}</span><div class="q-bar-track"><div class="q-bar-fill" style="width:${val}%;background:${c}"></div></div><span class="q-bar-value">${val}</span></div>`}
+
+async function boot(){
+  try{
+    const r=await fetch('/api/asset/'+name).then(r=>r.json());
+    const c=r.classification;const a=r.appraisal;const s=c.signals||{};const q=c.quality||{};
+    const fs=a.financeability_score||0;const conf=a.confidence_score||0;
+    const fsC=scoreColor(fs);const confC=scoreColor(conf);
+
+    let h=`<div class="asset-header">
+      <h1>${c.repo_name}</h1>
+      <div class="meta">
+        <span class="badge badge-cyan">${c.asset_type.replace(/_/g,' ')}</span>
+        <span class="badge badge-purple">${s.primary_language||'unknown'}</span>
+        <span class="badge badge-green">Proof ${c.proof_level}/7</span>
+        <span class="badge ${fs>=50?'badge-green':'badge-orange'}">${a.capital_readiness}</span>
+        <span class="badge badge-cyan">v${a.appraisal_version||'1.0'}</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Financeability Ring -->
+      <div class="card span-3">
+        <div class="card-header"><div class="card-title">Financeability</div></div>
+        <div class="score-ring">
+          <svg width="100" height="100" viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="42"/><circle class="progress" id="fs-progress" cx="50" cy="50" r="42" style="stroke:${fsC};stroke-dashoffset:${314-(314*fs/100)}"/></svg>
+          <div class="score-text"><div class="score-num" style="color:${fsC}">${fs}</div><div class="score-label">Score</div></div>
+        </div>
+        <div style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:6px">${a.capital_readiness}</div>
+      </div>
+
+      <!-- Confidence Ring -->
+      <div class="card span-3">
+        <div class="card-header"><div class="card-title">Confidence</div></div>
+        <div class="score-ring">
+          <svg width="100" height="100" viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="42"/><circle class="progress" cx="50" cy="50" r="42" style="stroke:${confC};stroke-dashoffset:${314-(314*conf/100)}"/></svg>
+          <div class="score-text"><div class="score-num" style="color:${confC}">${conf}</div><div class="score-label">Score</div></div>
+        </div>
+        <div style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:6px">Appraisal Confidence</div>
+      </div>
+
+      <!-- Six Number Appraisal -->
+      <div class="card span-6">
+        <div class="card-header"><div class="card-title">Eight-Value Appraisal</div></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+          <div class="metric"><div class="mv" style="color:var(--cyan)">${fmt$(a.replacement_cost_usd)}</div><div class="ml">Replacement</div></div>
+          <div class="metric"><div class="mv" style="color:var(--green)">${fmt$(a.as_is_sale_value_usd)}</div><div class="ml">As-Is</div></div>
+          <div class="metric"><div class="mv" style="color:var(--purple)">${fmt$(a.productized_value_usd)}</div><div class="ml">Productized</div></div>
+          <div class="metric"><div class="mv" style="color:var(--orange)">${fmt$(a.liquidation_value_usd)}</div><div class="ml">Liquidation</div></div>
+          <div class="metric"><div class="mv" style="color:var(--gold)">${fmt$(a.collateral_support_value_usd)}</div><div class="ml">Collateral</div></div>
+          <div class="metric"><div class="mv" style="color:var(--cyan)">${fmt$(a.market_comparable_value_usd||0)}</div><div class="ml">Market Comp</div></div>
+          <div class="metric"><div class="mv" style="color:var(--purple)">${fmt$(a.network_effect_value_usd||0)}</div><div class="ml">Network</div></div>
+          <div class="metric"><div class="mv" style="color:var(--green)">${fmt$(a.complexity_adjusted_value_usd||0)}</div><div class="ml">Complexity Adj</div></div>
+        </div>
+        <div class="val-bar" style="margin-top:12px"><span class="val-bar-label">Recommended LTV</span><span style="flex:1;text-align:right;font-family:var(--font-mono);font-size:12px">${a.recommended_ltv?.min_pct||0}%–${a.recommended_ltv?.max_pct||0}% — ${a.recommended_ltv?.note||''}</span></div>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:20px">
+      <!-- Subscores -->
+      <div class="card span-6">
+        <div class="card-header"><div class="card-title">Quality Subscores</div></div>
+        ${qbar('Ownership',(a.subscores?.ownership_clarity)||0)}
+        ${qbar('Tech Quality',(a.subscores?.technical_quality)||0)}
+        ${qbar('Market Liquidity',(a.subscores?.market_liquidity)||0)}
+        ${qbar('Security Posture',(a.subscores?.security_posture)||0)}
+        ${qbar('Documentation',(a.subscores?.documentation_depth)||0)}
+        ${qbar('Activity',(a.subscores?.activity_recency)||0)}
+        ${qbar('Dependencies',(a.subscores?.dependency_health)||0)}
+        ${qbar('Complexity',(a.subscores?.complexity_index)||0)}
+      </div>
+
+      <!-- Risk Matrix -->
+      <div class="card span-6">
+        <div class="card-header"><div class="card-title">Risk Matrix</div></div>
+        <div class="risk-grid">`;
+    const rm=a.risk_matrix||{};
+    const rCats=[['legal','Legal'],['security','Security'],['engineering','Engineering'],['market','Market'],['liquidity','Liquidity']];
+    rCats.forEach(([key,label])=>{
+      const rc=rm[key]||{score:100,severity:'low'};
+      const rcColor=rc.severity==='high'?'var(--red)':rc.severity==='medium'?'var(--orange)':'var(--green)';
+      h+=`<div class="risk-card"><div class="rc-title">${label}</div><div class="rc-score" style="color:${rcColor}">${rc.score}</div><div class="rc-sev" style="background:${rcColor}22;color:${rcColor}">${rc.severity}</div></div>`;
+    });
+    const overall=rm.overall||{score:100,severity:'low'};
+    const ovColor=overall.severity==='high'?'var(--red)':overall.severity==='medium'?'var(--orange)':'var(--green)';
+    h+=`<div class="risk-card" style="border-color:var(--cyan)"><div class="rc-title">Overall</div><div class="rc-score" style="color:${ovColor}">${overall.score}</div><div class="rc-sev" style="background:${ovColor}22;color:${ovColor}">${overall.severity} — ${overall.total_flags||0} flags</div></div>`;
+    h+=`</div></div></div>
+
+    <div class="grid" style="margin-top:20px">
+      <!-- Deductions -->
+      <div class="card span-6">
+        <div class="card-header"><div class="card-title">Deductions</div></div>
+        ${(a.deductions||[]).map(d=>`<div class="ded"><span class="impact">${d.impact}</span><span class="reason">${d.reason}</span><span class="cat">${d.category}</span><span class="sev sev-${d.severity}">${d.severity}</span></div>`).join('')||'<div style="color:var(--green);font-size:12px;padding:8px">No deductions — asset is clean</div>'}
+      </div>
+
+      <!-- Improvement Queue -->
+      <div class="card span-6">
+        <div class="card-header"><div class="card-title">Improvement Roadmap</div></div>
+        ${(a.next_actions||[]).map(act=>`<div class="action"><span class="pri pri-${act.priority}">${act.priority}</span><span class="desc">${act.action}</span><span class="imp">${act.impact}</span><span class="effort">${act.effort||''}</span></div>`).join('')||'<div style="color:var(--green);font-size:12px;padding:8px">No actions needed</div>'}
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:20px">
+      <!-- Technical Signals -->
+      <div class="card span-4">
+        <div class="card-header"><div class="card-title">Technical Signals</div></div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+          <div class="metric"><div class="mv" style="color:var(--cyan)">${s.total_src||0}</div><div class="ml">Source Files</div></div>
+          <div class="metric"><div class="mv" style="color:var(--cyan)">${s.total_files||0}</div><div class="ml">Total Files</div></div>
+          <div class="metric"><div class="mv" style="color:var(--green)">${s.test_files||0}</div><div class="ml">Test Files</div></div>
+          <div class="metric"><div class="mv" style="color:var(--purple)">${c.collateral_files||0}</div><div class="ml">Collateral</div></div>
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:var(--text-secondary);display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div>Git: <span style="color:${s.has_git?'var(--green)':'var(--red)'}">${s.has_git?'Yes':'No'}</span></div>
+          <div>README: <span style="color:${s.has_readme?'var(--green)':'var(--red)'}">${s.has_readme?'Yes':'No'}</span></div>
+          <div>License: <span style="color:${s.has_license?'var(--green)':'var(--red)'}">${s.has_license?'Yes':'No'}</span></div>
+          <div>Tests: <span style="color:${s.has_tests?'var(--green)':'var(--red)'}">${s.has_tests?'Yes':'No'}</span></div>
+          <div>Docker: <span style="color:${s.has_dockerfile?'var(--green)':'var(--red)'}">${s.has_dockerfile?'Yes':'No'}</span></div>
+          <div>CI/CD: <span style="color:${s.has_ci?'var(--green)':'var(--red)'}">${s.has_ci?'Yes':'No'}</span></div>
+          <div>Deps: <span style="color:var(--cyan)">${s.dependency_count||0}</span></div>
+          <div>Commits: <span style="color:var(--cyan)">${s.commit_count||0}</span></div>
+        </div>
+      </div>
+
+      <!-- Quality Scores -->
+      <div class="card span-4">
+        <div class="card-header"><div class="card-title">Quality Scores</div></div>
+        ${qbar('Engineering',q.engineering||0)}
+        ${qbar('Documentation',q.documentation||0)}
+        ${qbar('Security',q.security||0)}
+        ${qbar('Deployment',q.deployment||0)}
+        ${qbar('Collateral',q.collateral||0)}
+      </div>
+
+      <!-- Risk Flags -->
+      <div class="card span-4">
+        <div class="card-header"><div class="card-title">Risk Flags</div></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">${(c.risk_flags||[]).map(r=>`<span class="badge badge-red">${r.replace(/_/g,' ')}</span>`).join(' ')||'<span style="color:var(--green);font-size:12px">No critical risks</span>'}</div>
+      </div>
+    </div>
+
+    <div class="links">
+      <a href="/api/asset/${name}/packet" target="_blank">Full Packet JSON</a>
+      <a href="/api/asset/${name}/lender" target="_blank">Lender Summary</a>
+      <a href="/api/asset/${name}/buyer" target="_blank">Buyer Summary</a>
+      <a href="/">Back to Dashboard</a>
+    </div>`;
+
+    document.getElementById('content').innerHTML=h;
+  }catch(e){document.getElementById('content').innerHTML=`<div class="loading" style="color:var(--red)">Error: ${e.message}</div>`}
+}
+boot();
+</script>
+</body>
+</html>

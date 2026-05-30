@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CollateralOps — Software Collateral Execution Desk</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg-deep:#020204;--bg-surface:#0a0a0f;--bg-elevated:#12121a;--glass:rgba(255,255,255,0.03);--glass-border:rgba(255,255,255,0.06);--text-primary:#f0f0f8;--text-secondary:#8a8a9e;--text-muted:#4a4a5e;--cyan:#00f0ff;--cyan-dim:rgba(0,240,255,0.12);--orange:#ff6b35;--orange-dim:rgba(255,107,53,0.12);--purple:#c084fc;--purple-dim:rgba(192,132,252,0.12);--green:#34d399;--green-dim:rgba(52,211,153,0.12);--gold:#fbbf24;--red:#f87171;--font-sans:'Space Grotesk',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-primary);line-height:1.5;min-height:100vh}
+#particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.35}
+
+/* App shell */
+.app-shell{display:grid;grid-template-rows:48px 1fr;grid-template-columns:64px 1fr;height:100vh}
+.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--bg-surface);border-bottom:1px solid var(--glass-border);z-index:100}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.topbar-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;letter-spacing:0.05em}
+.topbar-logo span{color:var(--cyan)}
+.topbar-logo-mark{width:24px;height:24px;border:1.5px solid var(--cyan);border-radius:6px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 12px var(--cyan-dim)}
+.topbar-logo-mark::before{content:'';position:absolute;width:8px;height:8px;background:var(--cyan);border-radius:2px;transform:rotate(45deg)}
+.topbar-status{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted);padding:4px 12px;border-radius:6px;background:var(--glass);border:1px solid var(--glass-border)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.4}}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.view-toggle{display:flex;gap:4px;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:8px;padding:2px}
+.view-btn{padding:4px 12px;border-radius:6px;font-size:10px;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all 0.2s;border:none;background:transparent;font-family:var(--font-mono)}
+.view-btn.active{background:var(--cyan-dim);color:var(--cyan)}
+.view-btn:hover:not(.active){color:var(--text-primary)}
+
+/* Sidebar */
+.sidebar{background:var(--bg-surface);border-right:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:8px;z-index:10}
+.sidebar-item{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;color:var(--text-muted);font-size:18px;cursor:pointer;transition:all 0.2s;position:relative;text-decoration:none}
+.sidebar-item:hover,.sidebar-item.active{background:var(--cyan-dim);color:var(--cyan)}
+.sidebar-item.active::after{content:'';position:absolute;left:-1px;top:50%;transform:translateY(-50%);width:2px;height:20px;background:var(--cyan);border-radius:1px}
+
+/* Main */
+.main{overflow-y:auto;padding:24px;z-index:1}
+.main::-webkit-scrollbar{width:4px}
+.main::-webkit-scrollbar-thumb{background:var(--glass-border);border-radius:2px}
+.dash-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px;max-width:1400px;margin:0 auto}
+.card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:24px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.3}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:13px;font-weight:600;color:var(--text-secondary);letter-spacing:0.05em;text-transform:uppercase}
+.card-subtitle{font-size:10px;color:var(--text-muted);font-family:var(--font-mono);margin-top:4px}
+.card-value{font-family:var(--font-mono);font-size:28px;font-weight:700}
+.card-value.cyan{color:var(--cyan)}.card-value.green{color:var(--green)}.card-value.orange{color:var(--orange)}.card-value.purple{color:var(--purple)}.card-value.gold{color:var(--gold)}.card-value.red{color:var(--red)}
+.span-2{grid-column:span 2}.span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-8{grid-column:span 8}.span-10{grid-column:span 10}.span-12{grid-column:span 12}
+@media(max-width:1100px){.span-2,.span-3,.span-4{grid-column:span 6}.span-6,.span-8,.span-10{grid-column:span 12}}
+@media(max-width:700px){.span-2,.span-3,.span-4,.span-6,.span-8,.span-10,.span-12{grid-column:span 12}}
+
+/* Score ring */
+.score-ring{width:120px;height:120px;position:relative;margin:0 auto 16px}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring .track{stroke:var(--glass-border);stroke-width:8;fill:none}
+.score-ring .progress{stroke:var(--cyan);stroke-width:8;fill:none;stroke-linecap:round;stroke-dasharray:377;stroke-dashoffset:377;transition:stroke-dashoffset 1.5s ease-out}
+.score-ring .score-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-ring .score-num{font-family:var(--font-mono);font-size:32px;font-weight:700;color:var(--cyan)}
+.score-ring .score-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em}
+
+/* Val bars */
+.val-bar{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.val-bar-label{font-family:var(--font-mono);font-size:11px;color:var(--text-muted);min-width:160px;text-transform:uppercase;letter-spacing:0.05em}
+.val-bar-track{flex:1;height:8px;background:var(--glass);border-radius:4px;overflow:hidden}
+.val-bar-fill{height:100%;border-radius:4px;transition:width 1s ease-out}
+.val-bar-value{font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);min-width:90px;text-align:right}
+
+/* Table */
+.data-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:12px}
+.data-table th{text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.05em;font-size:10px;border-bottom:1px solid var(--glass-border)}
+.data-table td{padding:12px;border-bottom:1px solid var(--glass-border);color:var(--text-secondary}
+.data-table tr:hover td{background:var(--glass);color:var(--text-primary)}
+.data-table tr.junk td{opacity:0.4}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
+.badge-green{background:var(--green-dim);color:var(--green)}.badge-orange{background:var(--orange-dim);color:var(--orange)}.badge-purple{background:var(--purple-dim);color:var(--purple)}.badge-red{background:rgba(248,113,113,0.12);color:var(--red)}.badge-cyan{background:var(--cyan-dim);color:var(--cyan)}.badge-gold{background:rgba(251,191,36,0.12);color:var(--gold)}
+.name-cell{font-weight:600;color:var(--cyan);cursor:pointer;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.name-cell:hover{text-decoration:underline}
+.fs-bar{display:inline-block;height:6px;border-radius:3px;min-width:2px;vertical-align:middle;margin-right:6px}
+
+/* Filters */
+.filter-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.input-field{flex:1;min-width:140px;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:10px;padding:10px 14px;color:var(--text-primary);font-family:var(--font-mono);font-size:12px;outline:none;transition:border-color 0.2s}
+.input-field:focus{border-color:var(--cyan)}
+.input-field::placeholder{color:var(--text-muted)}
+.btn-action{padding:10px 20px;border-radius:10px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:var(--font-sans)}
+.btn-cyan{background:linear-gradient(135deg,var(--cyan),var(--purple));color:var(--bg-deep)}
+.btn-cyan:hover{box-shadow:0 0 30px var(--cyan-dim);transform:translateY(-1px)}
+.btn-orange{background:linear-gradient(135deg,var(--orange),#ff8c5a);color:var(--bg-deep)}
+.btn-green{background:linear-gradient(135deg,var(--green),#6ee7b7);color:var(--bg-deep)}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:20px;flex-wrap:wrap}
+.tab{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all 0.2s;border:1px solid transparent}
+.tab:hover{color:var(--text-primary)}
+.tab.active{background:var(--cyan-dim);color:var(--cyan);border-color:rgba(0,240,255,0.15)}
+
+/* Subscore grid */
+.subscore-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:900px){.subscore-grid{grid-template-columns:repeat(2,1fr)}}
+.subscore-card{background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:10px;padding:16px;text-align:center}
+.subscore-card .ss-value{font-family:var(--font-mono);font-size:24px;font-weight:700}
+.subscore-card .ss-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:6px}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(2,2,4,0.85);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal-card{background:var(--bg-elevated);border:1px solid var(--glass-border);border-radius:16px;padding:32px;max-width:700px;width:90%;max-height:85vh;overflow-y:auto}
+.modal-card h3{margin-bottom:12px;font-size:16px}.modal-card p{color:var(--text-secondary);margin-bottom:20px;font-size:13px}
+.modal-section{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--glass-border)}
+.modal-section:last-child{border-bottom:none}
+.modal-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:block}
+.modal-value{font-size:14px;color:var(--text-primary)}
+
+/* Evidence chain */
+.evidence-chain{display:flex;align-items:center;gap:8px;overflow-x:auto;padding:8px 0}
+.evidence-step{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border-radius:10px;background:var(--bg-deep);border:1px solid var(--glass-border);min-width:100px;text-align:center}
+.evidence-step.done{border-color:var(--green)}
+.evidence-step.current{border-color:var(--cyan);box-shadow:0 0 20px var(--cyan-dim)}
+.evidence-step.pending{opacity:0.5}
+.evidence-icon{font-size:18px}
+.evidence-text{font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em}
+.evidence-arrow{color:var(--text-muted);font-size:12px}
+
+/* Packet sections */
+.packet-section{display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;background:var(--bg-deep);border:1px solid var(--glass-border);margin-bottom:8px}
+.packet-section.missing{border-color:var(--red);opacity:0.6}
+.packet-section.started{border-color:var(--orange)}
+.packet-section.complete{border-color:var(--green)}
+.packet-section.review{border-color:var(--cyan)}
+.packet-section.blocked{border-color:var(--red)}
+.packet-status{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.packet-section.missing .packet-status{background:var(--red)}
+.packet-section.started .packet-status{background:var(--orange)}
+.packet-section.complete .packet-status{background:var(--green)}
+.packet-section.review .packet-status{background:var(--cyan)}
+.packet-section.blocked .packet-status{background:var(--red)}
+.packet-name{flex:1;font-size:12px;color:var(--text-primary)}
+.packet-state{font-size:10px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase}
+
+/* Risk panel */
+.risk-item{display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:8px;background:rgba(248,113,113,0.05);border:1px solid rgba(248,113,113,0.15);margin-bottom:8px}
+.risk-icon{color:var(--red);font-size:16px;flex-shrink:0}
+.risk-content h4{font-size:12px;color:var(--red);margin-bottom:4px}
+.risk-content p{font-size:11px;color:var(--text-secondary)}
+
+/* Buyer list */
+.buyer-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;background:var(--bg-deep);border:1px solid var(--glass-border);margin-bottom:8px}
+.buyer-prob{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;font-weight:700}
+.buyer-prob.high{background:var(--green-dim);color:var(--green)}
+.buyer-prob.medium{background:var(--gold);color:var(--gold)}
+.buyer-prob.low{background:var(--orange-dim);color:var(--orange)}
+.buyer-info{flex:1}
+.buyer-name{font-size:12px;font-weight:600;color:var(--text-primary)}
+.buyer-reason{font-size:10px;color:var(--text-muted);margin-top:2px}
+.buyer-value{font-family:var(--font-mono);font-size:12px;color:var(--cyan)}
+
+/* Agent accounting */
+.agent-row{display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;background:var(--bg-deep);border:1px solid var(--glass-border);margin-bottom:8px}
+.agent-metric{font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);min-width:80px;text-align:right}
+.agent-metric.positive{color:var(--green)}
+.agent-metric.negative{color:var(--red)}
+
+/* Improvement queue */
+.queue-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;background:var(--bg-deep);border:1px solid var(--glass-border);margin-bottom:8px}
+.queue-priority{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.queue-priority.critical{background:var(--red)}
+.queue-priority.high{background:var(--orange)}
+.queue-priority.medium{background:var(--gold)}
+.queue-priority.low{background:var(--green)}
+.queue-content{flex:1}
+.queue-action{font-size:12px;color:var(--text-primary)}
+.queue-reason{font-size:10px;color:var(--text-muted);margin-top:2px}
+.queue-impact{font-family:var(--font-mono);font-size:11px;color:var(--green)}
+
+/* Doctrine banner */
+.doctrine-banner{background:linear-gradient(135deg,rgba(0,240,255,0.05),rgba(192,132,252,0.05));border:1px solid var(--cyan-dim);border-radius:10px;padding:16px;margin-bottom:20px}
+.doctrine-text{font-size:12px;color:var(--text-secondary);font-style:italic;text-align:center}
+.doctrine-text strong{color:var(--cyan)}
+
+/* Loading */
+.spinner{width:18px;height:18px;border:2px solid var(--glass-border);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Deduction list */
+.deduction-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--glass-border)}
+.deduction-item:last-child{border-bottom:none}
+.deduction-reason{flex:1;font-size:11px;color:var(--text-secondary)}
+.deduction-amount{font-family:var(--font-mono);font-size:11px;color:var(--red)}
+</style>
+</head>
+<body>
+<canvas id="particle-canvas"></canvas>
+<div class="app-shell">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo"><div class="topbar-logo-mark"></div>Collateral<span>Ops</span></div>
+      <div class="topbar-status"><span class="status-dot"></span>SOFTWARE COLLATERAL EXECUTION DESK</div>
+    </div>
+    <div class="topbar-right">
+      <div class="view-toggle">
+        <button class="view-btn active" onclick="setView('builder')">BUILDER</button>
+        <button class="view-btn" onclick="setView('lender')">LENDER</button>
+        <button class="view-btn" onclick="setView('buyer')">BUYER</button>
+        <button class="view-btn" onclick="setView('auditor')">AUDITOR</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar">
+    <a href="#" class="sidebar-item active" title="Balance Sheet">&#128200;</a>
+    <a href="#" class="sidebar-item" title="Asset Register">&#128194;</a>
+    <a href="#" class="sidebar-item" title="Collateral Packets">&#128176;</a>
+    <a href="#" class="sidebar-item" title="Liquidation Routes">&#128200;</a>
+    <a href="#" class="sidebar-item" title="Agent Accounting">&#128203;</a>
+    <a href="#" class="sidebar-item" title="Risk Review">&#9888;</a>
+  </nav>
+
+  <main class="main">
+    <!-- Doctrine Banner -->
+    <div class="doctrine-banner">
+      <p class="doctrine-text"><strong>Appraisal is not liquidity.</strong> Strategic value is not collateral value. Collateral support is the conservative lender number.</p>
+    </div>
+
+    <!-- Portfolio Balance Sheet -->
+    <div class="dash-grid">
+      <div class="card span-2"><div class="card-header"><div class="card-title">Strategic Value</div><div class="card-subtitle">Replacement cost</div></div><div class="card-value cyan" id="kpi-strategic">—</div></div>
+      <div class="card span-2"><div class="card-header"><div class="card-title">Buyer-Today</div><div class="card-subtitle">As-is sale value</div></div><div class="card-value green" id="kpi-buyer">—</div></div>
+      <div class="card span-2"><div class="card-header"><div class="card-title">Liquidation</div><div class="card-subtitle">Forced-sale value</div></div><div class="card-value orange" id="kpi-liquidation">—</div></div>
+      <div class="card span-2"><div class="card-header"><div class="card-title">Collateral Support</div><div class="card-subtitle">Lender conservative</div></div><div class="card-value gold" id="kpi-collateral">—</div></div>
+      <div class="card span-2"><div class="card-header"><div class="card-title">Financeability</div><div class="card-subtitle">Portfolio average</div></div><div class="card-value purple" id="kpi-financeability">—</div></div>
+      <div class="card span-2"><div class="card-header"><div class="card-title">Risk-Blocked</div><div class="card-subtitle">Not collateral-ready</div></div><div class="card-value red" id="kpi-blocked">—</div></div>
+    </div>
+
+    <!-- Capital Readiness States -->
+    <div class="dash-grid" style="margin-top:20px">
+      <div class="card span-12">
+        <div class="card-header"><div class="card-title">Capital Readiness Pipeline</div></div>
+        <div class="subscore-grid" id="readiness-states"></div>
+      </div>
+    </div>
+
+    <!-- Main Dashboard Tabs -->
+    <div class="dash-grid" style="margin-top:20px">
+      <div class="card span-12">
+        <div class="card-header"><div class="card-title">Software Collateral Execution Desk</div></div>
+        <div class="tabs">
+          <div class="tab active" onclick="setMainTab('assets')">Asset Register</div>
+          <div class="tab" onclick="setMainTab('financeability')">Financeability Decomposition</div>
+          <div class="tab" onclick="setMainTab('packet')">Collateral Packet</div>
+          <div class="tab" onclick="setMainTab('evidence')">Evidence Chain</div>
+          <div class="tab" onclick="setMainTab('liquidation')">Liquidation Route</div>
+          <div class="tab" onclick="setMainTab('agents')">Agent Accounting</div>
+          <div class="tab" onclick="setMainTab('improvement')">Improvement Queue</div>
+          <div class="tab" onclick="setMainTab('risks')">Risk-Blocked Assets</div>
+        </div>
+
+        <!-- Asset Register Tab -->
+        <div id="tab-assets">
+          <div class="filter-row">
+            <select class="input-field" id="sort" style="max-width:180px"><option value="replacement_cost_usd">Strategic Value</option><option value="collateral_support_value_usd">Collateral Support</option><option value="financeability_score">Financeability Score</option><option value="capital_readiness">Capital Readiness</option></select>
+            <select class="input-field" id="status-filter" style="max-width:160px"><option value="all">All Statuses</option><option value="financeable">Financeable</option><option value="packet_ready">Packet Ready</option><option value="risk_blocked">Risk Blocked</option><option value="build_verified">Build Verified</option></select>
+            <select class="input-field" id="type-filter" style="max-width:160px"><option value="all">All Types</option><option value="production">Production Systems</option><option value="prototype">Prototypes</option><option value="tool">Tools/Services</option></select>
+            <input class="input-field" id="search" type="text" placeholder="Search assets..." style="max-width:200px">
+            <button class="btn-action btn-cyan" onclick="refreshData()">Refresh</button>
+          </div>
+          <table class="data-table">
+            <thead><tr>
+              <th>Asset</th><th>Type</th><th>Proof Level</th><th>Prod Grade</th><th>Comm Grade</th><th>Fin Score</th>
+              <th>Strategic</th><th>Buyer-Today</th><th>Collateral</th><th>Status</th><th>Next Action</th>
+            </tr></thead>
+            <tbody id="asset-tbody"><tr><td colspan="11" style="text-align:center;padding:2rem"><div class="spinner" style="margin:0 auto"></div></td></tr></tbody>
+          </table>
+        </div>
+
+        <!-- Financeability Decomposition Tab -->
+        <div id="tab-financeability" style="display:none">
+          <div class="filter-row">
+            <select class="input-field" id="asset-select" style="max-width:300px"><option value="">Select Asset...</option></select>
+          </div>
+          <div id="financeability-detail" style="display:none">
+            <div class="dash-grid">
+              <div class="card span-4">
+                <div class="card-header"><div class="card-title">Financeability Score</div></div>
+                <div class="score-ring">
+                  <svg width="120" height="120" viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="50"/><circle class="progress" id="fin-progress" cx="60" cy="60" r="50"/></svg>
+                  <div class="score-text"><div class="score-num" id="fin-score">0</div><div class="score-label">Score</div></div>
+                </div>
+              </div>
+              <div class="card span-8">
+                <div class="card-header"><div class="card-title">Score Components</div></div>
+                <div id="fin-components"></div>
+              </div>
+            </div>
+            <div class="dash-grid" style="margin-top:20px">
+              <div class="card span-12">
+                <div class="card-header"><div class="card-title">Deductions & Blockers</div></div>
+                <div id="fin-deductions"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Collateral Packet Tab -->
+        <div id="tab-packet" style="display:none">
+          <div class="filter-row">
+            <select class="input-field" id="packet-asset-select" style="max-width:300px"><option value="">Select Asset...</option></select>
+          </div>
+          <div id="packet-detail" style="display:none">
+            <div class="card span-12">
+              <div class="card-header"><div class="card-title">Packet Readiness</div></div>
+              <div class="score-ring" style="width:80px;height:80px;margin:0 auto 16px">
+                <svg width="80" height="80" viewBox="0 0 80 80"><circle class="track" cx="40" cy="40" r="35"/><circle class="progress" id="packet-progress" cx="40" cy="40" r="35"/></svg>
+                <div class="score-text"><div class="score-num" id="packet-readiness" style="font-size:20px">0%</div></div>
+              </div>
+            </div>
+            <div class="card span-12" style="margin-top:20px">
+              <div class="card-header"><div class="card-title">Packet Sections</div></div>
+              <div id="packet-sections"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evidence Chain Tab -->
+        <div id="tab-evidence" style="display:none">
+          <div class="filter-row">
+            <select class="input-field" id="evidence-asset-select" style="max-width:300px"><option value="">Select Asset...</option></select>
+          </div>
+          <div id="evidence-detail" style="display:none">
+            <div class="card span-12">
+              <div class="card-header"><div class="card-title">Proof Kernel / Evidence Chain</div></div>
+              <div class="evidence-chain" id="evidence-chain"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Liquidation Route Tab -->
+        <div id="tab-liquidation" style="display:none">
+          <div class="filter-row">
+            <select class="input-field" id="liquidation-asset-select" style="max-width:300px"><option value="">Select Asset...</option></select>
+          </div>
+          <div id="liquidation-detail" style="display:none">
+            <div class="dash-grid">
+              <div class="card span-6">
+                <div class="card-header"><div class="card-title">Buyer Universe</div></div>
+                <div id="buyer-universe"></div>
+              </div>
+              <div class="card span-6">
+                <div class="card-header"><div class="card-title">Recovery Analysis</div></div>
+                <div id="recovery-analysis"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Agent Accounting Tab -->
+        <div id="tab-agents" style="display:none">
+          <div class="card span-12">
+            <div class="card-header"><div class="card-title">Agent Work Accounting</div><div class="card-subtitle">CFO-readable audit of AI agent output</div></div>
+            <div id="agent-accounting"></div>
+          </div>
+        </div>
+
+        <!-- Improvement Queue Tab -->
+        <div id="tab-improvement" style="display:none">
+          <div class="card span-12">
+            <div class="card-header"><div class="card-title">Asset Improvement Queue</div><div class="card-subtitle">Highest-value next actions to increase financeability</div></div>
+            <div id="improvement-queue"></div>
+          </div>
+        </div>
+
+        <!-- Risk-Blocked Assets Tab -->
+        <div id="tab-risks" style="display:none">
+          <div class="card span-12">
+            <div class="card-header"><div class="card-title">Risk-Blocked Assets</div><div class="card-subtitle">Assets that should not be collateralized yet</div></div>
+            <div id="risk-blocked"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="modal"><div class="modal-card" id="modal-content"></div></div>
+
+<script>
+// Data Schema
+let currentView='builder';
+let currentMainTab='assets';
+let data={summary:{},assets:[],agents:[],improvements:[],risks:[]};
+
+// Sample Data (Demo Mode)
+const sampleData={
+  summary:{
+    total_strategic_value_usd:2850000,
+    buyer_today_value_usd:1425000,
+    liquidation_value_usd:570000,
+    collateral_support_value_usd:399000,
+    financeability_score_avg:52,
+    risk_blocked_count:4,
+    packet_ready_count:3,
+    buyer_ready_count:2,
+    lender_ready_count:1,
+    agent_work_audited:156
+  },
+  assets:[
+    {
+      name:"trading-engine-v2",
+      asset_type:"production_system",
+      proof_level:6,
+      proof_level_name:"Build-Verified",
+      production_grade:85,
+      commercial_grade:72,
+      financeability_score:78,
+      replacement_cost_usd:850000,
+      buyer_today_value_usd:595000,
+      collateral_support_value_usd:416500,
+      capital_readiness:"Lender Ready",
+      status:"financeable",
+      language:"Python",
+      next_action:"Prepare lender packet"
+    },
+    {
+      name:"ml-pipeline-core",
+      asset_type:"production_system",
+      proof_level:5,
+      proof_level_name:"Test-Verified",
+      production_grade:78,
+      commercial_grade:65,
+      financeability_score:62,
+      replacement_cost_usd:620000,
+      buyer_today_value_usd:372000,
+      collateral_support_value_usd:260400,
+      capital_readiness:"Packet Ready",
+      status:"packet_ready",
+      language:"Python",
+      next_action:"Add deployment proof"
+    },
+    {
+      name:"api-gateway-service",
+      asset_type:"backend_service",
+      proof_level:4,
+      proof_level_name:"Documented",
+      production_grade:70,
+      commercial_grade:58,
+      financeability_score:45,
+      replacement_cost_usd:380000,
+      buyer_today_value_usd:152000,
+      collateral_support_value_usd:106400,
+      capital_readiness:"Build Verified",
+      status:"build_verified",
+      language:"TypeScript",
+      next_action:"Generate buyer memo"
+    },
+    {
+      name:"data-ingestion-tool",
+      asset_type:"internal_tool",
+      proof_level:3,
+      proof_level_name:"Hashed",
+      production_grade:55,
+      commercial_grade:40,
+      financeability_score:28,
+      replacement_cost_usd:240000,
+      buyer_today_value_usd:72000,
+      collateral_support_value_usd:50400,
+      capital_readiness:"Proof Started",
+      status:"needs_work",
+      language:"Go",
+      next_action:"Add license documentation"
+    },
+    {
+      name:"experimental-agent",
+      asset_type:"research_prototype",
+      proof_level:2,
+      proof_level_name:"Discovered",
+      production_grade:35,
+      commercial_grade:25,
+      financeability_score:15,
+      replacement_cost_usd:180000,
+      buyer_today_value_usd:18000,
+      collateral_support_value_usd:12600,
+      capital_readiness:"Discovered",
+      status:"risk_blocked",
+      language:"Python",
+      next_action:"Resolve ownership uncertainty"
+    },
+    {
+      name:"frontend-dashboard",
+      asset_type:"frontend_product",
+      proof_level:5,
+      proof_level_name:"Test-Verified",
+      production_grade:72,
+      commercial_grade:68,
+      financeability_score:55,
+      replacement_cost_usd:320000,
+      buyer_today_value_usd:160000,
+      collateral_support_value_usd:112000,
+      capital_readiness:"Packet Ready",
+      status:"packet_ready",
+      language:"TypeScript",
+      next_action:"Remove hardcoded secrets"
+    },
+    {
+      name:"auth-microservice",
+      asset_type:"backend_service",
+      proof_level:6,
+      proof_level_name:"Build-Verified",
+      production_grade:82,
+      commercial_grade:75,
+      financeability_score:68,
+      replacement_cost_usd:260000,
+      buyer_today_value_usd:156000,
+      collateral_support_value_usd:109200,
+      capital_readiness:"Buyer Ready",
+      status:"buyer_ready",
+      language:"Rust",
+      next_action:"Send buyer outreach"
+    }
+  ],
+  readiness_states:[
+    {label:"Discovered",count:1,color:"red"},
+    {label:"Proof Started",count:2,color:"orange"},
+    {label:"Risk Blocked",count:4,color:"red"},
+    {label:"Build Verified",count:5,color:"gold"},
+    {label:"Packet Ready",count:3,color:"cyan"},
+    {label:"Buyer Ready",count:2,color:"green"},
+    {label:"Lender Ready",count:1,color:"purple"}
+  ],
+  agents:[
+    {name:"Claude-3.5-Sonnet",period:"30d",files_created:47,files_modified:128,builds_passed:42,builds_failed:3,production_ready:18,gross_value:28500,cleanup_cost:3200,net_value:25300,capitalizable:19500},
+    {name:"GPT-4-Turbo",period:"30d",files_created:32,files_modified:89,builds_passed:28,builds_failed:5,production_ready:12,gross_value:19200,cleanup_cost:4500,net_value:14700,capitalizable:9800}
+  ],
+  improvements:[
+    {asset:"ml-pipeline-core",action:"Add deployment proof",reason:"Missing Dockerfile and deployment docs",impact:"+15% financeability",priority:"high"},
+    {asset:"api-gateway-service",action:"Generate buyer memo",reason:"No market positioning document",impact:"+12% financeability",priority:"high"},
+    {asset:"data-ingestion-tool",action:"Add license documentation",reason:"License unclear in repo root",impact:"+20% financeability",priority:"critical"},
+    {asset:"frontend-dashboard",action:"Remove hardcoded secrets",reason:"API keys in source code",impact:"Unblock collateralization",priority:"critical"},
+    {asset:"experimental-agent",action:"Resolve ownership uncertainty",reason:"Employer IP assignment unclear",impact:"Unblock packaging",priority:"critical"}
+  ],
+  risks:[
+    {asset:"experimental-agent",reason:"Unclear ownership - may belong to employer",type:"ownership"},
+    {asset:"frontend-dashboard",reason:"Hardcoded API keys detected in 3 files",type:"security"},
+    {asset:"data-ingestion-tool",reason:"Missing license file - rights unclear",type:"license"},
+    {asset:"legacy-auth-module",reason:"Fork contamination - contains GPL code",type:"originality"}
+  ]
+};
+
+// Utility Functions
+function fmt$(v){return typeof v==='number'?'$'+v.toLocaleString(undefined,{maximumFractionDigits:0}):v}
+function fmtN(v){return typeof v==='number'?v.toLocaleString():v}
+function fmtPct(v){return typeof v==='number'?v.toFixed(0)+'%':v}
+
+// View Management
+function setView(view){
+  currentView=view;
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.view-btn[onclick="setView('${view}')"]`).classList.add('active');
+  renderAll();
+}
+
+function setMainTab(tab){
+  currentMainTab=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`.tab[onclick="setMainTab('${tab}')"]`).classList.add('active');
+  document.querySelectorAll('[id^="tab-"]').forEach(el=>el.style.display='none');
+  document.getElementById('tab-'+tab).style.display='block';
+}
+
+// Data Loading
+async function refreshData(){
+  try{
+    const r=await fetch('/api/balance-sheet').then(r=>r.json());
+    data=r;
+    // Merge with sample data for demo
+    if(!data.agents||data.agents.length===0)data.agents=sampleData.agents;
+    if(!data.improvements||data.improvements.length===0)data.improvements=sampleData.improvements;
+    if(!data.risks||data.risks.length===0)data.risks=sampleData.risks;
+    renderAll();
+  }catch(e){
+    // Use sample data if API fails
+    data=sampleData;
+    renderAll();
+  }
+}
+
+// Rendering Functions
+function renderAll(){
+  renderBalanceSheet();
+  renderReadinessStates();
+  renderAssetRegister();
+  populateAssetSelects();
+  renderAgentAccounting();
+  renderImprovementQueue();
+  renderRiskBlocked();
+}
+
+function renderBalanceSheet(){
+  const s=data.summary||{};
+  document.getElementById('kpi-strategic').textContent=fmt$(s.total_strategic_value_usd);
+  document.getElementById('kpi-buyer').textContent=fmt$(s.buyer_today_value_usd);
+  document.getElementById('kpi-liquidation').textContent=fmt$(s.liquidation_value_usd);
+  document.getElementById('kpi-collateral').textContent=fmt$(s.collateral_support_value_usd);
+  document.getElementById('kpi-financeability').textContent=(s.financeability_score_avg||0)+'/100';
+  document.getElementById('kpi-blocked').textContent=s.risk_blocked_count||0;
+}
+
+function renderReadinessStates(){
+  const states=data.readiness_states||sampleData.readiness_states;
+  document.getElementById('readiness-states').innerHTML=states.map(s=>`
+    <div class="subscore-card">
+      <div class="ss-value" style="color:var(--${s.color})">${s.count}</div>
+      <div class="ss-label">${s.label}</div>
+    </div>
+  `).join('');
+}
+
+function renderAssetRegister(){
+  const assets=data.assets||[];
+  const col=document.getElementById('sort').value;
+  const sf=document.getElementById('status-filter').value;
+  const tf=document.getElementById('type-filter').value;
+  const q=document.getElementById('search').value.toLowerCase().trim();
+  
+  let rows=[...assets];
+  if(sf==='financeable')rows=rows.filter(r=>r.status==='financeable');
+  if(sf==='packet_ready')rows=rows.filter(r=>r.status==='packet_ready');
+  if(sf==='risk_blocked')rows=rows.filter(r=>r.status==='risk_blocked');
+  if(sf==='build_verified')rows=rows.filter(r=>r.status==='build_verified');
+  if(tf==='production')rows=rows.filter(r=>r.asset_type==='production_system');
+  if(tf==='prototype')rows=rows.filter(r=>r.asset_type.includes('prototype'));
+  if(tf==='tool')rows=rows.filter(r=>r.asset_type.includes('tool')||r.asset_type.includes('service'));
+  if(q)rows=rows.filter(r=>r.name.toLowerCase().includes(q)||r.asset_type.includes(q));
+  rows.sort((a,b)=>(b[col]||0)-(a[col]||0));
+
+  const statusColor=s=>({
+    'financeable':'badge-green','packet_ready':'badge-cyan','buyer_ready':'badge-purple','lender_ready':'badge-green','risk_blocked':'badge-red','build_verified':'badge-gold','needs_work':'badge-orange'
+  }[s]||'badge-orange');
+
+  document.getElementById('asset-tbody').innerHTML=rows.map(r=>`
+    <tr>
+      <td class="name-cell" onclick="showAssetDetail('${r.name}')">${r.name}</td>
+      <td><span class="badge badge-purple">${r.asset_type.replace(/_/g,' ')}</span></td>
+      <td><span class="badge badge-cyan">${r.proof_level}/7</span></td>
+      <td>${r.production_grade||'—'}</td>
+      <td>${r.commercial_grade||'—'}</td>
+      <td><span class="fs-bar" style="width:${Math.min(50,r.financeability_score*0.5)}px;background:${r.financeability_score>=60?'var(--green)':r.financeability_score>=40?'var(--gold)':'var(--red)'}"></span>${r.financeability_score}</td>
+      <td>${fmt$(r.replacement_cost_usd)}</td>
+      <td>${fmt$(r.buyer_today_value_usd)}</td>
+      <td>${fmt$(r.collateral_support_value_usd)}</td>
+      <td><span class="badge ${statusColor(r.status)}">${r.capital_readiness}</span></td>
+      <td><button class="btn-action btn-cyan" style="padding:4px 10px;font-size:10px" onclick="showAssetDetail('${r.name}')">${r.next_action}</button></td>
+    </tr>
+  `).join('');
+}
+
+function populateAssetSelects(){
+  const assets=data.assets||[];
+  const options='<option value="">Select Asset...</option>'+assets.map(a=>`<option value="${a.name}">${a.name}</option>`).join('');
+  document.getElementById('asset-select').innerHTML=options;
+  document.getElementById('packet-asset-select').innerHTML=options;
+  document.getElementById('evidence-asset-select').innerHTML=options;
+  document.getElementById('liquidation-asset-select').innerHTML=options;
+}
+
+function renderAgentAccounting(){
+  const agents=data.agents||[];
+  document.getElementById('agent-accounting').innerHTML=agents.map(a=>`
+    <div class="agent-row">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:var(--text-primary)">${a.name}</div>
+        <div style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono)">Period: ${a.period}</div>
+      </div>
+      <div class="agent-metric">${a.files_created} created</div>
+      <div class="agent-metric">${a.files_modified} modified</div>
+      <div class="agent-metric">${a.builds_passed}/${a.builds_failed} builds</div>
+      <div class="agent-metric positive">${fmt$(a.gross_value)} gross</div>
+      <div class="agent-metric negative">${fmt$(a.cleanup_cost)} cleanup</div>
+      <div class="agent-metric positive">${fmt$(a.net_value)} net</div>
+      <div class="agent-metric" style="color:var(--cyan)">${fmt$(a.capitalizable)} capitalizable</div>
+    </div>
+  `).join('');
+}
+
+function renderImprovementQueue(){
+  const improvements=data.improvements||[];
+  document.getElementById('improvement-queue').innerHTML=improvements.map(i=>`
+    <div class="queue-item">
+      <div class="queue-priority ${i.priority}"></div>
+      <div class="queue-content">
+        <div class="queue-action">${i.asset}: ${i.action}</div>
+        <div class="queue-reason">${i.reason}</div>
+      </div>
+      <div class="queue-impact">${i.impact}</div>
+    </div>
+  `).join('');
+}
+
+function renderRiskBlocked(){
+  const risks=data.risks||[];
+  document.getElementById('risk-blocked').innerHTML=risks.map(r=>`
+    <div class="risk-item">
+      <div class="risk-icon">&#9888;</div>
+      <div class="risk-content">
+        <h4>${r.asset}</h4>
+        <p>${r.reason}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Asset Detail Functions
+function showAssetDetail(name){
+  const asset=(data.assets||[]).find(a=>a.name===name);
+  if(!asset)return;
+  
+  const html=`
+    <h3>${asset.name}</h3>
+    <div class="modal-section">
+      <span class="modal-label">Asset Type</span>
+      <span class="modal-value">${asset.asset_type.replace(/_/g,' ')}</span>
+    </div>
+    <div class="modal-section">
+      <span class="modal-label">Capital Readiness</span>
+      <span class="modal-value">${asset.capital_readiness}</span>
+    </div>
+    <div class="modal-section">
+      <span class="modal-label">Valuation Summary</span>
+      <span class="modal-value">Strategic: ${fmt$(asset.replacement_cost_usd)} | Buyer-Today: ${fmt$(asset.buyer_today_value_usd)} | Collateral Support: ${fmt$(asset.collateral_support_value_usd)}</span>
+    </div>
+    <div class="modal-section">
+      <span class="modal-label">Financeability Score</span>
+      <span class="modal-value">${asset.financeability_score}/100</span>
+    </div>
+    <div class="modal-section">
+      <span class="modal-label">Next Action</span>
+      <span class="modal-value">${asset.next_action}</span>
+    </div>
+    <div style="text-align:right;margin-top:20px">
+      <button class="btn-action btn-cyan" onclick="closeModal()">Close</button>
+    </div>
+  `;
+  document.getElementById('modal-content').innerHTML=html;
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+}
+
+// Event Listeners
+document.getElementById('sort').onchange=()=>renderAssetRegister();
+document.getElementById('status-filter').onchange=()=>renderAssetRegister();
+document.getElementById('type-filter').onchange=()=>renderAssetRegister();
+document.getElementById('search').oninput=()=>renderAssetRegister();
+
+document.getElementById('modal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('modal'))closeModal();
+});
+
+// Asset Select Change Handlers
+document.getElementById('asset-select').onchange=function(){
+  const name=this.value;
+  if(name){
+    document.getElementById('financeability-detail').style.display='block';
+    renderFinanceabilityDetail(name);
+  }else{
+    document.getElementById('financeability-detail').style.display='none';
+  }
+};
+
+document.getElementById('packet-asset-select').onchange=function(){
+  const name=this.value;
+  if(name){
+    document.getElementById('packet-detail').style.display='block';
+    renderPacketDetail(name);
+  }else{
+    document.getElementById('packet-detail').style.display='none';
+  }
+};
+
+document.getElementById('evidence-asset-select').onchange=function(){
+  const name=this.value;
+  if(name){
+    document.getElementById('evidence-detail').style.display='block';
+    renderEvidenceDetail(name);
+  }else{
+    document.getElementById('evidence-detail').style.display='none';
+  }
+};
+
+document.getElementById('liquidation-asset-select').onchange=function(){
+  const name=this.value;
+  if(name){
+    document.getElementById('liquidation-detail').style.display='block';
+    renderLiquidationDetail(name);
+  }else{
+    document.getElementById('liquidation-detail').style.display='none';
+  }
+};
+
+function renderFinanceabilityDetail(name){
+  const asset=(data.assets||[]).find(a=>a.name===name);
+  if(!asset)return;
+  
+  const score=asset.financeability_score;
+  document.getElementById('fin-score').textContent=score;
+  const offset=377-(377*score/100);
+  document.getElementById('fin-progress').style.strokeDashoffset=offset;
+  const color=score>=70?'var(--green)':score>=50?'var(--gold)':score>=30?'var(--orange)':'var(--red)';
+  document.getElementById('fin-progress').style.stroke=color;
+  
+  const components=[
+    {label:"Ownership Clarity",value:85},
+    {label:"Originality Confidence",value:72},
+    {label:"Build Proof",value:asset.proof_level>=5?90:asset.proof_level>=3?60:30},
+    {label:"Test Proof",value:asset.proof_level>=4?85:50},
+    {label:"Documentation Quality",value:asset.proof_level>=4?75:40},
+    {label:"Security Cleanliness",value:70},
+    {label:"License Cleanliness",value:65},
+    {label:"Marketability",value:asset.commercial_grade},
+    {label:"Liquidation Path",value:55},
+    {label:"Revenue Evidence",value:30}
+  ];
+  
+  document.getElementById('fin-components').innerHTML=components.map(c=>`
+    <div class="val-bar">
+      <span class="val-bar-label">${c.label}</span>
+      <div class="val-bar-track"><div class="val-bar-fill" style="width:${c.value}%;background:${c.value>=70?'var(--green)':c.value>=50?'var(--gold)':'var(--orange)'}"></div></div>
+      <span class="val-bar-value">${c.value}</span>
+    </div>
+  `).join('');
+  
+  const deductions=[
+    {reason:"No verified build",amount:asset.proof_level<5?"-20%":"0%"},
+    {reason:"No revenue evidence",amount:"-35%"},
+    {reason:"No buyer interest",amount:"-25%"},
+    {reason:"Thin liquidation market",amount:"-30%"},
+    {reason:"License unclear",amount:asset.name.includes('data-ingestion')?"-15%":"0%"}
+  ].filter(d=>d.amount!=="0%");
+  
+  document.getElementById('fin-deductions').innerHTML=deductions.map(d=>`
+    <div class="deduction-item">
+      <span class="deduction-reason">${d.reason}</span>
+      <span class="deduction-amount">${d.amount}</span>
+    </div>
+  `).join('')||'<p style="color:var(--text-muted);font-size:12px">No major deductions</p>';
+}
+
+function renderPacketDetail(name){
+  const asset=(data.assets||[]).find(a=>a.name===name);
+  if(!asset)return;
+  
+  const readiness=Math.round(asset.proof_level/7*100);
+  document.getElementById('packet-readiness').textContent=readiness+'%';
+  const offset=220-(220*readiness/100);
+  document.getElementById('packet-progress').style.strokeDashoffset=offset;
+  
+  const sections=[
+    {name:"Executive Summary",state:asset.proof_level>=2?"complete":"missing"},
+    {name:"Asset Identity",state:asset.proof_level>=2?"complete":"missing"},
+    {name:"Ownership Statement",state:asset.proof_level>=3?"complete":"started"},
+    {name:"Technical Inventory",state:asset.proof_level>=3?"complete":"started"},
+    {name:"File Hash Manifest",state:asset.proof_level>=3?"complete":"missing"},
+    {name:"Git/Commit Evidence",state:asset.proof_level>=4?"complete":"started"},
+    {name:"Build and Test Evidence",state:asset.proof_level>=5?"complete":"started"},
+    {name:"Security and Secret Scan",state:asset.status!=='risk_blocked'?"complete":"blocked"},
+    {name:"License and Fork Risk",state:asset.status!=='risk_blocked'?"complete":"blocked"},
+    {name:"Documentation Review",state:asset.proof_level>=4?"complete":"started"},
+    {name:"Market Use Case",state:asset.commercial_grade>=60?"complete":"started"},
+    {name:"Buyer Universe",state:asset.status==='buyer_ready'?"complete":"started"},
+    {name:"Valuation Methodology",state:asset.proof_level>=5?"complete":"missing"},
+    {name:"Collateral Support Estimate",state:asset.proof_level>=5?"complete":"missing"},
+    {name:"Liquidation Route",state:asset.status==='buyer_ready'?"complete":"started"},
+    {name:"Monitoring Plan",state:asset.status==='lender_ready'?"complete":"missing"},
+    {name:"Risk Disclosures",state:asset.proof_level>=4?"complete":"started"}
+  ];
+  
+  document.getElementById('packet-sections').innerHTML=sections.map(s=>`
+    <div class="packet-section ${s.state}">
+      <div class="packet-status"></div>
+      <span class="packet-name">${s.name}</span>
+      <span class="packet-state">${s.state}</span>
+    </div>
+  `).join('');
+}
+
+function renderEvidenceDetail(name){
+  const asset=(data.assets||[]).find(a=>a.name===name);
+  if(!asset)return;
+  
+  const steps=[
+    {icon:"&#128193;",text:"Folder Selected",state:asset.proof_level>=0?"done":"pending"},
+    {icon:"&#128196;",text:"Files Enumerated",state:asset.proof_level>=1?"done":"pending"},
+    {icon:"#128274;",text:"Hashes Computed",state:asset.proof_level>=2?"done":"pending"},
+    {icon:"&#128065;",text:"Git Metadata",state:asset.proof_level>=3?"done":"pending"},
+    {icon:"&#128737;",text:"Secrets Scanned",state:asset.status!=='risk_blocked'?"done":"blocked"},
+    {icon:"&#128269;",text:"License Detected",state:asset.status!=='risk_blocked'?"done":"blocked"},
+    {icon:"&#9881;",text:"Build Attempted",state:asset.proof_level>=5?"done":"pending"},
+    {icon:"&#10004;",text:"Tests Attempted",state:asset.proof_level>=4?"done":"pending"},
+    {icon:"&#128279;",text:"Endpoint Checked",state:asset.proof_level>=5?"done":"pending"},
+    {icon:"&#128200;",text:"Appraisal Generated",state:asset.proof_level>=5?"done":"pending"},
+    {icon:"&#128190;",text:"Packet Exported",state:asset.status==='packet_ready'?"done":"pending"},
+    {icon:"#128274;",text:"Packet Hash Created",state:asset.status==='packet_ready'?"done":"pending"}
+  ];
+  
+  document.getElementById('evidence-chain').innerHTML=steps.map((s,i)=>`
+    <div class="evidence-step ${s.state}">
+      <div class="evidence-icon">${s.icon}</div>
+      <div class="evidence-text">${s.text}</div>
+    </div>
+    ${i<steps.length-1?'<div class="evidence-arrow">&#8594;</div>':''}
+  `).join('');
+}
+
+function renderLiquidationDetail(name){
+  const asset=(data.assets||[]).find(a=>a.name===name);
+  if(!asset)return;
+  
+  const buyers=[
+    {name:"Enterprise Tech Corp",prob:"high",reason:"Similar tech stack, recent acquisitions",value:fmt$(asset.buyer_today_value_usd*0.8)},
+    {name:"Fintech Solutions Inc",prob:"medium",reason:"Complementary product fit",value:fmt$(asset.buyer_today_value_usd*0.6)},
+    {name:"Open Source Foundation",prob:"low",reason:"Non-commercial interest only",value:fmt$(asset.buyer_today_value_usd*0.3)}
+  ];
+  
+  document.getElementById('buyer-universe').innerHTML=buyers.map(b=>`
+    <div class="buyer-item">
+      <div class="buyer-prob ${b.prob}">${b.prob.toUpperCase()[0]}</div>
+      <div class="buyer-info">
+        <div class="buyer-name">${b.name}</div>
+        <div class="buyer-reason">${b.reason}</div>
+      </div>
+      <div class="buyer-value">${b.value}</div>
+    </div>
+  `).join('');
+  
+  document.getElementById('recovery-analysis').innerHTML=`
+    <div class="modal-section">
+      <span class="modal-label">Forced-Sale Value</span>
+      <span class="modal-value">${fmt$(asset.liquidation_value_usd)}</span>
+    </div>
+    <div class="modal-section">
+      <span class="modal-label">Expected Recovery Timeline</span>
+      <span class="modal-value">${asset.status==='lender_ready'?'30-60 days':'90-180 days'}</span>
+    </div>
+    <div class="modal-section">
+      <span class="modal-label">Default Recovery Path</span>
+      <span class="modal-value">${asset.status==='buyer_ready'?'Direct buyer outreach':'Broker-mediated sale'}</span>
+    </div>
+    <div class="modal-section">
+      <span class="modal-label">Recovery Confidence</span>
+      <span class="modal-value">${asset.financeability_score>=60?'High':asset.financeability_score>=40?'Medium':'Low'}</span>
+    </div>
+  `;
+}
+
+// Particle Canvas
+const canvas=document.getElementById('particle-canvas');
+const ctx=canvas.getContext('2d');
+let W,H,particles=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+window.addEventListener('resize',resize);resize();
+class P{constructor(){this.reset()}reset(){this.x=Math.random()*W;this.y=Math.random()*H;this.vx=(Math.random()-0.5)*0.3;this.vy=(Math.random()-0.5)*0.3;this.s=Math.random()*1.5+0.5;this.a=Math.random()*0.4+0.1}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset()}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,Math.PI*2);ctx.fillStyle=`rgba(0,240,255,${this.a})`;ctx.fill()}}
+for(let i=0;i<60;i++)particles.push(new P);
+function anim(){ctx.clearRect(0,0,W,H);for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<140){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle=`rgba(0,240,255,${0.04*(1-d/140)})`;ctx.stroke()}}}particles.forEach(p=>{p.update();p.draw()});requestAnimationFrame(anim)}
+anim();
+
+// Initialize
+refreshData();
+</script>
+</body>
+</html>
