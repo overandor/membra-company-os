@@ -11,16 +11,11 @@ from pathlib import Path
 
 from scanner import discover_projects, scan_collateral
 from classifier import classify_repo
+from appraiser import appraise
 from packet import generate_packet, generate_lender_summary, generate_buyer_summary
-
-try:
-    from appraiser_v2 import appraise_v2 as appraise
-except ImportError:
-    from appraiser import appraise
 
 SCAN_ROOT = Path.home() / "Downloads"
 OUT = Path(__file__).parent / "data" / "index.json"
-OUT_DEPLOY = Path(__file__).parent / "data" / "index_deploy.json"
 
 
 def build():
@@ -67,7 +62,6 @@ def build():
             "classification": cls_light,
             "appraisal": apr,
             "collateral_records": records,
-            "collateral_records_count": len(records),
             "lender_summary": generate_lender_summary(pkt),
             "buyer_summary": generate_buyer_summary(pkt),
         }
@@ -100,33 +94,6 @@ def build():
     print(f"Total replacement cost: ${total_rc:,.0f}")
     print(f"Total collateral support: ${total_csv:,.0f}")
     print(f"Financeable assets: {financeable}")
-
-    # Create deployment-optimized version (without heavy collateral_records)
-    index_deploy = {
-        "generated_at": time.time(),
-        "scan_root": str(SCAN_ROOT),
-        "projects": [],
-    }
-    
-    for p in index["projects"]:
-        deploy_entry = {
-            "name": p["name"],
-            "classification": p["classification"],
-            "appraisal": p["appraisal"],
-            "collateral_records_count": p["collateral_records_count"],
-            "lender_summary": p["lender_summary"],
-            "buyer_summary": p["buyer_summary"],
-        }
-        index_deploy["projects"].append(deploy_entry)
-    
-    index_deploy["summary"] = index["summary"]
-    
-    with open(OUT_DEPLOY, "w") as f:
-        json.dump(index_deploy, f, indent=2, default=str)
-    
-    deploy_size_mb = OUT_DEPLOY.stat().st_size / 1024 / 1024
-    print(f"\nDeployment index written to {OUT_DEPLOY} ({deploy_size_mb:.1f} MB)")
-    print(f"Size reduction: {((1 - deploy_size_mb/size_mb) * 100):.1f}%")
 
 
 if __name__ == "__main__":

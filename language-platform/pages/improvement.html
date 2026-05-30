@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Improvement Queue — CollateralOps</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg-deep:#020204;--bg-surface:#0a0a0f;--bg-elevated:#12121a;--glass:rgba(255,255,255,0.03);--glass-border:rgba(255,255,255,0.06);--text-primary:#f0f0f8;--text-secondary:#8a8a9e;--text-muted:#4a4a5e;--cyan:#00f0ff;--cyan-dim:rgba(0,240,255,0.12);--orange:#ff6b35;--orange-dim:rgba(255,107,53,0.12);--purple:#c084fc;--purple-dim:rgba(192,132,252,0.12);--green:#34d399;--green-dim:rgba(52,211,153,0.12);--gold:#fbbf24;--red:#f87171;--font-sans:'Space Grotesk',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-primary);line-height:1.5;min-height:100vh}
+#particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.35}
+
+/* App shell */
+.app-shell{display:grid;grid-template-rows:48px 1fr;grid-template-columns:64px 1fr;height:100vh}
+.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--bg-surface);border-bottom:1px solid var(--glass-border);z-index:100}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.topbar-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;letter-spacing:0.05em}
+.topbar-logo span{color:var(--cyan)}
+.topbar-logo-mark{width:24px;height:24px;border:1.5px solid var(--cyan);border-radius:6px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 12px var(--cyan-dim)}
+.topbar-logo-mark::before{content:'';position:absolute;width:8px;height:8px;background:var(--cyan);border-radius:2px;transform:rotate(45deg)}
+.topbar-btn{padding:6px 14px;border-radius:6px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-secondary);font-size:12px;font-family:var(--font-mono);cursor:pointer;transition:all 0.2s;text-decoration:none}
+.topbar-btn:hover{border-color:var(--cyan);color:var(--text-primary)}
+
+/* Sidebar */
+.sidebar{background:var(--bg-surface);border-right:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:8px;z-index:10}
+.sidebar-item{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;color:var(--text-muted);font-size:18px;cursor:pointer;transition:all 0.2s;position:relative;text-decoration:none}
+.sidebar-item:hover,.sidebar-item.active{background:var(--cyan-dim);color:var(--cyan)}
+.sidebar-item.active::after{content:'';position:absolute;left:-1px;top:50%;transform:translateY(-50%);width:2px;height:20px;background:var(--cyan);border-radius:1px}
+
+/* Main */
+.main{overflow-y:auto;padding:24px;z-index:1}
+.main::-webkit-scrollbar{width:4px}
+.main::-webkit-scrollbar-thumb{background:var(--glass-border);border-radius:2px}
+.wrap{max-width:1400px;margin:0 auto}
+
+/* Header */
+.header{margin-bottom:24px}
+.header h1{font-size:32px;font-weight:700;margin-bottom:4px}
+.header .sub{color:var(--text-muted);font-size:13px}
+
+/* Summary cards */
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+@media(max-width:900px){.summary-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.summary-grid{grid-template-columns:1fr}}
+.summary-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.summary-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.5}
+.summary-card .sv{font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--text-primary)}
+.summary-card .sl{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:8px}
+.summary-card.critical .sv{color:var(--red)}
+.summary-card.high .sv{color:var(--orange)}
+.summary-card.medium .sv{color:var(--gold)}
+.summary-card.low .sv{color:var(--green)}
+
+/* Action queue */
+.queue-section{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden}
+.queue-section::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.3}
+.queue-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.queue-title{font-size:16px;font-weight:600;color:var(--text-primary)}
+.queue-count{font-family:var(--font-mono);font-size:12px;color:var(--text-muted);padding:4px 10px;border-radius:6px;background:var(--bg-deep);border:1px solid var(--glass-border)}
+.action-item{background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:10px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:16px;transition:border-color 0.2s}
+.action-item:hover{border-color:var(--cyan)}
+.action-item.critical{border-left:4px solid var(--red)}
+.action-item.high{border-left:4px solid var(--orange)}
+.action-item.medium{border-left:4px solid var(--gold)}
+.action-item.low{border-left:4px solid var(--green)}
+.action-info{flex:1}
+.action-asset{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.action-desc{font-size:12px;color:var(--text-secondary)}
+.action-impact{font-size:11px;color:var(--green);font-family:var(--font-mono);padding:4px 10px;border-radius:6px;background:var(--green-dim);min-width:100px;text-align:center}
+.action-priority{font-size:10px;padding:4px 10px;border-radius:6px;text-transform:uppercase;font-weight:600;font-family:var(--font-mono);min-width:80px;text-align:right}
+.action-priority.critical{background:var(--red-dim);color:var(--red)}
+.action-priority.high{background:var(--orange-dim);color:var(--orange)}
+.action-priority.medium{background:var(--gold-dim);color:var(--gold)}
+.action-priority.low{background:var(--green-dim);color:var(--green)}
+
+/* Loading */
+.loading{color:var(--text-muted);text-align:center;padding:3rem}
+.spinner{width:18px;height:18px;border:2px solid var(--glass-border);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<canvas id="particle-canvas"></canvas>
+<div class="app-shell">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo"><div class="topbar-logo-mark"></div>Collateral<span>Ops</span></div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <a href="/" class="topbar-btn">Dashboard</a>
+      <a href="/compare" class="topbar-btn">Compare</a>
+    </div>
+  </div>
+
+  <nav class="sidebar">
+    <a href="/" class="sidebar-item" title="Dashboard">&#128200;</a>
+    <a href="/compare" class="sidebar-item" title="Compare">&#8646;</a>
+    <a href="/passport" class="sidebar-item" title="Passport">&#128196;</a>
+    <a href="/explorer" class="sidebar-item" title="Explorer">&#128194;</a>
+    <a href="/prioritization" class="sidebar-item" title="Prioritization">&#9889;</a>
+    <a href="/improvement" class="sidebar-item active" title="Improvement Queue">&#128221;</a>
+  </nav>
+
+  <main class="main">
+    <div class="wrap">
+      <div class="header">
+        <h1>Improvement Queue</h1>
+        <p class="sub">Catacomb action queue — prioritize improvements to maximize portfolio value</p>
+      </div>
+      
+      <div class="summary-grid" id="summary-grid">
+        <div class="loading"><div class="spinner"></div><div style="margin-top:12px">Loading queue...</div></div>
+      </div>
+      
+      <div class="queue-section">
+        <div class="queue-header">
+          <div class="queue-title">Critical Actions</div>
+          <div class="queue-count" id="critical-count">-</div>
+        </div>
+        <div id="critical-actions">
+          <div class="loading"><div class="spinner"></div><div style="margin-top:12px">Loading...</div></div>
+        </div>
+      </div>
+      
+      <div class="queue-section">
+        <div class="queue-header">
+          <div class="queue-title">High Priority Actions</div>
+          <div class="queue-count" id="high-count">-</div>
+        </div>
+        <div id="high-actions">
+          <div class="loading"><div class="spinner"></div><div style="margin-top:12px">Loading...</div></div>
+        </div>
+      </div>
+      
+      <div class="queue-section">
+        <div class="queue-header">
+          <div class="queue-title">Medium Priority Actions</div>
+          <div class="queue-count" id="medium-count">-</div>
+        </div>
+        <div id="medium-actions">
+          <div class="loading"><div class="spinner"></div><div style="margin-top:12px">Loading...</div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const BASE='';
+
+async function boot(){
+  try{
+    const [impQueue,prio]=await Promise.all([
+      fetch(BASE+'/api/portfolio/improvement-queue').then(r=>r.json()),
+      fetch(BASE+'/api/catacomb/prioritization').then(r=>r.json())
+    ]);
+    
+    const items=impQueue.items||[];
+    const critical=items.filter(i=>(i.next_actions||[]).some(a=>a.priority==='critical'));
+    const high=items.filter(i=>(i.next_actions||[]).some(a=>a.priority==='high'));
+    const medium=items.filter(i=>(i.next_actions||[]).some(a=>a.priority==='medium'));
+    
+    // Summary grid
+    document.getElementById('summary-grid').innerHTML=`
+      <div class="summary-card critical">
+        <div class="sv">${critical.reduce((sum,i)=>sum+(i.next_actions||[]).filter(a=>a.priority==='critical').length,0)}</div>
+        <div class="sl">Critical Actions</div>
+      </div>
+      <div class="summary-card high">
+        <div class="sv">${high.reduce((sum,i)=>sum+(i.next_actions||[]).filter(a=>a.priority==='high').length,0)}</div>
+        <div class="sl">High Priority</div>
+      </div>
+      <div class="summary-card medium">
+        <div class="sv">${medium.reduce((sum,i)=>sum+(i.next_actions||[]).filter(a=>a.priority==='medium').length,0)}</div>
+        <div class="sl">Medium Priority</div>
+      </div>
+      <div class="summary-card low">
+        <div class="sv">${items.length}</div>
+        <div class="sl">Total Assets</div>
+      </div>
+    `;
+    
+    // Render critical actions
+    document.getElementById('critical-count').textContent=critical.reduce((sum,i)=>sum+(i.next_actions||[]).filter(a=>a.priority==='critical').length,0);
+    let critHtml='';
+    critical.forEach(item=>{
+      (item.next_actions||[]).filter(a=>a.priority==='critical').forEach(action=>{
+        critHtml+=`
+          <div class="action-item critical">
+            <div class="action-info">
+              <div class="action-asset">${item.name}</div>
+              <div class="action-desc">${action.action}</div>
+            </div>
+            <div class="action-impact">+${action.impact}</div>
+            <div class="action-priority critical">Critical</div>
+          </div>
+        `;
+      });
+    });
+    document.getElementById('critical-actions').innerHTML=critHtml||'<div style="color:var(--text-muted);text-align:center;padding:20px">No critical actions</div>';
+    
+    // Render high priority actions
+    document.getElementById('high-count').textContent=high.reduce((sum,i)=>sum+(i.next_actions||[]).filter(a=>a.priority==='high').length,0);
+    let highHtml='';
+    high.forEach(item=>{
+      (item.next_actions||[]).filter(a=>a.priority==='high').forEach(action=>{
+        highHtml+=`
+          <div class="action-item high">
+            <div class="action-info">
+              <div class="action-asset">${item.name}</div>
+              <div class="action-desc">${action.action}</div>
+            </div>
+            <div class="action-impact">+${action.impact}</div>
+            <div class="action-priority high">High</div>
+          </div>
+        `;
+      });
+    });
+    document.getElementById('high-actions').innerHTML=highHtml||'<div style="color:var(--text-muted);text-align:center;padding:20px">No high priority actions</div>';
+    
+    // Render medium priority actions
+    document.getElementById('medium-count').textContent=medium.reduce((sum,i)=>sum+(i.next_actions||[]).filter(a=>a.priority==='medium').length,0);
+    let medHtml='';
+    medium.slice(0,10).forEach(item=>{
+      (item.next_actions||[]).filter(a=>a.priority==='medium').forEach(action=>{
+        medHtml+=`
+          <div class="action-item medium">
+            <div class="action-info">
+              <div class="action-asset">${item.name}</div>
+              <div class="action-desc">${action.action}</div>
+            </div>
+            <div class="action-impact">+${action.impact}</div>
+            <div class="action-priority medium">Medium</div>
+          </div>
+        `;
+      });
+    });
+    document.getElementById('medium-actions').innerHTML=medHtml||'<div style="color:var(--text-muted);text-align:center;padding:20px">No medium priority actions</div>';
+  }catch(e){
+    document.getElementById('critical-actions').innerHTML=`<div class="loading" style="color:var(--red)">Error: ${e.message}</div>`;
+  }
+}
+
+// Particle canvas
+const canvas=document.getElementById('particle-canvas');
+const ctx=canvas.getContext('2d');
+let W,H,particles=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+window.addEventListener('resize',resize);resize();
+class P{constructor(){this.reset()}reset(){this.x=Math.random()*W;this.y=Math.random()*H;this.vx=(Math.random()-0.5)*0.3;this.vy=(Math.random()-0.5)*0.3;this.s=Math.random()*1.5+0.5;this.a=Math.random()*0.4+0.1}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset()}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,Math.PI*2);ctx.fillStyle=`rgba(0,240,255,${this.a})`;ctx.fill()}}
+for(let i=0;i<60;i++)particles.push(new P);
+function anim(){ctx.clearRect(0,0,W,H);for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<140){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle=`rgba(0,240,255,${0.04*(1-d/140)})`;ctx.stroke()}}}particles.forEach(p=>{p.update();p.draw()});requestAnimationFrame(anim)}
+anim();
+
+boot();
+</script>
+</body>
+</html>

@@ -26,6 +26,8 @@ CollateralOps scans your codebase, builds a financial-grade appraisal, and gives
 - **Lender View** (`/lender`) — Conservative collateral assessment with risk-adjusted estimates
 - **Explorer** (`/explorer`) — File tree explorer with collateral evidence detail
 - **Passport** (`/passport`) — Platform provenance passport
+- **Prioritization** (`/prioritization`) — Catacomb capital allocation engine with revival potential scoring and tier classification
+- **Improvement Queue** (`/improvement`) — Action queue showing critical, high, and medium priority improvements
 
 ### API Endpoints
 - `GET /health` — System health and version info
@@ -37,6 +39,9 @@ CollateralOps scans your codebase, builds a financial-grade appraisal, and gives
 - `GET /api/timeline/{name}` — Historical appraisal timeline
 - `GET /api/export/balance-sheet?format=json|csv` — Export full portfolio
 - `GET /api/export/asset/{name}?format=json|csv` — Export single asset
+- `GET /api/catacomb/prioritization` — Catacomb capital allocation engine with revival potential scoring
+- `GET /api/portfolio/improvement-queue` — Improvement queue with action priorities
+- `GET /api/export/prioritization?format=json|csv` — Export Catacomb prioritization data
 
 ## Local Development
 
@@ -52,9 +57,54 @@ Visit `http://localhost:8000`
 ## Deploy to Vercel
 
 ```bash
-python build_index.py  # Build data/index.json
+python build_index.py  # Build data/index.json and data/index_deploy.json
 vercel --prod
 ```
+
+## Catacomb Capital Allocation Engine
+
+### Overview
+
+Catacomb is the killer wedge of the Overandor/Membra software-capital formation system. It's a deterministic engine for discovering underpriced software assets, scoring revival potential, and converting neglected repositories into monetizable infrastructure.
+
+### Thesis
+
+**Not all software is worth saving.** Catacomb prioritizes assets with high strategic value, low collateral conversion, and achievable improvement paths. Archives the rest.
+
+### Algorithm
+
+The revival potential score uses weighted factors:
+- **40%** - Raw value (replacement cost scaled by $100k)
+- **30%** - Ease of realization (financeability score)
+- **20%** - Foundation (proof level / 7 × 100)
+- **10%** - Substance (source code volume)
+
+### Tier Classification
+
+- **Tier 1 - Core Asset** (≥70 score, ≥$1M value) - Immediate investment priority
+- **Tier 2 - High Potential** (≥50 score, ≥$500K value) - High priority for improvement
+- **Tier 3 - Medium Potential** (≥30 score) - Moderate priority, evaluate case-by-case
+- **Tier 4 - Low Potential** (≥15 score) - Low priority, consider archival
+- **Archive Candidate** (<15 score) - Archive unless strategic reasons exist
+
+### ROI Calculation
+
+ROI = (Collateral Support × (100 / (100 - Conversion Gap))) / Estimated Effort (weeks)
+
+### Improvement Queue
+
+The improvement queue categorizes all pending actions by priority:
+- **Critical** - Must fix immediately (e.g., no license, env file detected)
+- **High** - Fix soon for significant financeability gains
+- **Medium** - Nice-to-have improvements
+
+### Strategic Context
+
+Catacomb indexes the broader Membra/Overandor repo estate, scores every repo as a software asset, writes the results into LiquidDB, snapshots the asset ledger, and publishes proof-backed capitalization reports.
+
+This gives one coherent product: **Catacomb for software asset capitalization.**
+
+Everything else becomes inventory in the software-capital formation stack.
 
 ## Tech Stack
 

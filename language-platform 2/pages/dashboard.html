@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CollateralOps — Software Balance Sheet</title>
+<style>
+:root{--bg:#0a0a0a;--card:#141414;--accent:#ff6b00;--text:#e0e0e0;--dim:#777;--border:#262626;--green:#22c55e;--red:#ef4444;--blue:#6b8aff;--yellow:#eab308;--purple:#c084fc}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'SF Mono','Fira Code',monospace;background:var(--bg);color:var(--text);min-height:100vh}
+nav{background:#0f0f0f;border-bottom:1px solid var(--border);padding:.6rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100}
+nav .logo{color:var(--accent);font-weight:bold;font-size:1rem;margin-right:auto;letter-spacing:.08em}
+nav a{color:var(--dim);text-decoration:none;font-size:.7rem;padding:4px 10px;border-radius:6px;transition:all .2s}
+nav a:hover,nav a.active{color:var(--accent);background:#1a1200}
+.wrap{max-width:1200px;margin:0 auto;padding:1.5rem}
+h1{color:#fff;font-size:1.4rem;margin-bottom:.15rem}
+.tagline{color:var(--accent);font-size:.75rem;margin-bottom:.15rem}
+.sub{color:var(--dim);font-size:.7rem;margin-bottom:1.5rem}
+/* Balance Sheet Summary */
+.bs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-bottom:1.5rem}
+.bs-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center;position:relative;overflow:hidden}
+.bs-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.bs-card.green::before{background:var(--green)}.bs-card.red::before{background:var(--red)}.bs-card.blue::before{background:var(--blue)}.bs-card.orange::before{background:var(--accent)}.bs-card.yellow::before{background:var(--yellow)}
+.bs-val{font-size:1.5rem;font-weight:bold;color:#fff}
+.bs-lbl{font-size:.55rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-top:.2rem}
+.bs-note{font-size:.55rem;color:var(--accent);margin-top:.3rem}
+/* Asset Table */
+.section-title{font-size:.7rem;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;margin:1.5rem 0 .75rem;padding-bottom:.3rem;border-bottom:1px solid #1a1a1a}
+.topbar{display:flex;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap;align-items:center}
+.topbar select,.topbar input{background:#1a1a1a;border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:.7rem;padding:.35rem .5rem;border-radius:6px}
+.topbar select:focus,.topbar input:focus{outline:none;border-color:var(--accent)}
+.btn{background:var(--accent);color:#000;border:none;padding:.35rem .7rem;border-radius:6px;font-family:inherit;font-size:.65rem;cursor:pointer;font-weight:bold}
+table{width:100%;border-collapse:collapse;font-size:.7rem}
+th{text-align:left;color:var(--accent);padding:.45rem .35rem;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+td{padding:.4rem .35rem;border-bottom:1px solid #1a1a1a}
+tr:hover td{background:#1a1a1a}
+tr.junk td{opacity:.5}
+.name-cell{font-weight:bold;color:var(--accent);cursor:pointer;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.name-cell:hover{text-decoration:underline}
+.tag{font-size:.5rem;padding:1px 5px;border-radius:3px;text-transform:uppercase;white-space:nowrap}
+.tag-production{background:#0a1a0a;color:var(--green);border:1px solid #1a3a1a}
+.tag-prototype{background:#1a1a00;color:var(--yellow);border:1px solid #3a3a1a}
+.tag-tool{background:#0a0a1a;color:var(--blue);border:1px solid #1a1a3a}
+.tag-junk{background:#1a0a0a;color:var(--red);border:1px solid #3a1a1a}
+.tag-collateral{background:#1a0a1a;color:var(--purple);border:1px solid #3a1a3a}
+.tag-trading{background:#1a1200;color:var(--accent);border:1px solid #3a2a00}
+.tag-agent{background:#0a1a1a;color:#4dd;border:1px solid #1a3a3a}
+.fs-bar{display:inline-block;height:6px;border-radius:3px;min-width:2px;vertical-align:middle;margin-right:4px}
+.positive{color:var(--green)}.negative{color:var(--red)}
+.proof-badge{font-size:.5rem;padding:1px 4px;border-radius:3px;background:#1a1a1a;border:1px solid var(--border)}
+/* Readiness States */
+.state{font-size:.5rem;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.state-discovered{background:#1a1a1a;color:var(--dim)}
+.state-proof{background:#1a1200;color:var(--accent)}
+.state-packet{background:#0a1a1a;color:var(--blue)}
+.state-buyer{background:#1a1a00;color:var(--yellow)}
+.state-lender{background:#0a1a0a;color:var(--green)}
+.loading{color:var(--dim);text-align:center;padding:2rem;font-size:.75rem}
+@media(max-width:768px){.bs{grid-template-columns:1fr 1fr}table{font-size:.6rem}}
+</style>
+</head>
+<body>
+<nav>
+  <span class="logo">COLLATERALOPS</span>
+  <a href="/" class="active">Balance Sheet</a>
+  <a href="/lender">Lender View</a>
+  <a href="/explorer">Collateral</a>
+  <a href="/docs">API</a>
+</nav>
+<div class="wrap">
+<h1>Your Software Balance Sheet</h1>
+<p class="tagline">Software Collateral Execution Network</p>
+<p class="sub">Your financeable software inventory is ready.</p>
+<div class="bs" id="summary"><div class="loading">Scanning projects...</div></div>
+<div class="section-title">Software Asset Register</div>
+<div class="topbar">
+  <select id="sort"><option value="replacement_cost_usd">Replacement Cost</option><option value="financeability_score">Financeability</option><option value="collateral_support_value_usd">Collateral Support</option><option value="as_is_sale_value_usd">Buyer-Today Value</option><option value="total_src">Source Files</option></select>
+  <select id="type-filter"><option value="all">All Types</option><option value="real">Real Assets</option><option value="junk">Junk/Scaffold</option></select>
+  <input id="search" type="text" placeholder="Search..." style="width:120px">
+  <button class="btn" onclick="rescan()">Rescan All</button>
+</div>
+<table>
+<thead><tr>
+  <th>Asset</th><th>Type</th><th>Lang</th><th>Src</th><th>Proof</th><th>Readiness</th>
+  <th>Replacement</th><th>Buyer-Today</th><th>Collateral</th><th>Score</th><th>Coll.</th>
+</tr></thead>
+<tbody id="tbody"><tr><td colspan="11" class="loading">Loading...</td></tr></tbody>
+</table>
+</div>
+<script>
+let data={summary:{},assets:[]};
+async function boot(){
+  try{
+    const r=await(await fetch('/api/balance-sheet')).json();
+    data=r;renderSummary(r.summary);renderTable(r.assets);
+  }catch(e){document.getElementById('tbody').innerHTML=`<tr><td colspan="11" class="loading" style="color:var(--red)">Error: ${e.message}</td></tr>`}
+  document.getElementById('sort').onchange=()=>renderTable(data.assets);
+  document.getElementById('type-filter').onchange=()=>renderTable(data.assets);
+  document.getElementById('search').oninput=()=>renderTable(data.assets);
+}
+function $(v){return typeof v==='number'?'$'+v.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0}):v}
+function renderSummary(s){
+  document.getElementById('summary').innerHTML=`
+    <div class="bs-card orange"><div class="bs-val">${$(s.total_strategic_value_usd)}</div><div class="bs-lbl">Total Strategic Value</div></div>
+    <div class="bs-card blue"><div class="bs-val">${$(s.buyer_today_value_usd)}</div><div class="bs-lbl">Buyer-Today Value</div></div>
+    <div class="bs-card green"><div class="bs-val">${$(s.collateral_support_value_usd)}</div><div class="bs-lbl">Collateral Support</div></div>
+    <div class="bs-card yellow"><div class="bs-val">${s.financeability_score_avg}/100</div><div class="bs-lbl">Avg Financeability</div></div>
+    <div class="bs-card blue"><div class="bs-val">${s.total_projects}</div><div class="bs-lbl">Total Projects</div></div>
+    <div class="bs-card green"><div class="bs-val">${s.sale_candidates}</div><div class="bs-lbl">Sale Candidates</div></div>
+    <div class="bs-card red"><div class="bs-val">${s.needs_cleanup}</div><div class="bs-lbl">Needs Cleanup</div></div>
+    <div class="bs-card"><div class="bs-val">${s.junk_scaffold}</div><div class="bs-lbl">Junk / Scaffold</div>
+    <div class="bs-note">${s.next_value_unlock||''}</div></div>
+  `;
+}
+function typeTag(t){
+  const m={'production_system':'production','working_prototype':'prototype','research_prototype':'prototype',
+    'internal_tool':'tool','api_service':'tool','frontend_product':'tool','backend_service':'tool',
+    'trading_engine':'trading','smart_contract':'trading','agent_workflow':'agent',
+    'collateral_package':'collateral','scaffold':'junk','duplicate':'junk','junk':'junk'};
+  return m[t]||'tool';
+}
+function stateClass(s){
+  const m={'Discovered':'discovered','Proof Started':'proof','Packet Ready':'packet','Buyer Ready':'buyer','Lender Ready':'lender'};
+  return m[s]||'discovered';
+}
+function renderTable(assets){
+  const col=document.getElementById('sort').value;
+  const tf=document.getElementById('type-filter').value;
+  const q=document.getElementById('search').value.toLowerCase().trim();
+  let rows=[...assets];
+  if(tf==='real')rows=rows.filter(r=>!['junk','scaffold','duplicate'].includes(r.asset_type));
+  if(tf==='junk')rows=rows.filter(r=>['junk','scaffold','duplicate'].includes(r.asset_type));
+  if(q)rows=rows.filter(r=>r.name.toLowerCase().includes(q)||r.asset_type.includes(q));
+  rows.sort((a,b)=>(b[col]||0)-(a[col]||0));
+  document.getElementById('tbody').innerHTML=rows.map(r=>{
+    const tt=typeTag(r.asset_type);
+    const junk=['junk','scaffold','duplicate'].includes(r.asset_type);
+    const fsColor=r.financeability_score>=60?'var(--green)':r.financeability_score>=30?'var(--yellow)':'var(--red)';
+    return`<tr class="${junk?'junk':''}">
+      <td class="name-cell" onclick="location.href='/asset/${r.name}'">${r.name}</td>
+      <td><span class="tag tag-${tt}">${r.asset_type.replace(/_/g,' ')}</span></td>
+      <td>${r.primary_language}</td>
+      <td>${r.total_src}</td>
+      <td><span class="proof-badge">${r.proof_level}/7</span></td>
+      <td><span class="state state-${stateClass(r.capital_readiness)}">${r.capital_readiness}</span></td>
+      <td>${$(r.replacement_cost_usd)}</td>
+      <td>${$(r.as_is_sale_value_usd)}</td>
+      <td>${$(r.collateral_support_value_usd)}</td>
+      <td><span class="fs-bar" style="width:${r.financeability_score*.6}px;background:${fsColor}"></span>${r.financeability_score}</td>
+      <td>${r.collateral_files||0}</td>
+    </tr>`;
+  }).join('');
+}
+async function rescan(){
+  document.getElementById('summary').innerHTML='<div class="loading">Rescanning all projects...</div>';
+  await fetch('/api/rescan',{method:'POST'});
+  boot();
+}
+boot();
+</script>
+</body>
+</html>
