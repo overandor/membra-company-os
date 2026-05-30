@@ -15,9 +15,10 @@ from typing import Optional
 import csv
 import io
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, Response, StreamingResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 app = FastAPI(
     title="CollateralOps",
@@ -39,6 +40,61 @@ _collateral: dict = {}
 _lender_summaries: dict = {}
 _buyer_summaries: dict = {}
 _last_scan: float = 0
+
+# Auth
+API_KEY = os.environ.get("COLLATERALOPS_API_KEY", "")
+security = HTTPBasic(auto_error=False)
+
+
+def verify_key(credentials: HTTPBasicCredentials = Depends(security)):
+    if not API_KEY:
+        return True
+    if credentials and secrets.compare_digest(credentials.password, API_KEY):
+        return True
+    raise HTTPException(401, "Invalid API key")
+
+
+# WebSocket + SSE
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+        self._listeners: list = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
+
+    async def broadcast(self, message: dict):
+        data = json.dumps(message)
+        disconnected = []
+        for ws in self.active_connections:
+            try:
+                await ws.send_text(data)
+            except Exception:
+                disconnected.append(ws)
+        for ws in disconnected:
+            self.disconnect(ws)
+
+    def sse_add_listener(self, queue):
+        self._listeners.append(queue)
+
+    def sse_remove_listener(self, queue):
+        if queue in self._listeners:
+            self._listeners.remove(queue)
+
+    async def sse_broadcast(self, message: dict):
+        for q in list(self._listeners):
+            try:
+                await q.put(message)
+            except Exception:
+                pass
+
+
+manager = ConnectionManager()
 
 
 def _load_from_index():
@@ -866,6 +922,26 @@ def prioritization_page():
 def improvement_page():
     return (PAGES / "improvement.html").read_text()
 
+@app.get("/passport", response_class=HTMLResponse)
+def passport_page():
+    return (PAGES / "passport.html").read_text()
+
+
+@app.get("/buyer", response_class=HTMLResponse)
+def buyer_page():
+    return (PAGES / "buyer.html").read_text()
+
+
+@app.get("/settings", response_class=HTMLResponse)
+def settings_page():
+    return (PAGES / "settings.html").read_text()
+
+
+@app.get("/api-docs", response_class=HTMLResponse)
+def api_docs_page():
+    return (PAGES / "api-docs.html").read_text()
+
+
 @app.get("/compare", response_class=HTMLResponse)
 def compare_page():
     return (PAGES / "compare.html").read_text()
@@ -1056,6 +1132,126 @@ def export_prioritization(format: str = Query("json", enum=["json", "csv"])):
             media_type="text/csv",
             headers={"Content-Disposition": 'attachment; filename="catacomb_prioritization.csv"'}
         )
+
+
+# ── Real-time ─────────────────────────────────────────────────────
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            msg = await websocket.receive_text()
+            data = json.loads(msg) if msg.startswith("{") else {"type": "echo", "message": msg}
+            if data.get("type") == "subscribe":
+                await websocket.send_text(json.dumps({
+                    "type": "portfolio_snapshot",
+                    "total_assets": len(_projects),
+                    "total_value": sum(a.get("collateral_support_value_usd", 0) for a in _appraisals.values()),
+                    "avg_financeability": round(sum(a.get("financeability_score", 0) for a in _appraisals.values()) / max(1, len(_appraisals)), 1),
+                }))
+            else:
+                await websocket.send_text(json.dumps({"type": "echo", "message": msg}))
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+
+@app.get("/api/sse")
+async def sse_endpoint():
+    """Server-Sent Events fallback for deployed environments."""
+    import asyncio
+    queue = asyncio.Queue()
+    manager.sse_add_listener(queue)
+
+    async def event_generator():
+        try:
+            while True:
+                msg = await asyncio.wait_for(queue.get(), timeout=15)
+                yield f"data: {json.dumps(msg)}\n\n"
+        except asyncio.TimeoutError:
+            yield f"data: {json.dumps({'type': 'heartbeat'})}\n\n"
+        finally:
+            manager.sse_remove_listener(queue)
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
+@app.post("/api/broadcast")
+def broadcast_update(payload: dict, _=Depends(verify_key)):
+    """Broadcast an update to all connected WebSocket/SSE clients."""
+    import asyncio
+    msg = {"type": "update", "timestamp": time.time(), "payload": payload}
+    asyncio.create_task(manager.broadcast(msg))
+    asyncio.create_task(manager.sse_broadcast(msg))
+    return {"status": "broadcasted", "connections": len(manager.active_connections)}
+
+
+# ── AI Chat ───────────────────────────────────────────────────────
+
+@app.post("/api/chat")
+def chat_endpoint(message: dict):
+    """Portfolio-aware chat assistant. Responds to questions about assets, valuations, and recommendations."""
+    q = message.get("message", "").lower().strip()
+    if not _appraisals:
+        return {"reply": "No portfolio data loaded yet. Run a scan or deploy with a pre-built index."}
+
+    # Simple rule-based NLU on portfolio data
+    total_value = sum(a.get("collateral_support_value_usd", 0) for a in _appraisals.values())
+    total_rc = sum(a.get("replacement_cost_usd", 0) for a in _appraisals.values())
+    avg_fs = sum(a.get("financeability_score", 0) for a in _appraisals.values()) / max(1, len(_appraisals))
+    best = max(_appraisals.items(), key=lambda x: x[1].get("collateral_support_value_usd", 0))
+    worst = min(_appraisals.items(), key=lambda x: x[1].get("collateral_support_value_usd", 0))
+    financeable = [n for n, a in _appraisals.items() if a.get("financeability_score", 0) >= 40]
+
+    if any(w in q for w in ["most valuable", "best asset", "top asset", "highest value"]):
+        return {"reply": f"Your most valuable asset is **{best[0]}** with a collateral support value of **${best[1].get('collateral_support_value_usd', 0):,.0f}** and a financeability score of **{best[1].get('financeability_score', 0)}/100**."}
+
+    if any(w in q for w in ["least valuable", "worst asset", "lowest value", "bottom"]):
+        return {"reply": f"Your lowest-valued asset is **{worst[0]}** with a collateral support value of **${worst[1].get('collateral_support_value_usd', 0):,.0f}**. Consider improvement actions or archiving."}
+
+    if any(w in q for w in ["total value", "portfolio value", "worth", "how much"]):
+        return {"reply": f"Your total portfolio collateral support value is **${total_value:,.0f}**. Total replacement cost is **${total_rc:,.0f}**. Average financeability is **{avg_fs:.1f}/100**."}
+
+    if any(w in q for w in ["financeable", "can sell", "loan", "collateral", "how many"]):
+        return {"reply": f"You have **{len(financeable)}** financeable assets out of **{len(_appraisals)}** total. Financeable means a score of 40+ on the 100-point scale."}
+
+    if any(w in q for w in ["recommend", "should i", "what should", "improve", "next step"]):
+        actions = []
+        for name, apr in _appraisals.items():
+            for act in apr.get("next_actions", [])[:2]:
+                actions.append(f"**{name}**: {act.get('action')} ({act.get('effort')})")
+        if actions:
+            return {"reply": "Top recommended actions:\n\n" + "\n".join(actions[:8])}
+        return {"reply": "No specific improvement actions found. Your portfolio looks solid!"}
+
+    if any(w in q for w in ["risk", "danger", "problem", "issue", "warning"]):
+        risky = [(n, a) for n, a in _appraisals.items() if a.get("financeability_score", 0) < 30]
+        if risky:
+            names = ", ".join([f"**{n}**" for n, _ in risky[:5]])
+            return {"reply": f"Found **{len(risky)}** high-risk assets (score <30): {names}. Review the Asset Detail pages for specific risk matrices and deductions."}
+        return {"reply": "No high-risk assets detected. Your portfolio risk profile is healthy."}
+
+    # Try to match asset name
+    for name in _appraisals:
+        if name.lower() in q:
+            apr = _appraisals[name]
+            return {"reply": f"**{name}**: Financeability **{apr.get('financeability_score', 0)}/100**, Confidence **{apr.get('confidence_score', 0)}/100**, Value range **${apr.get('liquidation_value_usd', 0):,.0f}** – **${apr.get('productized_value_usd', 0):,.0f}**. Capital readiness: **{apr.get('capital_readiness', 'unknown')}**."}
+
+    return {"reply": f"I can answer questions about your **{len(_appraisals)}** assets. Try asking:\n\n• What's my most valuable asset?\n• What's my total portfolio value?\n• How many financeable assets do I have?\n• What should I improve?\n• Tell me about [asset name]\n• What's my risk profile?"}
+
+
+# ── Admin ─────────────────────────────────────────────────────────
+
+@app.get("/api/admin/stats")
+def admin_stats(_=Depends(verify_key)):
+    return {
+        "total_projects": len(_projects),
+        "total_classifications": len(_classifications),
+        "total_appraisals": len(_appraisals),
+        "ws_connections": len(manager.active_connections),
+        "mode": "index" if INDEX_PATH.exists() else "live_scan",
+        "last_scan": _last_scan,
+    }
 
 
 @app.exception_handler(404)

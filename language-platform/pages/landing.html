@@ -242,5 +242,77 @@ document.querySelectorAll('.section, .stats-bar, .demo-cta').forEach(el=>obs.obs
 /* Run on load */
 setTimeout(()=>{animateCounters();animateRings();},300);
 </script>
+
+<!-- AI Chat Widget -->
+<style>
+.chat-widget{position:fixed;bottom:24px;right:24px;z-index:1000;font-family:var(--font-sans)}
+.chat-toggle{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));border:none;cursor:pointer;box-shadow:0 4px 20px var(--cyan-glow);display:flex;align-items:center;justify-content:center;font-size:24px;transition:all 0.3s;color:var(--bg-deep)}
+.chat-toggle:hover{transform:scale(1.1)}
+.chat-panel{width:360px;height:520px;background:var(--bg-surface);border:1px solid var(--glass-border);border-radius:16px;display:none;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);position:absolute;bottom:72px;right:0}
+.chat-panel.open{display:flex}
+.chat-header{padding:16px 20px;background:var(--glass);border-bottom:1px solid var(--glass-border);display:flex;align-items:center;gap:12px}
+.chat-header .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-size:14px}
+.chat-header .info{flex:1}
+.chat-header .name{font-size:13px;font-weight:600}
+.chat-header .status{font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+.chat-header .status::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%;display:inline-block}
+.chat-header .close{background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;padding:4px}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.chat-msg{max-width:85%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5}
+.chat-msg.user{align-self:flex-end;background:var(--cyan-dim);color:var(--text-primary);border-bottom-right-radius:4px}
+.chat-msg.bot{align-self:flex-start;background:var(--glass);color:var(--text-secondary);border-bottom-left-radius:4px;border:1px solid var(--glass-border)}
+.chat-msg.bot strong{color:var(--text-primary)}
+.chat-input{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--glass-border);background:var(--bg-elevated)}
+.chat-input input{flex:1;padding:10px 14px;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:10px;color:var(--text-primary);font-size:13px;outline:none;font-family:var(--font-sans)}
+.chat-input input:focus{border-color:var(--cyan)}
+.chat-input button{padding:10px 16px;background:linear-gradient(135deg,var(--cyan),var(--purple));border:none;border-radius:10px;color:var(--bg-deep);font-weight:600;cursor:pointer;font-size:12px}
+.chat-input button:disabled{opacity:0.5;cursor:not-allowed}
+.chat-typing{display:flex;gap:4px;padding:10px 14px}
+.chat-typing span{width:6px;height:6px;background:var(--text-muted);border-radius:50%;animation:typing 1.4s infinite}
+.chat-typing span:nth-child(2){animation-delay:0.2s}
+.chat-typing span:nth-child(3){animation-delay:0.4s}
+@keyframes typing{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}
+@media(max-width:480px){.chat-panel{width:calc(100vw - 32px);height:60vh;bottom:72px;right:0}}
+</style>
+
+<div class="chat-widget">
+  <div class="chat-panel" id="chat-panel">
+    <div class="chat-header">
+      <div class="avatar">&#129302;</div>
+      <div class="info">
+        <div class="name">CollateralOps AI</div>
+        <div class="status">Online — Ask about your portfolio</div>
+      </div>
+      <button class="close" onclick="toggleChat()">&#10005;</button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-msg bot">Hi! I'm your portfolio assistant. Ask me about your assets, valuations, risks, or recommendations.</div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chat-input" placeholder="Ask about your portfolio..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button id="chat-send" onclick="sendChat()">Send</button>
+    </div>
+  </div>
+  <button class="chat-toggle" onclick="toggleChat()">&#129302;</button>
+</div>
+
+<script>
+function toggleChat(){document.getElementById('chat-panel').classList.toggle('open')}
+function addMsg(text,who){const msgs=document.getElementById('chat-messages');const d=document.createElement('div');d.className='chat-msg '+who;d.innerHTML=text;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight}
+function showTyping(){const msgs=document.getElementById('chat-messages');const d=document.createElement('div');d.className='chat-msg bot chat-typing';d.id='typing';d.innerHTML='<span></span><span></span><span></span>';msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight}
+function hideTyping(){const t=document.getElementById('typing');if(t)t.remove()}
+async function sendChat(){
+  const input=document.getElementById('chat-input');
+  const btn=document.getElementById('chat-send');
+  const msg=input.value.trim();if(!msg)return;
+  addMsg(msg,'user');input.value='';btn.disabled=true;showTyping();
+  try{
+    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
+    const data=await r.json();
+    hideTyping();addMsg(data.reply.replace(/\n/g,'<br>'),'bot');
+  }catch(e){hideTyping();addMsg('Sorry, I had trouble connecting. Try again.','bot');}
+  btn.disabled=false;
+}
+</script>
 </body>
 </html>
