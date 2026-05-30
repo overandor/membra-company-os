@@ -14,6 +14,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import declarative_base, relationship, Session
 
 Base = declarative_base()
+Base.__allow_unmapped__ = True
 
 
 def _gen_id() -> str:
@@ -92,7 +93,7 @@ class ProofEvent(Base):
     description = Column(Text, nullable=False)
     hash = Column(String(64), nullable=False)
     prev_hash = Column(String(64), nullable=True)
-    metadata = Column(JSON, default=dict)
+    event_metadata = Column(JSON, default=dict)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     asset: Asset = relationship("Asset", back_populates="proofs")

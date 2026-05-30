@@ -91,7 +91,7 @@ class ValuationCreate(BaseModel):
 class ProofCreate(BaseModel):
     event_type: str
     description: str
-    metadata: dict = Field(default_factory=dict)
+    event_metadata: dict = Field(default_factory=dict)
 
 
 class RiskCreate(BaseModel):
@@ -381,7 +381,7 @@ def create_proof(asset_id: str, body: ProofCreate):
             raise HTTPException(status_code=404, detail="Asset not found")
         last = session.query(ProofEvent).filter(ProofEvent.asset_id == asset_id).order_by(ProofEvent.created_at.desc()).first()
         prev = last.hash if last else "0" * 64
-        payload = json.dumps(body.metadata, sort_keys=True, default=str)
+        payload = json.dumps(body.event_metadata, sort_keys=True, default=str)
         h = _hash(f"{asset_id}:{body.event_type}:{body.description}:{payload}:{prev}")
         p = ProofEvent(
             asset_id=asset_id,
@@ -389,7 +389,7 @@ def create_proof(asset_id: str, body: ProofCreate):
             description=body.description,
             hash=h,
             prev_hash=prev,
-            metadata=body.metadata,
+            event_metadata=body.event_metadata,
         )
         session.add(p)
         session.commit()
@@ -403,7 +403,7 @@ def list_proofs(asset_id: str):
     with get_session() as session:
         proofs = session.query(ProofEvent).filter(ProofEvent.asset_id == asset_id).order_by(ProofEvent.created_at.asc()).all()
         return [{"id": p.id, "event_type": p.event_type, "description": p.description,
-                 "hash": p.hash, "prev_hash": p.prev_hash, "metadata": p.metadata,
+                 "hash": p.hash, "prev_hash": p.prev_hash, "metadata": p.event_metadata,
                  "created_at": p.created_at.isoformat()} for p in proofs]
 
 
@@ -416,7 +416,7 @@ def verify_proof_chain(asset_id: str):
             return {"valid": True, "count": 0}
         prev = "0" * 64
         for p in proofs:
-            payload = json.dumps(p.metadata, sort_keys=True, default=str)
+            payload = json.dumps(p.event_metadata, sort_keys=True, default=str)
             expected = _hash(f"{asset_id}:{p.event_type}:{p.description}:{payload}:{prev}")
             if p.hash != expected or p.prev_hash != prev:
                 return {"valid": False, "broken_at": p.id, "expected": expected, "got": p.hash}
