@@ -70,7 +70,7 @@ body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-pri
 /* Table */
 .data-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:12px}
 .data-table th{text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.05em;font-size:10px;border-bottom:1px solid var(--glass-border)}
-.data-table td{padding:12px;border-bottom:1px solid var(--glass-border);color:var(--text-secondary}
+.data-table td{padding:12px;border-bottom:1px solid var(--glass-border);color:var(--text-secondary)}
 .data-table tr:hover td{background:var(--glass);color:var(--text-primary)}
 .data-table tr.junk td{opacity:0.4}
 .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
@@ -199,6 +199,8 @@ body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-pri
       <div class="topbar-status"><span class="status-dot"></span>SOFTWARE COLLATERAL EXECUTION DESK</div>
     </div>
     <div class="topbar-right">
+      <a href="/" style="padding:6px 14px;border-radius:6px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-secondary);font-size:12px;font-family:var(--font-mono);text-decoration:none;transition:all 0.2s;margin-right:8px">Home</a>
+      <a href="/compare" style="padding:6px 14px;border-radius:6px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-secondary);font-size:12px;font-family:var(--font-mono);text-decoration:none;transition:all 0.2s;margin-right:8px">Compare</a>
       <div class="view-toggle">
         <button class="view-btn active" onclick="setView('builder')">BUILDER</button>
         <button class="view-btn" onclick="setView('lender')">LENDER</button>

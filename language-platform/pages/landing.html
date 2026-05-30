@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CollateralOps — Software Collateral Execution Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg-deep:#020204;--bg-surface:#0a0a0f;--bg-elevated:#12121a;--glass:rgba(255,255,255,0.03);--glass-border:rgba(255,255,255,0.06);--text-primary:#f0f0f8;--text-secondary:#8a8a9e;--text-muted:#4a4a5e;--cyan:#00f0ff;--cyan-dim:rgba(0,240,255,0.12);--cyan-glow:rgba(0,240,255,0.25);--orange:#ff6b35;--orange-dim:rgba(255,107,53,0.12);--purple:#c084fc;--purple-dim:rgba(192,132,252,0.12);--green:#34d399;--gold:#fbbf24;--red:#f87171;--font-sans:'Space Grotesk',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-primary);line-height:1.5;overflow-x:hidden}
+canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.topbar{position:relative;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:64px}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.topbar-logo{display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px;letter-spacing:0.08em;text-transform:uppercase}
+.topbar-logo span{color:var(--cyan)}
+.topbar-logo-mark{width:28px;height:28px;border:2px solid var(--cyan);border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 20px var(--cyan-dim)}
+.topbar-logo-mark::before{content:'';position:absolute;width:10px;height:10px;background:var(--cyan);border-radius:3px;transform:rotate(45deg)}
+.topbar-links{display:flex;gap:8px}
+.topbar-links a{padding:8px 18px;border-radius:8px;color:var(--text-secondary);font-size:12px;font-weight:500;text-decoration:none;transition:all 0.2s}
+.topbar-links a:hover{color:var(--text-primary);background:var(--glass)}
+.hero{position:relative;z-index:2;min-height:90vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 20px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--glass-border);border-radius:20px;background:var(--glass);font-size:11px;color:var(--text-secondary);margin-bottom:32px;letter-spacing:0.05em;text-transform:uppercase}
+.hero-badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green)}
+.hero h1{font-size:clamp(36px,6vw,72px);font-weight:700;line-height:1.05;letter-spacing:-0.02em;margin-bottom:20px;max-width:900px}
+.hero h1 .accent-cyan{color:var(--cyan);text-shadow:0 0 40px var(--cyan-glow)}
+.hero h1 .accent-purple{color:var(--purple)}
+.hero-sub{font-size:clamp(14px,2vw,18px);color:var(--text-secondary);max-width:560px;margin:0 auto 40px;line-height:1.6;font-weight:300}
+.hero-cta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.3s;cursor:pointer;border:none;font-family:var(--font-sans)}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),var(--purple));color:var(--bg-deep);box-shadow:0 4px 30px var(--cyan-dim)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 40px var(--cyan-glow)}
+.btn-glass{background:var(--glass);border:1px solid var(--glass-border);color:var(--text-primary)}
+.btn-glass:hover{border-color:var(--cyan);color:var(--cyan)}
+.stats-bar{position:relative;z-index:2;display:flex;justify-content:center;gap:60px;padding:48px 20px;flex-wrap:wrap;border-top:1px solid var(--glass-border);border-bottom:1px solid var(--glass-border);background:linear-gradient(180deg,transparent,rgba(0,240,255,0.02),transparent)}
+.stat{text-align:center}
+.stat .sv{font-family:var(--font-mono);font-size:32px;font-weight:700;color:var(--text-primary)}
+.stat .sl{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.12em;margin-top:6px}
+.section{position:relative;z-index:2;padding:80px 20px;max-width:1200px;margin:0 auto}
+.section-title{font-size:28px;font-weight:700;margin-bottom:12px}
+.section-sub{font-size:14px;color:var(--text-secondary);margin-bottom:48px;max-width:520px}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.feature{background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:28px;position:relative;transition:all 0.3s}
+.feature::before{content:'';position:absolute;top:0;left:20px;right:20px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.4}
+.feature:hover{border-color:rgba(0,240,255,0.15);transform:translateY(-3px)}
+.feature-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:16px;background:var(--cyan-dim);border:1px solid rgba(0,240,255,0.15);color:var(--cyan)}
+.feature:nth-child(2) .feature-icon{background:var(--purple-dim);border-color:rgba(192,132,252,0.15);color:var(--purple)}
+.feature:nth-child(3) .feature-icon{background:var(--orange-dim);border-color:rgba(255,107,53,0.15);color:var(--orange)}
+.feature:nth-child(4) .feature-icon{background:rgba(52,211,153,0.12);border-color:rgba(52,211,153,0.15);color:var(--green)}
+.feature h3{font-size:16px;font-weight:600;margin-bottom:8px}
+.feature p{font-size:13px;color:var(--text-secondary);line-height:1.6}
+.appraisal-preview{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:40px;text-align:center;max-width:800px;margin:0 auto;position:relative}
+.appraisal-preview::before{content:'';position:absolute;top:0;left:30px;right:30px;height:1px;background:linear-gradient(90deg,transparent,var(--orange),transparent)}
+.preview-rings{display:flex;justify-content:center;gap:40px;margin-bottom:32px;flex-wrap:wrap}
+.ring-wrap{text-align:center}
+.ring-wrap .rv{font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--text-primary);margin-top:12px}
+.ring-wrap .rl{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.12em}
+.ring{width:120px;height:120px;position:relative}
+.ring svg{transform:rotate(-90deg)}
+.ring-track{fill:none;stroke:var(--bg-elevated);stroke-width:6}
+.ring-fill{fill:none;stroke:var(--cyan);stroke-width:6;stroke-linecap:round;stroke-dasharray:377;stroke-dashoffset:377;transition:stroke-dashoffset 2s ease-out}
+.ring-wrap:nth-child(2) .ring-fill{stroke:var(--purple)}
+.ring-wrap:nth-child(3) .ring-fill{stroke:var(--orange)}
+.val-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
+.val-item{padding:16px;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:12px;text-align:center}
+.val-item .vv{font-family:var(--font-mono);font-size:16px;font-weight:600;color:var(--text-primary)}
+.val-item .vl{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px}
+.demo-cta{position:relative;z-index:2;padding:80px 20px;text-align:center}
+.demo-cta h2{font-size:32px;font-weight:700;margin-bottom:16px}
+.demo-cta p{color:var(--text-secondary);margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto}
+.footer{position:relative;z-index:2;padding:40px 20px;border-top:1px solid var(--glass-border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;max-width:1200px;margin:0 auto}
+.footer-left{font-size:12px;color:var(--text-muted)}
+.footer-right{display:flex;gap:20px}
+.footer-right a{font-size:12px;color:var(--text-muted);text-decoration:none;transition:color 0.2s}
+.footer-right a:hover{color:var(--text-primary)}
+@media(max-width:768px){.stats-bar{gap:30px}.hero-cta{flex-direction:column}.val-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo"><div class="topbar-logo-mark"></div>Collateral<span>Ops</span></div>
+  </div>
+  <div class="topbar-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/compare">Compare</a>
+    <a href="/explorer">Explorer</a>
+    <a href="/lender">Lender</a>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-badge"><span class="dot"></span> Version 2.0 &mdash; Multi-Factor Appraisal Engine</div>
+  <h1>Turn developer work into <span class="accent-cyan">capital-ready</span><br><span class="accent-purple">collateral.</span></h1>
+  <p class="hero-sub">CollateralOps scans your codebase, builds a financial-grade appraisal, and gives you a balance sheet that lenders and buyers actually understand.</p>
+  <div class="hero-cta">
+    <a href="/dashboard" class="btn btn-primary">Open Dashboard &rarr;</a>
+    <a href="/compare" class="btn btn-glass">Compare Assets</a>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="sv" data-count="8">0</div><div class="sl">Valuation Methods</div></div>
+  <div class="stat"><div class="sv" data-count="40">0</div><div class="sl">Signal Dimensions</div></div>
+  <div class="stat"><div class="sv" data-count="6">0</div><div class="sl">Risk Categories</div></div>
+  <div class="stat"><div class="sv" data-count="2040">0</div><div class="sl">Year Vision</div></div>
+</div>
+
+<div class="section">
+  <h2 class="section-title">How it works</h2>
+  <p class="section-sub">From raw repository to capital-ready appraisal in four stages.</p>
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">&#9733;</div>
+      <h3>1. Signal Collection</h3>
+      <p>We scan commits, tests, docs, CI, Docker, dependencies, and licensing to build a 40-dimensional fingerprint of your codebase.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">&#9874;</div>
+      <h3>2. Quality Classification</h3>
+      <p>Every asset gets graded across 8 quality dimensions: engineering, documentation, security, deployment, collateral, and more.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">&#9733;</div>
+      <h3>3. Financial Appraisal</h3>
+      <p>Eight valuation methods including replacement cost, productized value, market comparables, network effects, and complexity adjustment.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">&#9878;</div>
+      <h3>4. Capital Readiness</h3>
+      <p>Receive financeability scores, risk matrices, recommended LTVs, and a prioritized improvement roadmap for due diligence.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="appraisal-preview">
+    <h3 style="font-size:13px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:28px">Sample Appraisal Preview</h3>
+    <div class="preview-rings">
+      <div class="ring-wrap">
+        <div class="ring">
+          <svg width="120" height="120"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-fill" id="ring1" cx="60" cy="60" r="54"/></svg>
+        </div>
+        <div class="rv">87</div><div class="rl">Financeability</div>
+      </div>
+      <div class="ring-wrap">
+        <div class="ring">
+          <svg width="120" height="120"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-fill" id="ring2" cx="60" cy="60" r="54"/></svg>
+        </div>
+        <div class="rv">72</div><div class="rl">Confidence</div>
+      </div>
+      <div class="ring-wrap">
+        <div class="ring">
+          <svg width="120" height="120"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-fill" id="ring3" cx="60" cy="60" r="54"/></svg>
+        </div>
+        <div class="rv">94</div><div class="rl">Capital Ready</div>
+      </div>
+    </div>
+    <div class="val-grid">
+      <div class="val-item"><div class="vv">$127,000</div><div class="vl">Replacement Cost</div></div>
+      <div class="val-item"><div class="vv">$89,000</div><div class="vl">Productized Value</div></div>
+      <div class="val-item"><div class="vv">$45,000</div><div class="vl">Liquidation Value</div></div>
+      <div class="val-item"><div class="vv">$72,000</div><div class="vl">Collateral Support</div></div>
+      <div class="val-item"><div class="vv">$95,000</div><div class="vl">Market Comparable</div></div>
+      <div class="val-item"><div class="vv">$68,000</div><div class="vl">Complexity Adjusted</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="demo-cta">
+  <h2>Ready to appraise your stack?</h2>
+  <p>Point CollateralOps at your repositories and get a capital-ready balance sheet in seconds.</p>
+  <a href="/dashboard" class="btn btn-primary" style="padding:16px 40px;font-size:16px">Launch Dashboard</a>
+</div>
+
+<div class="footer">
+  <div class="footer-left">CollateralOps 2040 &mdash; Software Collateral Execution Network</div>
+  <div class="footer-right">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/explorer">Explorer</a>
+    <a href="/compare">Compare</a>
+    <a href="/lender">Lender</a>
+  </div>
+</div>
+
+<script>
+/* Canvas particles */
+const canvas=document.getElementById('bgCanvas');
+const ctx=canvas.getContext('2d');
+let W,H;
+function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight}
+resize();window.addEventListener('resize',resize);
+const particles=[];const N=80;
+for(let i=0;i<N;i++)particles.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+0.5,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,a:Math.random()*0.5+0.3});
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  for(let i=0;i<N;i++){
+    const p=particles[i];p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(0,240,255,${p.a*0.15})`;ctx.fill();
+  }
+  for(let i=0;i<N;i++)for(let j=i+1;j<N;j++){
+    const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,d=Math.sqrt(dx*dx+dy*dy);
+    if(d<120){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle=`rgba(0,240,255,${(1-d/120)*0.04})`;ctx.stroke()}
+  }
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* Counter animation */
+function animateCounters(){
+  document.querySelectorAll('.sv[data-count]').forEach(el=>{
+    const target=+el.dataset.count, dur=1500, start=performance.now();
+    function tick(now){
+      const p=Math.min((now-start)/dur,1);
+      el.textContent=Math.round(target*(1-Math.pow(1-p,3))).toLocaleString();
+      if(p<1)requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+}
+
+/* Ring animation */
+function animateRings(){
+  const circum=2*Math.PI*54;
+  setTimeout(()=>{document.getElementById('ring1').style.strokeDashoffset=circum*(1-87/100)},200);
+  setTimeout(()=>{document.getElementById('ring2').style.strokeDashoffset=circum*(1-72/100)},500);
+  setTimeout(()=>{document.getElementById('ring3').style.strokeDashoffset=circum*(1-94/100)},800);
+}
+
+/* Intersection observer for scroll-in animations */
+const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');if(e.target.querySelectorAll('.sv[data-count]').length)animateCounters();if(e.target.querySelector('.ring'))animateRings();}})},{threshold:0.2});
+document.querySelectorAll('.section, .stats-bar, .demo-cta').forEach(el=>obs.observe(el));
+
+/* Run on load */
+setTimeout(()=>{animateCounters();animateRings();},300);
+</script>
+</body>
+</html>

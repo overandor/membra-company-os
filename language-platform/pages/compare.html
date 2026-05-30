@@ -3,133 +3,406 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Compare Assets — CollateralOps 2040</title>
+<title>Asset Comparison — CollateralOps</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg-deep:#020204;--bg-surface:#0a0a0f;--bg-elevated:#12121a;--glass:rgba(255,255,255,0.03);--glass-border:rgba(255,255,255,0.06);--text-primary:#f0f0f8;--text-secondary:#8a8a9e;--text-muted:#4a4a5e;--cyan:#00f0ff;--cyan-dim:rgba(0,240,255,0.12);--orange:#ff6b35;--orange-dim:rgba(255,107,53,0.12);--purple:#c084fc;--purple-dim:rgba(192,132,252,0.12);--green:#34d399;--green-dim:rgba(52,211,153,0.12);--gold:#fbbf24;--red:#f87171;--font-sans:'Space Grotesk',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace}
 *{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
 body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-primary);line-height:1.5;min-height:100vh}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--bg-surface);border-bottom:1px solid var(--glass-border);height:48px;position:sticky;top:0;z-index:100}
+#particle-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.35}
+
+/* App shell */
+.app-shell{display:grid;grid-template-rows:48px 1fr;grid-template-columns:64px 1fr;height:100vh}
+.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--bg-surface);border-bottom:1px solid var(--glass-border);z-index:100}
 .topbar-left{display:flex;align-items:center;gap:16px}
 .topbar-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;letter-spacing:0.05em}
 .topbar-logo span{color:var(--cyan)}
 .topbar-logo-mark{width:24px;height:24px;border:1.5px solid var(--cyan);border-radius:6px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 12px var(--cyan-dim)}
 .topbar-logo-mark::before{content:'';position:absolute;width:8px;height:8px;background:var(--cyan);border-radius:2px;transform:rotate(45deg)}
+.topbar-status{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted);padding:4px 12px;border-radius:6px;background:var(--glass);border:1px solid var(--glass-border)}
 .topbar-btn{padding:6px 14px;border-radius:6px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-secondary);font-size:12px;font-family:var(--font-mono);cursor:pointer;transition:all 0.2s;text-decoration:none}
 .topbar-btn:hover{border-color:var(--cyan);color:var(--text-primary)}
-.wrap{max-width:1200px;margin:0 auto;padding:24px}
+
+/* Sidebar */
+.sidebar{background:var(--bg-surface);border-right:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:8px;z-index:10}
+.sidebar-item{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;color:var(--text-muted);font-size:18px;cursor:pointer;transition:all 0.2s;position:relative;text-decoration:none}
+.sidebar-item:hover,.sidebar-item.active{background:var(--cyan-dim);color:var(--cyan)}
+.sidebar-item.active::after{content:'';position:absolute;left:-1px;top:50%;transform:translateY(-50%);width:2px;height:20px;background:var(--cyan);border-radius:1px}
+
+/* Main */
+.main{overflow-y:auto;padding:24px;z-index:1}
+.main::-webkit-scrollbar{width:4px}
+.main::-webkit-scrollbar-thumb{background:var(--glass-border);border-radius:2px}
+.wrap{max-width:1400px;margin:0 auto}
+
+/* Cards */
 .card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:24px;position:relative;overflow:hidden;margin-bottom:20px}
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.3}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .card-title{font-size:13px;font-weight:600;color:var(--text-secondary);letter-spacing:0.05em;text-transform:uppercase}
+.card-subtitle{font-size:10px;color:var(--text-muted);font-family:var(--font-mono);margin-top:4px}
+
+/* Grid */
 .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px}
-.span-6{grid-column:span 6}
-@media(max-width:900px){.span-6{grid-column:span 12}}
-.metric{text-align:center;padding:12px}
-.metric .mv{font-family:var(--font-mono);font-size:18px;font-weight:700}
-.metric .ml{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px}
-.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
-.badge-green{background:var(--green-dim);color:var(--green)}.badge-orange{background:var(--orange-dim);color:var(--orange)}.badge-purple{background:var(--purple-dim);color:var(--purple)}.badge-red{background:rgba(248,113,113,0.12);color:var(--red)}.badge-cyan{background:var(--cyan-dim);color:var(--cyan)}
-.compare-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--glass-border);font-size:12px}
-.compare-row .label{min-width:180px;color:var(--text-muted);text-transform:uppercase;font-size:10px;letter-spacing:0.05em}
-.compare-row .a,.compare-row .b{flex:1;text-align:center;font-family:var(--font-mono)}
-.compare-row .a{color:var(--cyan)}.compare-row .b{color:var(--purple)}
-.compare-row .winner{color:var(--green);font-weight:700}
-.compare-header{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:2px solid var(--glass-border);margin-bottom:8px}
-.compare-header .label{min-width:180px}
-.compare-header .a,.compare-header .b{flex:1;text-align:center;font-weight:700;font-size:14px}
-.compare-header .a{color:var(--cyan)}.compare-header .b{color:var(--purple)}
+.span-4{grid-column:span 4}.span-6{grid-column:span 6}.span-12{grid-column:span 12}
+@media(max-width:900px){.span-4,.span-6{grid-column:span 12}}
+
+/* Compare layout */
+.compare-container{display:grid;grid-template-columns:1fr 1px 1fr;gap:24px;align-items:start}
+.compare-divider{background:var(--glass-border);height:100%}
+@media(max-width:900px){.compare-container{grid-template-columns:1fr}.compare-divider{display:none}}
+
+.asset-card{background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:12px;padding:20px}
+.asset-card.a{border-color:rgba(0,240,255,0.3)}.asset-card.b{border-color:rgba(192,132,252,0.3)}
+.asset-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--glass-border)}
+.asset-name{font-size:18px;font-weight:700;color:var(--text-primary)}
+.asset-type{font-size:11px;color:var(--text-muted);font-family:var(--font-mono);text-transform:uppercase}
+
+/* Score ring */
+.score-ring{width:100px;height:100px;position:relative;margin:0 auto 16px}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring .track{stroke:var(--glass-border);stroke-width:8;fill:none}
+.score-ring .progress{stroke-width:8;fill:none;stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:314;transition:stroke-dashoffset 1.5s ease-out}
+.score-ring .score-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-ring .score-num{font-family:var(--font-mono);font-size:24px;font-weight:700}
+.score-ring .score-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em}
+.asset-card.a .score-ring .progress{stroke:var(--cyan)}.asset-card.a .score-ring .score-num{color:var(--cyan)}
+.asset-card.b .score-ring .progress{stroke:var(--purple)}.asset-card.b .score-ring .score-num{color:var(--purple)}
+
+/* Metrics */
+.metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+.metric-item{background:var(--glass);border-radius:8px;padding:12px;text-align:center}
+.metric-value{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--text-primary)}
+.metric-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px}
+
+/* Comparison table */
+.compare-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:12px}
+.compare-table th{text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.05em;font-size:10px;border-bottom:2px solid var(--glass-border)}
+.compare-table td{padding:12px 16px;border-bottom:1px solid var(--glass-border);color:var(--text-secondary)}
+.compare-table tr:hover td{background:var(--glass)}
+.compare-table .winner{color:var(--green);font-weight:700}
+.compare-table .metric-col{min-width:200px;color:var(--text-muted)}
+.compare-table .val-a{color:var(--cyan);text-align:center}.compare-table .val-b{color:var(--purple);text-align:center}
+
+/* Doctrine banner */
+.doctrine-banner{background:linear-gradient(135deg,rgba(0,240,255,0.05),rgba(192,132,252,0.05));border:1px solid var(--cyan-dim);border-radius:10px;padding:16px;margin-bottom:20px}
+.doctrine-text{font-size:12px;color:var(--text-secondary);font-style:italic;text-align:center}
+.doctrine-text strong{color:var(--cyan)}
+
+/* Loading */
 .loading{color:var(--text-muted);text-align:center;padding:3rem}
 .spinner{width:18px;height:18px;border:2px solid var(--glass-border);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
 @keyframes spin{to{transform:rotate(360deg)}}
-.select-row{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
-.select-field{flex:1;min-width:200px;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:10px;padding:10px 14px;color:var(--text-primary);font-family:var(--font-mono);font-size:12px;outline:none}
+
+/* Selectors */
+.selector-row{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+.select-field{flex:1;min-width:250px;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:10px;padding:10px 14px;color:var(--text-primary);font-family:var(--font-mono);font-size:12px;outline:none}
 .select-field:focus{border-color:var(--cyan)}
 .btn-action{padding:10px 20px;border-radius:10px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:var(--font-sans);background:linear-gradient(135deg,var(--cyan),var(--purple));color:var(--bg-deep)}
 .btn-action:hover{box-shadow:0 0 30px var(--cyan-dim);transform:translateY(-1px)}
+
+/* Analysis panel */
+.analysis-panel{background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:12px;padding:20px;margin-top:20px}
+.analysis-title{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:12px}
+.analysis-point{display:flex;align-items:start;gap:12px;padding:12px 0;border-bottom:1px solid var(--glass-border)}
+.analysis-point:last-child{border-bottom:none}
+.analysis-icon{font-size:16px;flex-shrink:0}
+.analysis-content{flex:1}
+.analysis-content h4{font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.analysis-content p{font-size:11px;color:var(--text-secondary)}
+
+/* Badge */
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
+.badge-green{background:var(--green-dim);color:var(--green)}.badge-orange{background:var(--orange-dim);color:var(--orange)}.badge-purple{background:var(--purple-dim);color:var(--purple)}.badge-red{background:rgba(248,113,113,0.12);color:var(--red)}.badge-cyan{background:var(--cyan-dim);color:var(--cyan)}.badge-gold{background:rgba(251,191,36,0.12);color:var(--gold)}
 </style>
 </head>
 <body>
-<div class="topbar">
-  <div class="topbar-left">
-    <div class="topbar-logo"><div class="topbar-logo-mark"></div>Collateral<span>Ops</span></div>
+<canvas id="particle-canvas"></canvas>
+<div class="app-shell">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo"><div class="topbar-logo-mark"></div>Collateral<span>Ops</span></div>
+      <div class="topbar-status">ASSET COMPARISON ANALYSIS</div>
+    </div>
+    <div style="display:flex;gap:12px">
+      <a href="/dashboard" class="topbar-btn">Dashboard</a>
+      <a href="/" class="topbar-btn">Home</a>
+      <a href="/explorer" class="topbar-btn">Explorer</a>
+    </div>
   </div>
-  <div style="display:flex;gap:12px">
-    <a href="/" class="topbar-btn">Dashboard</a>
-    <a href="/explorer" class="topbar-btn">Explorer</a>
-  </div>
+
+  <nav class="sidebar">
+    <a href="/dashboard" class="sidebar-item" title="Dashboard">&#128200;</a>
+    <a href="/compare" class="sidebar-item active" title="Compare">&#8646;</a>
+    <a href="/explorer" class="sidebar-item" title="Explorer">&#128194;</a>
+  </nav>
+
+  <main class="main">
+    <div class="wrap">
+      <h1 style="font-size:28px;font-weight:700;margin-bottom:4px">Asset Comparison</h1>
+      <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px">Side-by-side institutional appraisal analysis for collateral decision-making</p>
+      
+      <!-- Doctrine Banner -->
+      <div class="doctrine-banner">
+        <p class="doctrine-text"><strong>Comparative analysis informs relative financeability.</strong> Higher scores do not guarantee liquidity. Both assets require independent proof packets and buyer verification.</p>
+      </div>
+
+      <!-- Asset Selection -->
+      <div class="selector-row">
+        <select class="select-field" id="sel-a"><option value="">Select asset A...</option></select>
+        <select class="select-field" id="sel-b"><option value="">Select asset B...</option></select>
+        <button class="btn-action" onclick="doCompare()">Compare Assets</button>
+      </div>
+
+      <!-- Results -->
+      <div id="result"><div class="loading">Select two assets to begin comparative analysis</div></div>
+    </div>
+  </main>
 </div>
-<div class="wrap">
-  <h1 style="font-size:24px;font-weight:700;margin-bottom:4px">Asset Comparison</h1>
-  <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px">Side-by-side appraisal analysis</p>
-  <div class="select-row">
-    <select class="select-field" id="sel-a"><option value="">Select asset A...</option></select>
-    <select class="select-field" id="sel-b"><option value="">Select asset B...</option></select>
-    <button class="btn-action" onclick="doCompare()">Compare</button>
-  </div>
-  <div id="result"><div class="loading">Select two assets to compare</div></div>
-</div>
+
 <script>
 let allAssets=[];
+function fmt$(v){return typeof v==='number'?'$'+v.toLocaleString(undefined,{maximumFractionDigits:0}):v}
+function fmtN(v){return typeof v==='number'?v.toLocaleString():v}
+
 async function boot(){
   try{
     const r=await fetch('/api/balance-sheet').then(r=>r.json());
     allAssets=r.assets||[];
-    const opts=allAssets.map(a=>`<option value="${a.name}">${a.name} (${a.financeability_score})</option>`).join('');
+    const opts=allAssets.map(a=>`<option value="${a.name}">${a.name} (Financeability: ${a.financeability_score})</option>`).join('');
     document.getElementById('sel-a').innerHTML='<option value="">Select asset A...</option>'+opts;
     document.getElementById('sel-b').innerHTML='<option value="">Select asset B...</option>'+opts;
-  }catch(e){document.getElementById('result').innerHTML=`<div class="loading" style="color:var(--red)">Error: ${e.message}</div>`}
+  }catch(e){document.getElementById('result').innerHTML=`<div class="loading" style="color:var(--red)">Error loading assets: ${e.message}</div>`}
 }
-function fmt$(v){return typeof v==='number'?'$'+v.toLocaleString(undefined,{maximumFractionDigits:0}):v}
-function scoreColor(v){return v>=70?'var(--green)':v>=50?'var(--gold)':v>=30?'var(--orange)':'var(--red)'}
+
 async function doCompare(){
   const aName=document.getElementById('sel-a').value;
   const bName=document.getElementById('sel-b').value;
-  if(!aName||!bName){alert('Select both assets');return}
-  document.getElementById('result').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  if(!aName||!bName){alert('Please select both assets for comparison');return}
+  if(aName===bName){alert('Please select different assets for comparison');return}
+  
+  document.getElementById('result').innerHTML='<div class="loading"><div class="spinner"></div><div style="margin-top:12px">Loading comparative analysis...</div></div>';
+  
   try{
     const r=await fetch(`/api/compare?a=${encodeURIComponent(aName)}&b=${encodeURIComponent(bName)}`).then(r=>r.json());
     const ca=r.asset_a.classification,cb=r.asset_b.classification;
     const aa=r.asset_a.appraisal,ab=r.asset_b.appraisal;
     const sa=ca.signals||{},sb=cb.signals||{};
 
-    function row(label,aVal,bVal,fmt=v=>v){
+    function compareRow(label,aVal,bVal,fmt=v=>v,higherBetter=true){
       const av=fmt(aVal),bv=fmt(bVal);
-      const aWin=typeof aVal==='number'&&typeof bVal==='number'?aVal>bVal:av>bv;
-      const bWin=typeof aVal==='number'&&typeof bVal==='number'?bVal>aVal:bv>av;
-      return`<div class="compare-row"><span class="label">${label}</span><span class="a ${aWin?'winner':''}">${av}</span><span class="b ${bWin?'winner':''}">${bv}</span></div>`;
+      let aWin=false,bWin=false;
+      if(typeof aVal==='number'&&typeof bVal==='number'){
+        aWin=higherBetter?aVal>bVal:aVal<bVal;
+        bWin=higherBetter?bVal>aVal:bVal<aVal;
+      }
+      return`<tr>
+        <td class="metric-col">${label}</td>
+        <td class="val-a ${aWin?'winner':''}">${av}</td>
+        <td class="val-b ${bWin?'winner':''}">${bv}</td>
+      </tr>`;
     }
 
-    let h=`<div class="card">
-      <div class="compare-header"><span class="label">Metric</span><span class="a">${aName}</span><span class="b">${bName}</span></div>
-      ${row('Type',ca.asset_type,cb.asset_type)}
-      ${row('Language',sa.primary_language||'—',sb.primary_language||'—')}
-      ${row('Proof Level',ca.proof_level,cb.proof_level)}
-      ${row('Source Files',sa.total_src||0,sb.total_src||0)}
-      ${row('Financeability',aa.financeability_score,ab.financeability_score)}
-      ${row('Confidence',aa.confidence_score,ab.confidence_score)}
-      ${row('Replacement Cost',aa.replacement_cost_usd,ab.replacement_cost_usd,fmt$)}
-      ${row('As-Is Value',aa.as_is_sale_value_usd,ab.as_is_sale_value_usd,fmt$)}
-      ${row('Productized',aa.productized_value_usd,ab.productized_value_usd,fmt$)}
-      ${row('Liquidation',aa.liquidation_value_usd,ab.liquidation_value_usd,fmt$)}
-      ${row('Collateral Support',aa.collateral_support_value_usd,ab.collateral_support_value_usd,fmt$)}
-      ${row('Market Comparable',aa.market_comparable_value_usd||0,ab.market_comparable_value_usd||0,fmt$)}
-      ${row('Capital Readiness',aa.capital_readiness,ab.capital_readiness)}
-    </div>
+    const aWinOverall=aa.financeability_score>ab.financeability_score;
+    const winnerText=aWinOverall?`${aName} shows higher financeability`:`${bName} shows higher financeability`;
+    const winnerColor=aWinOverall?'var(--cyan)':'var(--purple)';
 
-    <div class="grid" style="margin-top:20px">
-      <div class="card span-6">
-        <div class="card-header"><div class="card-title">${aName} — Next Actions</div></div>
-        ${(aa.next_actions||[]).slice(0,4).map(act=>`<div style="padding:8px 12px;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:8px;margin-bottom:6px;font-size:12px"><span style="color:var(--orange);font-size:10px;text-transform:uppercase;font-weight:600">${act.priority}</span> <span style="margin-left:8px">${act.action}</span></div>`).join('')||'<div style="color:var(--text-muted);font-size:12px">No actions</div>'}
+    let html=`
+      <div class="compare-container">
+        <!-- Asset A -->
+        <div class="asset-card a">
+          <div class="asset-header">
+            <div style="font-size:24px">&#128200;</div>
+            <div>
+              <div class="asset-name">${aName}</div>
+              <div class="asset-type">${ca.asset_type.replace(/_/g,' ')}</div>
+            </div>
+          </div>
+          <div class="score-ring">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+              <circle class="track" cx="50" cy="50" r="45"/>
+              <circle class="progress" cx="50" cy="50" r="45" style="stroke-dashoffset:${314-(314*aa.financeability_score/100)}"/>
+            </svg>
+            <div class="score-text">
+              <div class="score-num">${aa.financeability_score}</div>
+              <div class="score-label">Financeability</div>
+            </div>
+          </div>
+          <div class="metric-grid">
+            <div class="metric-item">
+              <div class="metric-value">${fmt$(aa.collateral_support_value_usd)}</div>
+              <div class="metric-label">Collateral Support</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-value">${fmt$(aa.liquidation_value_usd)}</div>
+              <div class="metric-label">Liquidation Value</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-value">${aa.confidence_score}</div>
+              <div class="metric-label">Confidence</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-value">${ca.proof_level}/7</div>
+              <div class="metric-label">Proof Level</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="compare-divider"></div>
+
+        <!-- Asset B -->
+        <div class="asset-card b">
+          <div class="asset-header">
+            <div style="font-size:24px">&#128200;</div>
+            <div>
+              <div class="asset-name">${bName}</div>
+              <div class="asset-type">${cb.asset_type.replace(/_/g,' ')}</div>
+            </div>
+          </div>
+          <div class="score-ring">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+              <circle class="track" cx="50" cy="50" r="45"/>
+              <circle class="progress" cx="50" cy="50" r="45" style="stroke-dashoffset:${314-(314*ab.financeability_score/100)}"/>
+            </svg>
+            <div class="score-text">
+              <div class="score-num">${ab.financeability_score}</div>
+              <div class="score-label">Financeability</div>
+            </div>
+          </div>
+          <div class="metric-grid">
+            <div class="metric-item">
+              <div class="metric-value">${fmt$(ab.collateral_support_value_usd)}</div>
+              <div class="metric-label">Collateral Support</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-value">${fmt$(ab.liquidation_value_usd)}</div>
+              <div class="metric-label">Liquidation Value</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-value">${ab.confidence_score}</div>
+              <div class="metric-label">Confidence</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-value">${cb.proof_level}/7</div>
+              <div class="metric-label">Proof Level</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="card span-6">
-        <div class="card-header"><div class="card-title">${bName} — Next Actions</div></div>
-        ${(ab.next_actions||[]).slice(0,4).map(act=>`<div style="padding:8px 12px;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:8px;margin-bottom:6px;font-size:12px"><span style="color:var(--orange);font-size:10px;text-transform:uppercase;font-weight:600">${act.priority}</span> <span style="margin-left:8px">${act.action}</span></div>`).join('')||'<div style="color:var(--text-muted);font-size:12px">No actions</div>'}
+
+      <!-- Detailed Comparison Table -->
+      <div class="card" style="margin-top:24px">
+        <div class="card-header">
+          <div class="card-title">Detailed Metric Comparison</div>
+          <div class="card-subtitle">Institutional appraisal breakdown</div>
+        </div>
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>${aName}</th>
+              <th>${bName}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${compareRow('Asset Type',ca.asset_type,cb.asset_type)}
+            ${compareRow('Primary Language',sa.primary_language||'—',sb.primary_language||'—')}
+            ${compareRow('Source Files',sa.total_src||0,sb.total_src||0)}
+            ${compareRow('Proof Level',ca.proof_level,cb.proof_level)}
+            ${compareRow('Financeability Score',aa.financeability_score,ab.financeability_score)}
+            ${compareRow('Confidence Score',aa.confidence_score,ab.confidence_score)}
+            ${compareRow('Strategic Value',aa.replacement_cost_usd,ab.replacement_cost_usd,fmt$)}
+            ${compareRow('Buyer-Today Value',aa.as_is_sale_value_usd,ab.as_is_sale_value_usd,fmt$)}
+            ${compareRow('Productized Value',aa.productized_value_usd,ab.productized_value_usd,fmt$)}
+            ${compareRow('Liquidation Value',aa.liquidation_value_usd,ab.liquidation_value_usd,fmt$)}
+            ${compareRow('Collateral Support',aa.collateral_support_value_usd,ab.collateral_support_value_usd,fmt$)}
+            ${compareRow('Market Comparable',aa.market_comparable_value_usd,ab.market_comparable_value_usd,fmt$)}
+            ${compareRow('Network Effect',aa.network_effect_value_usd,ab.network_effect_value_usd,fmt$)}
+            ${compareRow('Capital Readiness',aa.capital_readiness,ab.capital_readiness)}
+          </tbody>
+        </table>
       </div>
-    </div>`;
-    document.getElementById('result').innerHTML=h;
-  }catch(e){document.getElementById('result').innerHTML=`<div class="loading" style="color:var(--red)">Error: ${e.message}</div>`}
+
+      <!-- Subscore Comparison -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-header">
+          <div class="card-title">Quality Subscore Comparison</div>
+          <div class="card-subtitle">Technical and market assessment breakdown</div>
+        </div>
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>${aName}</th>
+              <th>${bName}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${compareRow('Ownership Clarity',(aa.subscores||{}).ownership_clarity,0,(ab.subscores||{}).ownership_clarity,0)}
+            ${compareRow('Technical Quality',(aa.subscores||{}).technical_quality,0,(ab.subscores||{}).technical_quality,0)}
+            ${compareRow('Market Liquidity',(aa.subscores||{}).market_liquidity,0,(ab.subscores||{}).market_liquidity,0)}
+            ${compareRow('Security Posture',(aa.subscores||{}).security_posture,0,(ab.subscores||{}).security_posture,0)}
+            ${compareRow('Documentation Depth',(aa.subscores||{}).documentation_depth,0,(ab.subscores||{}).documentation_depth,0)}
+            ${compareRow('Activity Recency',(aa.subscores||{}).activity_recency,0,(ab.subscores||{}).activity_recency,0)}
+            ${compareRow('Dependency Health',(aa.subscores||{}).dependency_health,0,(ab.subscores||{}).dependency_health,0)}
+            ${compareRow('Complexity Index',(aa.subscores||{}).complexity_index,0,(ab.subscores||{}).complexity_index,0)}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Institutional Analysis -->
+      <div class="analysis-panel">
+        <div class="analysis-title">Institutional Analysis</div>
+        <div class="analysis-point">
+          <div class="analysis-icon" style="color:${winnerColor}">&#128200;</div>
+          <div class="analysis-content">
+            <h4>Financeability Assessment</h4>
+            <p>${winnerText}. However, relative superiority does not guarantee individual collateral readiness. Both assets require independent proof verification and buyer engagement.</p>
+          </div>
+        </div>
+        <div class="analysis-point">
+          <div class="analysis-icon" style="color:var(--gold)">&#9888;</div>
+          <div class="analysis-content">
+            <h4>Liquidity Considerations</h4>
+            <p>Strategic value differences (${fmt$(Math.abs(aa.replacement_cost_usd-ab.replacement_cost_usd))}) may not translate to liquidation value differences. Recovery confidence depends on buyer universe depth, not code quality alone.</p>
+          </div>
+        </div>
+        <div class="analysis-point">
+          <div class="analysis-icon" style="color:var(--cyan)">&#128194;</div>
+          <div class="analysis-content">
+            <h4>Proof Gap Analysis</h4>
+            <p>Asset A has proof level ${ca.proof_level}/7 while Asset B has ${cb.proof_level}/7. The higher-proof asset may have shorter due diligence timelines but requires verification of proof authenticity.</p>
+          </div>
+        </div>
+        <div class="analysis-point">
+          <div class="analysis-icon" style="color:var(--green)">&#176;</div>
+          <div class="analysis-content">
+            <h4>Collateral Support Recommendation</h4>
+            <p>For lending purposes, prioritize ${aWinOverall?aName:bName} based on financeability, but apply conservative haircuts to both. Recommended LTV: ${Math.round((aWinOverall?aa:ab).collateral_support_value_usd/(aWinOverall?aa:ab).replacement_cost_usd*100)}% of collateral support value.</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('result').innerHTML=html;
+  }catch(e){
+    document.getElementById('result').innerHTML=`<div class="loading" style="color:var(--red)">Comparison failed: ${e.message}</div>`;
+  }
 }
+
+// Particle canvas
+const canvas=document.getElementById('particle-canvas');
+const ctx=canvas.getContext('2d');
+let W,H,particles=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+window.addEventListener('resize',resize);resize();
+class P{constructor(){this.reset()}reset(){this.x=Math.random()*W;this.y=Math.random()*H;this.vx=(Math.random()-0.5)*0.3;this.vy=(Math.random()-0.5)*0.3;this.s=Math.random()*1.5+0.5;this.a=Math.random()*0.4+0.1}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset()}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,Math.PI*2);ctx.fillStyle=`rgba(0,240,255,${this.a})`;ctx.fill()}}
+for(let i=0;i<60;i++)particles.push(new P);
+function anim(){ctx.clearRect(0,0,W,H);for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<140){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle=`rgba(0,240,255,${0.04*(1-d/140)})`;ctx.stroke()}}}particles.forEach(p=>{p.update();p.draw()});requestAnimationFrame(anim)}
+anim();
+
 boot();
 </script>
 </body>

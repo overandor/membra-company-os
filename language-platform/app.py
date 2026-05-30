@@ -129,6 +129,58 @@ def health():
     }
 
 
+# ── Passport API Endpoints ────────────────────────────────────────────
+
+@app.get("/api/stats")
+def stats():
+    """General stats for passport page."""
+    total_files = sum(cls.get("collateral_files", 0) for cls in _classifications.values())
+    total_src = sum(cls.get("signals", {}).get("total_src", 0) for cls in _classifications.values())
+    total_rc = sum(a.get("replacement_cost_usd", 0) for a in _appraisals.values())
+    
+    return {
+        "total_projects": len(_projects),
+        "total_files": total_files,
+        "total_src": total_src,
+        "total_replacement_value_usd": round(total_rc, 2),
+        "generated_at": _last_scan
+    }
+
+
+@app.get("/api/systems")
+def systems():
+    """Systems breakdown for passport page."""
+    from collections import Counter
+    types = Counter(cls.get("asset_type", "unknown") for cls in _classifications.values())
+    
+    systems_data = []
+    for asset_type, count in types.most_common():
+        systems_data.append({
+            "system": {"name": asset_type},
+            "count": count,
+            "label": "Assets"
+        })
+    
+    return {"systems": systems_data}
+
+
+@app.get("/api/workstreams")
+def workstreams():
+    """Workstream breakdown for passport page."""
+    from collections import Counter
+    all_recs = [r for recs in _collateral.values() for r in recs]
+    by_ws = Counter(r.get("workstream", "unknown") for r in all_recs)
+    
+    workstreams_data = []
+    for ws, count in by_ws.most_common(10):
+        workstreams_data.append({
+            "workstream": ws,
+            "count": count
+        })
+    
+    return {"workstreams": workstreams_data}
+
+
 # ── Balance Sheet ──────────────────────────────────────────────────
 
 @app.get("/api/balance-sheet")
@@ -312,7 +364,17 @@ def risk_blocked():
         risks = cls.get("risk_flags", [])
         critical = [r for r in risks if r in ("env_file_detected", "no_license", "no_version_control")]
         if critical:
-            blocked.append({"name": name, "critical_risks": critical, "financeability": _appraisals.get(name, {}).get("financeability_score", 0)})
+            apr = _appraisals.get(name, {})
+            blocked.append({
+                "name": name,
+                "critical_risks": critical,
+                "financeability": apr.get("financeability_score", 0),
+                "replacement_cost_usd": apr.get("replacement_cost_usd", 0),
+                "collateral_support_value_usd": apr.get("collateral_support_value_usd", 0),
+                "asset_type": cls.get("asset_type", "unknown"),
+                "all_risks": risks
+            })
+    blocked.sort(key=lambda b: -b["replacement_cost_usd"])
     return {"total": len(blocked), "items": blocked}
 
 
@@ -324,9 +386,338 @@ def improvement_queue():
         at = _classifications.get(name, {}).get("asset_type", "")
         if fs < 80 and at not in ("junk", "scaffold", "duplicate"):
             actions = apr.get("next_actions", [])
-            queue.append({"name": name, "current_financeability": fs, "replacement_cost": apr.get("replacement_cost_usd", 0), "top_action": actions[0] if actions else None})
-    queue.sort(key=lambda q: (-q["replacement_cost"], q["current_financeability"]))
+            cls = _classifications.get(name, {})
+            queue.append({
+                "name": name,
+                "current_financeability": fs,
+                "replacement_cost_usd": apr.get("replacement_cost_usd", 0),
+                "collateral_support_value_usd": apr.get("collateral_support_value_usd", 0),
+                "top_action": actions[0] if actions else None,
+                "all_actions": actions,
+                "asset_type": at,
+                "proof_level": cls.get("proof_level", 0),
+                "capital_readiness": apr.get("capital_readiness", "Unknown"),
+                "estimated_days": sum(a.get("effort", "0").replace("h","").replace("d","").split() for a in actions[:3] if a.get("effort")) if actions else 0
+            })
+    queue.sort(key=lambda q: (-q["replacement_cost_usd"], q["current_financeability"]))
     return {"total": len(queue), "items": queue}
+
+
+# ── Agent Work Accounting ──────────────────────────────────────────────
+
+@app.get("/api/agent/accounting")
+def agent_accounting():
+    """Returns agent work accounting data for the Agent Accounting tab."""
+    total_work = 0
+    assets_processed = len(_projects)
+    total_files = sum(cls.get("collateral_files", 0) for cls in _classifications.values())
+    total_value_processed = sum(apr.get("replacement_cost_usd", 0) for apr in _appraisals.values())
+    
+    # Estimate work items based on collateral records
+    work_items = []
+    for name, recs in _collateral.items():
+        for r in recs:
+            work_items.append({
+                "asset": name,
+                "workstream": r.get("workstream", "unknown"),
+                "file": r.get("file_path", ""),
+                "sku": r.get("sku", ""),
+                "status": "processed",
+                "value_contribution": r.get("value_estimate", 0)
+            })
+    
+    return {
+        "summary": {
+            "total_work_items": len(work_items),
+            "assets_processed": assets_processed,
+            "total_files_processed": total_files,
+            "total_value_processed_usd": round(total_value_processed, 2),
+            "agent_efficiency": round(len(work_items) / max(1, assets_processed), 2)
+        },
+        "work_items": work_items[:100]  # Limit to 100 items for performance
+    }
+
+
+# ── Capital Readiness Pipeline ─────────────────────────────────────────
+
+@app.get("/api/capital-readiness")
+def capital_readiness_pipeline():
+    """Returns capital readiness pipeline data."""
+    pipeline = {
+        "ready_for_collateral": [],
+        "near_ready": [],
+        "needs_work": [],
+        "not_ready": []
+    }
+    
+    for name, apr in _appraisals.items():
+        fs = apr.get("financeability_score", 0)
+        cls = _classifications.get(name, {})
+        at = cls.get("asset_type", "")
+        if at in ("junk", "scaffold", "duplicate"):
+            continue
+            
+        readiness = {
+            "name": name,
+            "financeability_score": fs,
+            "capital_readiness": apr.get("capital_readiness", "Unknown"),
+            "replacement_cost_usd": apr.get("replacement_cost_usd", 0),
+            "collateral_support_value_usd": apr.get("collateral_support_value_usd", 0),
+            "proof_level": cls.get("proof_level", 0),
+            "asset_type": at
+        }
+        
+        if fs >= 70:
+            pipeline["ready_for_collateral"].append(readiness)
+        elif fs >= 50:
+            pipeline["near_ready"].append(readiness)
+        elif fs >= 30:
+            pipeline["needs_work"].append(readiness)
+        else:
+            pipeline["not_ready"].append(readiness)
+    
+    # Sort each bucket by value
+    for key in pipeline:
+        pipeline[key].sort(key=lambda x: -x["replacement_cost_usd"])
+    
+    return {
+        "summary": {
+            "ready_for_collateral": len(pipeline["ready_for_collateral"]),
+            "near_ready": len(pipeline["near_ready"]),
+            "needs_work": len(pipeline["needs_work"]),
+            "not_ready": len(pipeline["not_ready"]),
+            "total": sum(len(v) for v in pipeline.values())
+        },
+        "pipeline": pipeline
+    }
+
+
+# ── Evidence Chain Data ────────────────────────────────────────────────
+
+@app.get("/api/evidence-chain/{name}")
+def evidence_chain(name: str):
+    """Returns evidence chain data for an asset."""
+    if name not in _classifications:
+        raise HTTPException(404, f"Asset not found: {name}")
+    
+    cls = _classifications[name]
+    proof_level = cls.get("proof_level", 0)
+    
+    # Build evidence chain steps based on proof level
+    steps = [
+        {"step": "discovered", "label": "Discovered", "status": "done" if proof_level >= 0 else "pending"},
+        {"step": "hashed", "label": "Hashed", "status": "done" if proof_level >= 1 else "pending"},
+        {"step": "git_metadata", "label": "Git Metadata", "status": "done" if proof_level >= 3 else "pending"},
+        {"step": "security_scan", "label": "Security Scan", "status": "done" if proof_level >= 3 else "pending"},
+        {"step": "documented", "label": "Documented", "status": "done" if proof_level >= 4 else "pending"},
+        {"step": "test_verified", "label": "Test Verified", "status": "done" if proof_level >= 5 else "pending"},
+        {"step": "build_verified", "label": "Build Verified", "status": "done" if proof_level >= 6 else "pending"}
+    ]
+    
+    return {
+        "asset": name,
+        "proof_level": proof_level,
+        "proof_level_name": cls.get("proof_level_name", "Unknown"),
+        "evidence_steps": steps,
+        "collateral_files": cls.get("collateral_files", 0),
+        "risk_flags": cls.get("risk_flags", [])
+    }
+
+
+# ── Packet Readiness Data ───────────────────────────────────────────────
+
+@app.get("/api/packet-readiness/{name}")
+def packet_readiness(name: str):
+    """Returns collateral packet readiness data for an asset."""
+    if name not in _classifications:
+        raise HTTPException(404, f"Asset not found: {name}")
+    
+    cls = _classifications[name]
+    apr = _appraisals[name]
+    proof_level = cls.get("proof_level", 0)
+    
+    # Define packet sections and their readiness based on proof level
+    sections = [
+        {"name": "Executive Summary", "state": "complete" if proof_level >= 1 else "missing"},
+        {"name": "Asset Identity", "state": "complete" if proof_level >= 1 else "missing"},
+        {"name": "Ownership Statement", "state": "started" if proof_level >= 2 else "missing"},
+        {"name": "Technical Inventory", "state": "complete" if proof_level >= 2 else "started"},
+        {"name": "File Hash Manifest", "state": "complete" if proof_level >= 2 else "missing"},
+        {"name": "Git/Commit Evidence", "state": "complete" if proof_level >= 3 else "started"},
+        {"name": "Build and Test Evidence", "state": "complete" if proof_level >= 5 else "started"},
+        {"name": "Security and Secret Scan", "state": "complete" if len(cls.get("risk_flags", [])) == 0 else "blocked"},
+        {"name": "License and Fork Risk", "state": "complete" if len(cls.get("risk_flags", [])) == 0 else "blocked"},
+        {"name": "Documentation Review", "state": "complete" if proof_level >= 4 else "started"},
+        {"name": "Market Use Case", "state": "complete" if apr.get("as_is_sale_value_usd", 0) > 0 else "started"},
+        {"name": "Valuation Methodology", "state": "complete" if proof_level >= 5 else "missing"},
+        {"name": "Collateral Support Estimate", "state": "complete" if proof_level >= 5 else "missing"},
+        {"name": "Liquidation Route", "state": "complete" if apr.get("liquidation_value_usd", 0) > 0 else "started"}
+    ]
+    
+    # Calculate overall readiness percentage
+    completed = sum(1 for s in sections if s["state"] == "complete")
+    readiness_pct = round((completed / len(sections)) * 100)
+    
+    return {
+        "asset": name,
+        "overall_readiness_pct": readiness_pct,
+        "proof_level": proof_level,
+        "sections": sections,
+        "total_sections": len(sections),
+        "completed_sections": completed,
+        "blocked_sections": sum(1 for s in sections if s["state"] == "blocked"),
+        "missing_sections": sum(1 for s in sections if s["state"] == "missing")
+    }
+
+
+# ── Buyer Universe Data ─────────────────────────────────────────────────
+
+@app.get("/api/buyer-universe")
+def buyer_universe():
+    """Returns buyer universe data for institutional buyers."""
+    buyers = [
+        {
+            "id": "buyer_001",
+            "name": "Strategic Tech Acquisitions",
+            "type": "Strategic",
+            "focus_areas": ["developer_tools", "infrastructure", "platforms"],
+            "min_financeability": 50,
+            "min_collateral_value": 100000,
+            "active": True
+        },
+        {
+            "id": "buyer_002",
+            "name": "Institutional Software Fund",
+            "type": "Financial",
+            "focus_areas": ["enterprise_software", "saas", "platforms"],
+            "min_financeability": 60,
+            "min_collateral_value": 500000,
+            "active": True
+        },
+        {
+            "id": "buyer_003",
+            "name": "Open Source Collective",
+            "type": "Community",
+            "focus_areas": ["open_source", "developer_tools", "libraries"],
+            "min_financeability": 40,
+            "min_collateral_value": 50000,
+            "active": True
+        },
+        {
+            "id": "buyer_004",
+            "name": "Private Equity Ventures",
+            "type": "Financial",
+            "focus_areas": ["enterprise", "infrastructure", "platforms"],
+            "min_financeability": 70,
+            "min_collateral_value": 1000000,
+            "active": True
+        }
+    ]
+    
+    # Match assets to buyers
+    matches = []
+    for name, apr in _appraisals.items():
+        cls = _classifications.get(name, {})
+        fs = apr.get("financeability_score", 0)
+        csv = apr.get("collateral_support_value_usd", 0)
+        at = cls.get("asset_type", "")
+        
+        if at in ("junk", "scaffold", "duplicate"):
+            continue
+            
+        for buyer in buyers:
+            if not buyer["active"]:
+                continue
+            if fs >= buyer["min_financeability"] and csv >= buyer["min_collateral_value"]:
+                matches.append({
+                    "asset": name,
+                    "buyer": buyer["name"],
+                    "buyer_id": buyer["id"],
+                    "match_score": min(100, (fs + (csv / buyer["min_collateral_value"]) * 10) / 2),
+                    "collateral_value_usd": csv
+                })
+    
+    matches.sort(key=lambda m: -m["match_score"])
+    
+    return {
+        "buyers": buyers,
+        "matches": matches[:50],  # Limit to top 50 matches
+        "total_matches": len(matches)
+    }
+
+
+# ── Liquidation Route Data ───────────────────────────────────────────────
+
+@app.get("/api/liquidation-route/{name}")
+def liquidation_route(name: str):
+    """Returns liquidation route data for an asset."""
+    if name not in _classifications:
+        raise HTTPException(404, f"Asset not found: {name}")
+    
+    cls = _classifications[name]
+    apr = _appraisals[name]
+    
+    # Determine liquidation route based on asset type and financeability
+    at = cls.get("asset_type", "")
+    fs = apr.get("financeability_score", 0)
+    liq_val = apr.get("liquidation_value_usd", 0)
+    
+    routes = []
+    
+    if at in ("mvp", "prototype", "poc"):
+        routes.append({
+            "route": "Direct Sale to Developer",
+            "priority": "high",
+            "estimated_recovery_pct": 60,
+            "timeframe_days": 30,
+            "description": "Sell directly to individual developer or small team"
+        })
+    
+    if at in ("library", "sdk", "api", "tool"):
+        routes.append({
+            "route": "Open Source Release",
+            "priority": "medium",
+            "estimated_recovery_pct": 40,
+            "timeframe_days": 60,
+            "description": "Release as open source to build community value"
+        })
+    
+    if fs >= 50:
+        routes.append({
+            "route": "Strategic Buyer Acquisition",
+            "priority": "high",
+            "estimated_recovery_pct": 70,
+            "timeframe_days": 90,
+            "description": "Sell to strategic buyer in related space"
+        })
+    
+    if fs >= 70:
+        routes.append({
+            "route": "Secondary Market Auction",
+            "priority": "medium",
+            "estimated_recovery_pct": 80,
+            "timeframe_days": 120,
+            "description": "List on secondary market for institutional buyers"
+        })
+    
+    routes.append({
+        "route": "Asset Liquidation Auction",
+        "priority": "low",
+        "estimated_recovery_pct": 30,
+        "timeframe_days": 180,
+        "description": "Bulk liquidation of code and assets"
+    })
+    
+    routes.sort(key=lambda r: -r["estimated_recovery_pct"])
+    
+    return {
+        "asset": name,
+        "asset_type": at,
+        "financeability_score": fs,
+        "liquidation_value_usd": liq_val,
+        "recommended_routes": routes[:3],
+        "all_routes": routes
+    }
 
 
 # ── Rescan (local mode only) ──────────────────────────────────────
@@ -342,6 +733,11 @@ def rescan():
 # ── Pages ──────────────────────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse)
+def landing():
+    return (PAGES / "landing.html").read_text()
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
 def dashboard():
     return (PAGES / "dashboard.html").read_text()
 
