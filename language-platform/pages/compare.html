@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Compare Assets — CollateralOps 2040</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg-deep:#020204;--bg-surface:#0a0a0f;--bg-elevated:#12121a;--glass:rgba(255,255,255,0.03);--glass-border:rgba(255,255,255,0.06);--text-primary:#f0f0f8;--text-secondary:#8a8a9e;--text-muted:#4a4a5e;--cyan:#00f0ff;--cyan-dim:rgba(0,240,255,0.12);--orange:#ff6b35;--orange-dim:rgba(255,107,53,0.12);--purple:#c084fc;--purple-dim:rgba(192,132,252,0.12);--green:#34d399;--green-dim:rgba(52,211,153,0.12);--gold:#fbbf24;--red:#f87171;--font-sans:'Space Grotesk',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-primary);line-height:1.5;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--bg-surface);border-bottom:1px solid var(--glass-border);height:48px;position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.topbar-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;letter-spacing:0.05em}
+.topbar-logo span{color:var(--cyan)}
+.topbar-logo-mark{width:24px;height:24px;border:1.5px solid var(--cyan);border-radius:6px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 12px var(--cyan-dim)}
+.topbar-logo-mark::before{content:'';position:absolute;width:8px;height:8px;background:var(--cyan);border-radius:2px;transform:rotate(45deg)}
+.topbar-btn{padding:6px 14px;border-radius:6px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-secondary);font-size:12px;font-family:var(--font-mono);cursor:pointer;transition:all 0.2s;text-decoration:none}
+.topbar-btn:hover{border-color:var(--cyan);color:var(--text-primary)}
+.wrap{max-width:1200px;margin:0 auto;padding:24px}
+.card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:24px;position:relative;overflow:hidden;margin-bottom:20px}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.3}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:13px;font-weight:600;color:var(--text-secondary);letter-spacing:0.05em;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px}
+.span-6{grid-column:span 6}
+@media(max-width:900px){.span-6{grid-column:span 12}}
+.metric{text-align:center;padding:12px}
+.metric .mv{font-family:var(--font-mono);font-size:18px;font-weight:700}
+.metric .ml{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
+.badge-green{background:var(--green-dim);color:var(--green)}.badge-orange{background:var(--orange-dim);color:var(--orange)}.badge-purple{background:var(--purple-dim);color:var(--purple)}.badge-red{background:rgba(248,113,113,0.12);color:var(--red)}.badge-cyan{background:var(--cyan-dim);color:var(--cyan)}
+.compare-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--glass-border);font-size:12px}
+.compare-row .label{min-width:180px;color:var(--text-muted);text-transform:uppercase;font-size:10px;letter-spacing:0.05em}
+.compare-row .a,.compare-row .b{flex:1;text-align:center;font-family:var(--font-mono)}
+.compare-row .a{color:var(--cyan)}.compare-row .b{color:var(--purple)}
+.compare-row .winner{color:var(--green);font-weight:700}
+.compare-header{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:2px solid var(--glass-border);margin-bottom:8px}
+.compare-header .label{min-width:180px}
+.compare-header .a,.compare-header .b{flex:1;text-align:center;font-weight:700;font-size:14px}
+.compare-header .a{color:var(--cyan)}.compare-header .b{color:var(--purple)}
+.loading{color:var(--text-muted);text-align:center;padding:3rem}
+.spinner{width:18px;height:18px;border:2px solid var(--glass-border);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.select-row{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+.select-field{flex:1;min-width:200px;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:10px;padding:10px 14px;color:var(--text-primary);font-family:var(--font-mono);font-size:12px;outline:none}
+.select-field:focus{border-color:var(--cyan)}
+.btn-action{padding:10px 20px;border-radius:10px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:var(--font-sans);background:linear-gradient(135deg,var(--cyan),var(--purple));color:var(--bg-deep)}
+.btn-action:hover{box-shadow:0 0 30px var(--cyan-dim);transform:translateY(-1px)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo"><div class="topbar-logo-mark"></div>Collateral<span>Ops</span></div>
+  </div>
+  <div style="display:flex;gap:12px">
+    <a href="/" class="topbar-btn">Dashboard</a>
+    <a href="/explorer" class="topbar-btn">Explorer</a>
+  </div>
+</div>
+<div class="wrap">
+  <h1 style="font-size:24px;font-weight:700;margin-bottom:4px">Asset Comparison</h1>
+  <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px">Side-by-side appraisal analysis</p>
+  <div class="select-row">
+    <select class="select-field" id="sel-a"><option value="">Select asset A...</option></select>
+    <select class="select-field" id="sel-b"><option value="">Select asset B...</option></select>
+    <button class="btn-action" onclick="doCompare()">Compare</button>
+  </div>
+  <div id="result"><div class="loading">Select two assets to compare</div></div>
+</div>
+<script>
+let allAssets=[];
+async function boot(){
+  try{
+    const r=await fetch('/api/balance-sheet').then(r=>r.json());
+    allAssets=r.assets||[];
+    const opts=allAssets.map(a=>`<option value="${a.name}">${a.name} (${a.financeability_score})</option>`).join('');
+    document.getElementById('sel-a').innerHTML='<option value="">Select asset A...</option>'+opts;
+    document.getElementById('sel-b').innerHTML='<option value="">Select asset B...</option>'+opts;
+  }catch(e){document.getElementById('result').innerHTML=`<div class="loading" style="color:var(--red)">Error: ${e.message}</div>`}
+}
+function fmt$(v){return typeof v==='number'?'$'+v.toLocaleString(undefined,{maximumFractionDigits:0}):v}
+function scoreColor(v){return v>=70?'var(--green)':v>=50?'var(--gold)':v>=30?'var(--orange)':'var(--red)'}
+async function doCompare(){
+  const aName=document.getElementById('sel-a').value;
+  const bName=document.getElementById('sel-b').value;
+  if(!aName||!bName){alert('Select both assets');return}
+  document.getElementById('result').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  try{
+    const r=await fetch(`/api/compare?a=${encodeURIComponent(aName)}&b=${encodeURIComponent(bName)}`).then(r=>r.json());
+    const ca=r.asset_a.classification,cb=r.asset_b.classification;
+    const aa=r.asset_a.appraisal,ab=r.asset_b.appraisal;
+    const sa=ca.signals||{},sb=cb.signals||{};
+
+    function row(label,aVal,bVal,fmt=v=>v){
+      const av=fmt(aVal),bv=fmt(bVal);
+      const aWin=typeof aVal==='number'&&typeof bVal==='number'?aVal>bVal:av>bv;
+      const bWin=typeof aVal==='number'&&typeof bVal==='number'?bVal>aVal:bv>av;
+      return`<div class="compare-row"><span class="label">${label}</span><span class="a ${aWin?'winner':''}">${av}</span><span class="b ${bWin?'winner':''}">${bv}</span></div>`;
+    }
+
+    let h=`<div class="card">
+      <div class="compare-header"><span class="label">Metric</span><span class="a">${aName}</span><span class="b">${bName}</span></div>
+      ${row('Type',ca.asset_type,cb.asset_type)}
+      ${row('Language',sa.primary_language||'—',sb.primary_language||'—')}
+      ${row('Proof Level',ca.proof_level,cb.proof_level)}
+      ${row('Source Files',sa.total_src||0,sb.total_src||0)}
+      ${row('Financeability',aa.financeability_score,ab.financeability_score)}
+      ${row('Confidence',aa.confidence_score,ab.confidence_score)}
+      ${row('Replacement Cost',aa.replacement_cost_usd,ab.replacement_cost_usd,fmt$)}
+      ${row('As-Is Value',aa.as_is_sale_value_usd,ab.as_is_sale_value_usd,fmt$)}
+      ${row('Productized',aa.productized_value_usd,ab.productized_value_usd,fmt$)}
+      ${row('Liquidation',aa.liquidation_value_usd,ab.liquidation_value_usd,fmt$)}
+      ${row('Collateral Support',aa.collateral_support_value_usd,ab.collateral_support_value_usd,fmt$)}
+      ${row('Market Comparable',aa.market_comparable_value_usd||0,ab.market_comparable_value_usd||0,fmt$)}
+      ${row('Capital Readiness',aa.capital_readiness,ab.capital_readiness)}
+    </div>
+
+    <div class="grid" style="margin-top:20px">
+      <div class="card span-6">
+        <div class="card-header"><div class="card-title">${aName} — Next Actions</div></div>
+        ${(aa.next_actions||[]).slice(0,4).map(act=>`<div style="padding:8px 12px;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:8px;margin-bottom:6px;font-size:12px"><span style="color:var(--orange);font-size:10px;text-transform:uppercase;font-weight:600">${act.priority}</span> <span style="margin-left:8px">${act.action}</span></div>`).join('')||'<div style="color:var(--text-muted);font-size:12px">No actions</div>'}
+      </div>
+      <div class="card span-6">
+        <div class="card-header"><div class="card-title">${bName} — Next Actions</div></div>
+        ${(ab.next_actions||[]).slice(0,4).map(act=>`<div style="padding:8px 12px;background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:8px;margin-bottom:6px;font-size:12px"><span style="color:var(--orange);font-size:10px;text-transform:uppercase;font-weight:600">${act.priority}</span> <span style="margin-left:8px">${act.action}</span></div>`).join('')||'<div style="color:var(--text-muted);font-size:12px">No actions</div>'}
+      </div>
+    </div>`;
+    document.getElementById('result').innerHTML=h;
+  }catch(e){document.getElementById('result').innerHTML=`<div class="loading" style="color:var(--red)">Error: ${e.message}</div>`}
+}
+boot();
+</script>
+</body>
+</html>
