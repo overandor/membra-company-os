@@ -201,6 +201,8 @@ body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-pri
     <div class="topbar-right">
       <a href="/" style="padding:6px 14px;border-radius:6px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-secondary);font-size:12px;font-family:var(--font-mono);text-decoration:none;transition:all 0.2s;margin-right:8px">Home</a>
       <a href="/compare" style="padding:6px 14px;border-radius:6px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-secondary);font-size:12px;font-family:var(--font-mono);text-decoration:none;transition:all 0.2s;margin-right:8px">Compare</a>
+      <a href="/api/export/balance-sheet?format=json" class="topbar-btn" title="Export JSON" download style="margin-right:4px">JSON</a>
+      <a href="/api/export/balance-sheet?format=csv" class="topbar-btn" title="Export CSV" download style="margin-right:8px">CSV</a>
       <div class="view-toggle">
         <button class="view-btn active" onclick="setView('builder')">BUILDER</button>
         <button class="view-btn" onclick="setView('lender')">LENDER</button>

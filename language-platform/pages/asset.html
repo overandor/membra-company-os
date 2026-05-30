@@ -167,6 +167,8 @@ body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-pri
       <a href="/dashboard" class="topbar-btn">Dashboard</a>
       <a href="/" class="topbar-btn">Home</a>
       <a href="/compare" class="topbar-btn">Compare</a>
+      <a id="export-json" class="topbar-btn" download>JSON</a>
+      <a id="export-csv" class="topbar-btn" download>CSV</a>
     </div>
   </div>
 
@@ -183,6 +185,8 @@ body{font-family:var(--font-sans);background:var(--bg-deep);color:var(--text-pri
 
 <script>
 const name=window.location.pathname.split('/').pop();
+document.getElementById('export-json').href='/api/export/asset/'+encodeURIComponent(name)+'?format=json';
+document.getElementById('export-csv').href='/api/export/asset/'+encodeURIComponent(name)+'?format=csv';
 function fmt$(v){return typeof v==='number'?'$'+v.toLocaleString(undefined,{maximumFractionDigits:0}):v}
 function fmtN(v){return typeof v==='number'?v.toLocaleString():v}
 function scoreColor(v){return v>=70?'var(--green)':v>=50?'var(--gold)':v>=30?'var(--orange)':'var(--red)'}
@@ -367,17 +371,77 @@ async function boot(){
         `).join('')}
       </div>
 
+      <!-- Timeline -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-header"><div class="card-title">Appraisal Timeline</div><div class="card-subtitle">Historical value evolution and milestones</div></div>
+        <div id="timeline-container"><div style="color:var(--text-muted);font-size:12px">Loading timeline...</div></div>
+      </div>
+
+      <!-- Preview Modal -->
+      <div id="preview-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(2,2,4,0.85);z-index:200;align-items:center;justify-content:center;padding:24px">
+        <div style="background:var(--bg-elevated);border:1px solid var(--glass-border);border-radius:16px;max-width:800px;width:100%;max-height:80vh;overflow:auto;padding:24px;position:relative">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <div class="card-title">Packet Preview</div>
+            <button onclick="document.getElementById('preview-modal').style.display='none'" style="background:transparent;border:1px solid var(--glass-border);color:var(--text-secondary);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:var(--font-mono);font-size:12px">Close</button>
+          </div>
+          <pre id="preview-content" style="background:var(--bg-deep);border:1px solid var(--glass-border);border-radius:10px;padding:16px;font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);overflow:auto;white-space:pre-wrap"></pre>
+        </div>
+      </div>
+
       <!-- Navigation -->
       <div class="links">
-        <a href="/">← Back to Dashboard</a>
+        <a href="/dashboard">← Back to Dashboard</a>
         <a href="/compare">Compare with Other Assets</a>
+        <a href="#" onclick="showPreview();return false">Preview Packet</a>
       </div>
     `;
 
     document.getElementById('content').innerHTML=html;
+    loadTimeline();
   }catch(e){
     document.getElementById('content').innerHTML=`<div class="loading" style="color:var(--red)">Error loading asset: ${e.message}</div>`;
   }
+}
+
+/* Preview modal */
+async function showPreview(){
+  try{
+    const r=await fetch('/api/asset/'+name).then(r=>r.json());
+    document.getElementById('preview-content').textContent=JSON.stringify(r,null,2);
+    document.getElementById('preview-modal').style.display='flex';
+  }catch(e){alert('Preview error: '+e.message)}
+}
+
+/* Timeline */
+async function loadTimeline(){
+  try{
+    const r=await fetch('/api/timeline/'+name).then(r=>r.json());
+    const t=r.timeline||[];
+    if(!t.length){document.getElementById('timeline-container').innerHTML='<div style="color:var(--text-muted);font-size:12px">No timeline data</div>';return}
+    const maxFS=Math.max(...t.map(x=>x.financeability_score),1);
+    const html=t.map((p,i)=>{
+      const fsPct=(p.financeability_score/maxFS)*100;
+      const confPct=(p.confidence_score/100)*100;
+      return`
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--glass-border)">
+        <div style="min-width:40px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${p.period}</div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <div style="font-family:var(--font-mono);font-size:12px;color:var(--text-primary);min-width:30px">${p.financeability_score}</div>
+            <div class="val-bar-track" style="height:6px;border-radius:3px"><div class="val-bar-fill" style="width:${fsPct}%;height:100%;background:var(--cyan)"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);min-width:30px">${p.confidence_score}</div>
+            <div class="val-bar-track" style="height:6px;border-radius:3px"><div class="val-bar-fill" style="width:${confPct}%;height:100%;background:var(--purple)"></div></div>
+          </div>
+        </div>
+        <div style="min-width:140px;text-align:right">
+          ${p.milestones.map(m=>`<span style="display:inline-block;padding:2px 8px;border-radius:4px;background:var(--cyan-dim);color:var(--cyan);font-size:10px;margin:2px">${m}</span>`).join('')}
+        </div>
+      </div>`
+    }).join('');
+    document.getElementById('timeline-container').innerHTML=`<div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Financeability (cyan) / Confidence (purple)</div>${html}`;
+  }catch(e){document.getElementById('timeline-container').innerHTML=`<div style="color:var(--red);font-size:12px">Error: ${e.message}</div>`}
 }
 
 // Particle canvas

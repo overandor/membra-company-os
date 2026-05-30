@@ -12,9 +12,12 @@ import time
 from pathlib import Path
 from typing import Optional
 
+import csv
+import io
+
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 
 app = FastAPI(
     title="CollateralOps",
@@ -768,6 +771,144 @@ def compare_api(a: str, b: str):
         "asset_a": {"name": a, "classification": _classifications[a], "appraisal": _appraisals[a]},
         "asset_b": {"name": b, "classification": _classifications[b], "appraisal": _appraisals[b]},
     }
+
+
+@app.get("/api/export/balance-sheet")
+def export_balance_sheet(format: str = Query("json", enum=["json", "csv"])):
+    """Export the full balance sheet as JSON or CSV."""
+    if format == "json":
+        data = balance_sheet()
+        return Response(
+            content=json.dumps(data, indent=2, default=str),
+            media_type="application/json",
+            headers={"Content-Disposition": 'attachment; filename="collateralops-balance-sheet.json"'}
+        )
+    # CSV
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "name", "asset_type", "proof_level", "primary_language", "total_src",
+        "financeability_score", "confidence_score", "replacement_cost_usd",
+        "as_is_sale_value_usd", "productized_value_usd", "liquidation_value_usd",
+        "collateral_support_value_usd", "market_comparable_value_usd",
+        "network_effect_value_usd", "complexity_adjusted_value_usd",
+        "recommended_ltv_min", "recommended_ltv_max", "capital_readiness",
+        "risk_count", "deduction_count", "action_count"
+    ])
+    data = balance_sheet()
+    for a in data.get("assets", []):
+        apr = a.get("appraisal", {})
+        ltv = apr.get("recommended_ltv", {})
+        writer.writerow([
+            a.get("name"), a.get("asset_type"), a.get("proof_level"),
+            a.get("primary_language"), a.get("total_src"),
+            apr.get("financeability_score"), apr.get("confidence_score"),
+            apr.get("replacement_cost_usd"), apr.get("as_is_sale_value_usd"),
+            apr.get("productized_value_usd"), apr.get("liquidation_value_usd"),
+            apr.get("collateral_support_value_usd"), apr.get("market_comparable_value_usd"),
+            apr.get("network_effect_value_usd"), apr.get("complexity_adjusted_value_usd"),
+            ltv.get("min_pct"), ltv.get("max_pct"), apr.get("capital_readiness"),
+            len(apr.get("risk_matrix", {})), len(apr.get("deductions", [])),
+            len(apr.get("next_actions", []))
+        ])
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="collateralops-balance-sheet.csv"'}
+    )
+
+
+@app.get("/api/timeline/{name}")
+def timeline(name: str):
+    """Generate synthetic appraisal timeline for an asset."""
+    if name not in _classifications:
+        raise HTTPException(404, "Asset not found")
+    apr = _appraisals.get(name, {})
+    cls = _classifications.get(name, {})
+    signals = cls.get("signals", {})
+    commits = signals.get("commit_count", 10)
+    has_tests = signals.get("has_tests", False)
+    has_ci = signals.get("has_ci", False)
+
+    # Generate 4-6 historical points based on commit maturity
+    points = max(4, min(6, commits // 3))
+    timeline = []
+    base_fs = apr.get("financeability_score", 50)
+    base_conf = apr.get("confidence_score", 50)
+    base_rc = apr.get("replacement_cost_usd", 50000)
+    base_pv = apr.get("productized_value_usd", 30000)
+
+    for i in range(points):
+        progress = (i + 1) / points
+        # Simulate growth curve: starts lower, grows to current
+        fs = int(base_fs * (0.3 + 0.7 * progress * progress))
+        conf = int(base_conf * (0.4 + 0.6 * progress))
+        rc = int(base_rc * (0.2 + 0.8 * progress))
+        pv = int(base_pv * (0.1 + 0.9 * progress))
+        # Add milestones
+        milestones = []
+        if i == 0:
+            milestones.append("Initial commit")
+        if has_tests and i == points - 2:
+            milestones.append("Test suite added")
+        if has_ci and i == points - 1:
+            milestones.append("CI/CD integrated")
+        if i == points - 1:
+            milestones.append("Current appraisal")
+        timeline.append({
+            "period": f"Q{i + 1}",
+            "financeability_score": fs,
+            "confidence_score": conf,
+            "replacement_cost_usd": rc,
+            "productized_value_usd": pv,
+            "milestones": milestones,
+        })
+    return {"name": name, "timeline": timeline, "generated_at": time.time()}
+
+
+@app.get("/api/export/asset/{name}")
+def export_asset(name: str, format: str = Query("json", enum=["json", "csv"])):
+    """Export a single asset appraisal as JSON or CSV."""
+    if name not in _classifications:
+        raise HTTPException(404, "Asset not found")
+    cls = _classifications[name]
+    apr = _appraisals[name]
+    if format == "json":
+        return Response(
+            content=json.dumps({"name": name, "classification": cls, "appraisal": apr}, indent=2, default=str),
+            media_type="application/json",
+            headers={"Content-Disposition": f'attachment; filename="collateralops-{name}.json"'}
+        )
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["field", "value"])
+    writer.writerow(["name", name])
+    writer.writerow(["asset_type", cls.get("asset_type")])
+    writer.writerow(["proof_level", cls.get("proof_level")])
+    writer.writerow(["financeability_score", apr.get("financeability_score")])
+    writer.writerow(["confidence_score", apr.get("confidence_score")])
+    writer.writerow(["replacement_cost_usd", apr.get("replacement_cost_usd")])
+    writer.writerow(["as_is_sale_value_usd", apr.get("as_is_sale_value_usd")])
+    writer.writerow(["productized_value_usd", apr.get("productized_value_usd")])
+    writer.writerow(["liquidation_value_usd", apr.get("liquidation_value_usd")])
+    writer.writerow(["collateral_support_value_usd", apr.get("collateral_support_value_usd")])
+    writer.writerow(["market_comparable_value_usd", apr.get("market_comparable_value_usd")])
+    writer.writerow(["network_effect_value_usd", apr.get("network_effect_value_usd")])
+    writer.writerow(["complexity_adjusted_value_usd", apr.get("complexity_adjusted_value_usd")])
+    writer.writerow(["capital_readiness", apr.get("capital_readiness")])
+    for k, v in apr.get("subscores", {}).items():
+        writer.writerow([f"subscore_{k}", v])
+    for k, v in apr.get("risk_matrix", {}).items():
+        writer.writerow([f"risk_{k}", v])
+    for d in apr.get("deductions", []):
+        writer.writerow([f"deduction_{d.get('category')}", f"{d.get('impact')}: {d.get('reason')}"])
+    for act in apr.get("next_actions", []):
+        writer.writerow([f"action_{act.get('priority')}", f"{act.get('action')} ({act.get('effort')})"])
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="collateralops-{name}.csv"'}
+    )
 
 
 if __name__ == "__main__":
