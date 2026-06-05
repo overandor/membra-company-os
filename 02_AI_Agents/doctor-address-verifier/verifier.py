@@ -1,6 +1,8 @@
 """
 Core verification engine for doctor address verification.
-Queries NPPES API, generates proof links, and uses Ollama for LLM-based analysis.
+
+Queries NPPES API, performs real web crawling of provider directories,
+generates proof links, and uses Ollama for LLM-based analysis of all evidence.
 """
 
 import re
@@ -8,6 +10,8 @@ import time
 import json
 import urllib.parse
 import requests
+
+from web_crawler import crawl_all_sources, summarize_crawl_results
 
 
 NPPES_API = "https://npiregistry.cms.hhs.gov/api/"
@@ -207,7 +211,7 @@ def call_ollama(prompt, host="http://localhost:11434", model="llama3.1"):
         "model": model,
         "prompt": prompt,
         "stream": False,
-        "options": {"temperature": 0.1, "num_predict": 500},
+        "options": {"temperature": 0.1, "num_predict": 800},
     }
     try:
         resp = requests.post(url, json=payload, timeout=120)
@@ -217,16 +221,49 @@ def call_ollama(prompt, host="http://localhost:11434", model="llama3.1"):
         return f"LLM unavailable: {e}"
 
 
-def build_llm_prompt(doctor_name, sheet_address, sheet_city, npi_data, hospital_info):
-    """Build a prompt for Ollama to analyze verification evidence."""
-    prompt = f"""You are a healthcare provider address verification agent.
+def check_ollama_status(host="http://localhost:11434"):
+    """Check if Ollama is running and responsive."""
+    try:
+        resp = requests.get(f"{host}/api/tags", timeout=5)
+        if resp.status_code == 200:
+            data = resp.json()
+            models = [m.get("name", "") for m in data.get("models", [])]
+            return {"running": True, "models": models}
+    except Exception:
+        pass
+    return {"running": False, "models": []}
 
-Analyze the following evidence and determine if the doctor's address is correct.
+
+def pull_ollama_model(model="llama3.1", host="http://localhost:11434"):
+    """Pull a model in Ollama (blocking)."""
+    try:
+        resp = requests.post(
+            f"{host}/api/pull",
+            json={"name": model, "stream": False},
+            timeout=600,  # Models can take a while to download
+        )
+        return resp.status_code == 200
+    except Exception:
+        return False
+
+
+def build_llm_prompt(doctor_name, sheet_address, sheet_city, npi_data,
+                     hospital_info, crawl_summary=None):
+    """
+    Build a comprehensive prompt for Ollama to analyze ALL verification evidence.
+    Now includes real crawled web data alongside NPPES and hospital detection.
+    """
+    prompt = f"""You are a healthcare provider address verification agent.
+You have access to multiple data sources including the federal NPPES registry,
+real-time web crawling of provider directories (Doximity, Healthgrades, WebMD),
+and hospital system databases.
+
+Analyze ALL the following evidence and determine if the doctor's address is correct.
 
 DOCTOR: {doctor_name}
 SHEET ADDRESS: {sheet_address}, {sheet_city}
 
-NPPES REGISTRY DATA:
+=== NPPES REGISTRY DATA ===
 """
     if npi_data:
         prompt += f"""  NPI: {npi_data['npi']}
@@ -239,23 +276,42 @@ NPPES REGISTRY DATA:
 
     if hospital_info:
         prompt += f"""
-HOSPITAL SYSTEM MATCH:
+=== HOSPITAL SYSTEM MATCH ===
   System: {hospital_info['name']}
   Tag: {hospital_info['tag']}
 """
 
+    if crawl_summary:
+        prompt += f"""
+=== WEB CRAWLING EVIDENCE ===
+  Sources checked: {crawl_summary['sources_checked']}
+  Sources with confirmed address: {crawl_summary['sources_with_address']}
+"""
+        if crawl_summary['addresses_found']:
+            prompt += "  Addresses found:\n"
+            for source, addr in crawl_summary['addresses_found']:
+                prompt += f"    - {source}: {addr}\n"
+        if crawl_summary['address_consensus']:
+            prompt += f"  Consensus address: {crawl_summary['address_consensus']}\n"
+        prompt += f"\n  Full evidence:\n{crawl_summary['evidence_summary']}\n"
+
     prompt += """
-Based on this evidence, provide:
+=== YOUR TASK ===
+Based on ALL the evidence above (NPPES, hospital system, and web crawling),
+provide your analysis. Weigh multiple confirming sources more heavily.
+
 1. VERDICT: One of [EXTERNALLY SUPPORTED, REVIEW - <reason>, UNVERIFIED]
 2. CONFIDENCE: One of [High, Medium, Low]
-3. EXPLANATION: One sentence summary of your reasoning.
-4. CORRECTED_ADDRESS: If the address should be different, provide the correct one. Otherwise write "N/A".
+3. EXPLANATION: 2-3 sentences summarizing your reasoning across all evidence sources.
+4. CORRECTED_ADDRESS: If the address should be different based on evidence, provide it. Otherwise write "N/A".
+5. SOURCES_CONFIRMING: Number of independent sources that confirm the address.
 
 Format your response as:
 VERDICT: ...
 CONFIDENCE: ...
 EXPLANATION: ...
 CORRECTED_ADDRESS: ...
+SOURCES_CONFIRMING: ...
 """
     return prompt
 
@@ -267,6 +323,7 @@ def parse_llm_response(response):
         "confidence": "Medium",
         "explanation": "",
         "corrected_address": "",
+        "sources_confirming": 0,
     }
 
     for line in response.strip().split("\n"):
@@ -281,22 +338,31 @@ def parse_llm_response(response):
             val = line.replace("CORRECTED_ADDRESS:", "").strip()
             if val.upper() not in ("N/A", "NONE", ""):
                 result["corrected_address"] = val
+        elif line.startswith("SOURCES_CONFIRMING:"):
+            try:
+                result["sources_confirming"] = int(
+                    line.replace("SOURCES_CONFIRMING:", "").strip()
+                )
+            except ValueError:
+                pass
 
     return result
 
 
-def verify_doctor(doctor, ollama_host=None, ollama_model=None, use_ollama=True):
+def verify_doctor(doctor, ollama_host=None, ollama_model=None,
+                  use_ollama=True, enable_crawling=True):
     """
-    Verify a single doctor's address.
+    Verify a single doctor's address using all available methods.
 
     Args:
         doctor: dict with keys: name, address, city, state, zip, specialty
         ollama_host: Ollama API endpoint
         ollama_model: Model name
         use_ollama: Whether to use LLM analysis
+        enable_crawling: Whether to perform real web crawling
 
     Returns:
-        dict with verification results
+        dict with verification results including crawl evidence
     """
     name = doctor["name"]
     parts = name.split(", ")
@@ -325,6 +391,9 @@ def verify_doctor(doctor, ollama_host=None, ollama_model=None, use_ollama=True):
         "google_maps_link": "",
         "all_evidence_links": "",
         "llm_analysis": "",
+        "crawl_sources_checked": 0,
+        "crawl_sources_confirmed": 0,
+        "crawl_evidence": "",
     }
 
     methods = []
@@ -358,7 +427,7 @@ def verify_doctor(doctor, ollama_host=None, ollama_model=None, use_ollama=True):
         evidence_links.append(hospital_info["url"])
         methods.append(hospital_info["tag"])
 
-    # 3. Generate proof links
+    # 3. Generate proof links (always, for manual verification)
     links = generate_proof_links(
         first_name, last_name, sheet_addr, sheet_city, sheet_state, sheet_zip
     )
@@ -377,10 +446,38 @@ def verify_doctor(doctor, ollama_host=None, ollama_model=None, use_ollama=True):
         ]
     )
 
-    result["verification_method"] = " | ".join(methods)
-    result["all_evidence_links"] = " ; ".join(evidence_links)
+    # 4. REAL WEB CRAWLING — scrape actual pages for address data
+    crawl_summary = None
+    if enable_crawling:
+        try:
+            crawl_results = crawl_all_sources(
+                first_name=first_name,
+                last_name=last_name,
+                address=sheet_addr,
+                city=sheet_city,
+                state=sheet_state,
+                npi_number=npi_match["npi"] if npi_match else "",
+                is_hospital_system=hospital_info is not None,
+            )
+            crawl_summary = summarize_crawl_results(crawl_results)
+            result["crawl_sources_checked"] = crawl_summary["sources_checked"]
+            result["crawl_sources_confirmed"] = crawl_summary["sources_with_address"]
+            result["crawl_evidence"] = crawl_summary["evidence_summary"]
 
-    # 4. Rule-based verdict
+            # Add crawl URLs to evidence links
+            evidence_links.extend(crawl_summary["all_urls"])
+
+            if crawl_summary["sources_with_address"] > 0:
+                methods.append(f"WEB-CRAWL-{crawl_summary['sources_with_address']}-SOURCES")
+        except Exception as e:
+            result["crawl_evidence"] = f"Crawling failed: {str(e)}"
+
+    result["verification_method"] = " | ".join(methods)
+    result["all_evidence_links"] = " ; ".join(
+        [link for link in evidence_links if link]
+    )
+
+    # 5. Rule-based verdict (baseline before LLM)
     if "NPPES-MATCH" in methods:
         result["visit_readiness"] = "EXTERNALLY SUPPORTED"
         result["confidence"] = "High"
@@ -412,22 +509,30 @@ def verify_doctor(doctor, ollama_host=None, ollama_model=None, use_ollama=True):
         result["evidence_note"] = "No NPPES record found. Phone-confirm before routing."
         result["routing_action"] = "Phone-confirm required"
 
-    # 5. Upgrade confidence if hospital system matches
+    # 6. Upgrade confidence if hospital system matches
     if hospital_info and "NPPES-MATCH" in methods:
         result["confidence"] = "High"
         result["evidence_note"] += f" Confirmed {hospital_info['name']} location."
 
-    # 6. Ollama LLM analysis (if enabled and there's ambiguity)
-    if use_ollama and ollama_host and "NPPES-MATCH" not in methods:
+    # 7. Upgrade confidence if multiple web sources confirm
+    if crawl_summary and crawl_summary["sources_with_address"] >= 2:
+        if result["confidence"] == "Low":
+            result["confidence"] = "Medium"
+        result["evidence_note"] += (
+            f" {crawl_summary['sources_with_address']} web sources confirm address."
+        )
+
+    # 8. Ollama LLM analysis — feed ALL evidence for comprehensive analysis
+    if use_ollama and ollama_host:
         prompt = build_llm_prompt(
-            name, sheet_addr, sheet_city, npi_match, hospital_info
+            name, sheet_addr, sheet_city, npi_match, hospital_info, crawl_summary
         )
         llm_response = call_ollama(prompt, host=ollama_host, model=ollama_model)
         result["llm_analysis"] = llm_response
 
         if "LLM unavailable" not in llm_response:
             parsed = parse_llm_response(llm_response)
-            # LLM can upgrade/refine the verdict
+            # LLM verdict overrides rule-based when LLM has more evidence
             if parsed["verdict"]:
                 result["visit_readiness"] = parsed["verdict"]
             if parsed["confidence"]:

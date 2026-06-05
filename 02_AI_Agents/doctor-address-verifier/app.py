@@ -1,6 +1,7 @@
 """
 Doctor Address Verifier — Flask web application.
-Upload a doctor worklist, verify addresses via NPPES + Ollama, download results.
+Upload a doctor worklist, verify addresses via NPPES + web crawling + Ollama,
+download results.
 """
 
 import os
@@ -17,7 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pandas as pd
 from flask import Flask, render_template, request, jsonify, send_file
 
-from verifier import verify_doctor
+from verifier import verify_doctor, check_ollama_status
 
 app = Flask(__name__)
 
@@ -30,6 +31,7 @@ RESULTS_DIR.mkdir(exist_ok=True)
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.1")
 NO_OLLAMA = os.environ.get("NO_OLLAMA", "").strip() == "1"
+ENABLE_CRAWLING = os.environ.get("NO_CRAWLING", "").strip() != "1"
 
 # In-memory job tracker
 jobs = {}
@@ -84,7 +86,12 @@ def run_verification(job_id, filepath):
 
         total = len(df)
         job["total"] = total
-        job["message"] = f"Starting verification of {total} doctors..."
+        crawl_label = "with web crawling" if ENABLE_CRAWLING else "rule-based"
+        llm_label = "with Ollama LLM" if not NO_OLLAMA else ""
+        job["message"] = (
+            f"Starting verification of {total} doctors "
+            f"({crawl_label}{', ' + llm_label if llm_label else ''})..."
+        )
 
         # Add result columns
         new_cols = [
@@ -93,6 +100,8 @@ def run_verification(job_id, filepath):
             "Routing Action", "NPPES_Link", "Hospital_Page_Link",
             "Doximity_Link", "WebMD_Link", "Healthgrades_Link",
             "Google_Maps_Link", "All_Evidence_Links", "LLM_Analysis",
+            "Crawl_Sources_Checked", "Crawl_Sources_Confirmed",
+            "Crawl_Evidence",
         ]
         for col in new_cols:
             if col not in df.columns:
@@ -119,6 +128,7 @@ def run_verification(job_id, filepath):
                 ollama_host=OLLAMA_HOST,
                 ollama_model=OLLAMA_MODEL,
                 use_ollama=not NO_OLLAMA,
+                enable_crawling=ENABLE_CRAWLING,
             )
 
             # Map results to dataframe
@@ -137,14 +147,20 @@ def run_verification(job_id, filepath):
             df.at[idx, "Google_Maps_Link"] = result["google_maps_link"]
             df.at[idx, "All_Evidence_Links"] = result["all_evidence_links"]
             df.at[idx, "LLM_Analysis"] = result["llm_analysis"]
+            df.at[idx, "Crawl_Sources_Checked"] = result.get(
+                "crawl_sources_checked", 0
+            )
+            df.at[idx, "Crawl_Sources_Confirmed"] = result.get(
+                "crawl_sources_confirmed", 0
+            )
+            df.at[idx, "Crawl_Evidence"] = result.get("crawl_evidence", "")
 
-            # Rate limit NPPES
+            # Rate limit
             time.sleep(0.3)
 
         # Save output
         output_path = RESULTS_DIR / f"verified_{job_id}.xlsx"
         with pd.ExcelWriter(str(output_path), engine="openpyxl") as writer:
-            # Summary sheet
             supported = len(
                 df[df["Visit Readiness"] == "EXTERNALLY SUPPORTED"]
             )
@@ -192,7 +208,12 @@ def run_verification(job_id, filepath):
 
 @app.route("/")
 def index():
-    return render_template("index.html", ollama_model=OLLAMA_MODEL, no_ollama=NO_OLLAMA)
+    return render_template(
+        "index.html",
+        ollama_model=OLLAMA_MODEL,
+        no_ollama=NO_OLLAMA,
+        enable_crawling=ENABLE_CRAWLING,
+    )
 
 
 @app.route("/upload", methods=["POST"])
@@ -270,12 +291,21 @@ def api_verify_single():
         ollama_host=OLLAMA_HOST,
         ollama_model=OLLAMA_MODEL,
         use_ollama=not NO_OLLAMA,
+        enable_crawling=ENABLE_CRAWLING,
     )
     return jsonify(result)
+
+
+@app.route("/api/ollama-status")
+def ollama_status():
+    """Check Ollama status and available models."""
+    status = check_ollama_status(OLLAMA_HOST)
+    return jsonify(status)
 
 
 if __name__ == "__main__":
     port = int(os.environ.get("FLASK_PORT", 5001))
     print(f"Doctor Address Verifier starting on port {port}")
     print(f"Ollama: {'disabled' if NO_OLLAMA else f'{OLLAMA_HOST} ({OLLAMA_MODEL})'}")
+    print(f"Web crawling: {'enabled' if ENABLE_CRAWLING else 'disabled'}")
     app.run(host="0.0.0.0", port=port, debug=False)
