@@ -11,6 +11,38 @@ Healthcare provider address verification tool with NPPES registry lookups, **liv
 - **Proof Links** — Clickable evidence links for every doctor (Google Maps, Doximity, WebMD, Healthgrades, hospital pages)
 - **Batch + Single** — Upload an Excel worklist for batch verification, or use the API for single doctor lookups
 - **macOS .dmg** — Build a standalone native macOS app with bundled Ollama
+- **Hugging Face Space** — Public Gradio web app for browser-based verification
+- **CI/CD DMG Build** — GitHub Actions workflow builds DMG automatically on macOS
+
+## Hugging Face Space
+
+A public Gradio web app is available for browser-based verification — no install needed.
+
+### Run Locally
+
+```bash
+cd 02_AI_Agents/doctor-address-verifier
+pip install -r hf_requirements.txt
+python hf_app.py
+```
+
+Open http://localhost:7860 in your browser.
+
+### Deploy to Hugging Face Spaces
+
+1. Create a new Space at https://huggingface.co/new-space (SDK: Gradio)
+2. Copy these files to the Space repo:
+   - `hf_app.py` → `app.py`
+   - `hf_requirements.txt` → `requirements.txt`
+   - `verifier.py`
+   - `web_crawler.py`
+3. Push and the Space will auto-deploy
+
+### CI-Built DMG
+
+The `.dmg` is built automatically by GitHub Actions on every push to `main` that touches `02_AI_Agents/doctor-address-verifier/`. You can also trigger it manually via workflow dispatch.
+
+Download the DMG from the **Actions → Build macOS DMG → Artifacts** tab.
 
 ## Quick Start (Development)
 
@@ -152,4 +184,6 @@ curl http://localhost:5001/api/ollama-status
 | `templates/index.html` | Web UI with dark theme |
 | `DoctorAddressVerifier.spec` | PyInstaller build configuration |
 | `build_dmg.sh` | macOS DMG build script (Swift + PyInstaller + Ollama) |
+| `hf_app.py` | Hugging Face Spaces Gradio app |
+| `hf_requirements.txt` | Python dependencies for the HF Space |
 | `DoctorAddressVerifierApp/` | Swift macOS wrapper (Package.swift + sources) |
