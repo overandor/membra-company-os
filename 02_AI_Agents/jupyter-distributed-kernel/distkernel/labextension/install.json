@@ -1,5 +1,0 @@
-{
-  "packageManager": "python",
-  "packageName": "jupyter-distributed-kernel",
-  "uninstallInstructions": "Use `pip uninstall jupyter-distributed-kernel` to remove."
-}
