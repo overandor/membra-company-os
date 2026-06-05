@@ -9,18 +9,21 @@ environment variables set by launcher.py.
 
 import os
 import sys
-import json
 import uuid
 import threading
 import time
 from pathlib import Path
 
 import pandas as pd
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import (
+    Flask, render_template, request, jsonify, send_file,
+)
 
 # Ensure verifier is importable
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from verifier import verify_doctor, check_ollama_status
+from verifier import (  # noqa: E402
+    verify_doctor, check_ollama_status,
+)
 
 
 def create_app():
@@ -32,9 +35,13 @@ def create_app():
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates"),
     )
 
-    # Upload and results directories — from env (bundle) or default (development)
-    upload_dir = Path(os.environ.get("UPLOAD_DIR", "uploads"))
-    results_dir = Path(os.environ.get("RESULTS_DIR", "results"))
+    # Upload and results directories
+    upload_dir = Path(
+        os.environ.get("UPLOAD_DIR", "uploads")
+    )
+    results_dir = Path(
+        os.environ.get("RESULTS_DIR", "results")
+    )
     upload_dir.mkdir(parents=True, exist_ok=True)
     results_dir.mkdir(parents=True, exist_ok=True)
 
@@ -76,7 +83,10 @@ def create_app():
                 cl = c.lower().strip()
                 if "doctor" in cl or cl == "name" or cl == "provider name":
                     col_map["name"] = c
-                elif cl in ("address", "street", "address_1", "street address"):
+                elif cl in (
+                    "address", "street",
+                    "address_1", "street address",
+                ):
                     col_map["address"] = c
                 elif cl == "city":
                     col_map["city"] = c
@@ -97,7 +107,10 @@ def create_app():
 
             total = len(df)
             job["total"] = total
-            crawl_label = "with web crawling" if enable_crawling else "rule-based"
+            crawl_label = (
+                "with web crawling"
+                if enable_crawling else "rule-based"
+            )
             llm_label = "with Ollama LLM" if not no_ollama else ""
             job["message"] = (
                 f"Starting verification of {total} doctors "
@@ -131,7 +144,10 @@ def create_app():
 
                 job["current"] = idx + 1
                 job["current_doctor"] = doctor["name"]
-                job["message"] = f"Verifying {idx + 1}/{total}: {doctor['name']}"
+                job["message"] = (
+                    f"Verifying {idx + 1}/{total}: "
+                    f"{doctor['name']}"
+                )
 
                 result = verify_doctor(
                     doctor,
@@ -143,7 +159,9 @@ def create_app():
 
                 df.at[idx, "Visit Readiness"] = result["visit_readiness"]
                 df.at[idx, "Confidence"] = result["confidence"]
-                df.at[idx, "Verification_Method"] = result["verification_method"]
+                df.at[idx, "Verification_Method"] = (
+                    result["verification_method"]
+                )
                 df.at[idx, "External Evidence Note"] = result["evidence_note"]
                 df.at[idx, "NPPES_Address"] = result["nppes_address"]
                 df.at[idx, "Corrected Address"] = result["corrected_address"]
@@ -189,13 +207,16 @@ def create_app():
                 })
                 summary.to_excel(writer, sheet_name="Summary", index=False)
                 df.to_excel(
-                    writer, sheet_name="Doctor Verification Worklist", index=False
+                    writer,
+                    sheet_name="Doctor Verification Worklist",
+                    index=False,
                 )
 
             job["status"] = "complete"
             job["output_file"] = str(output_path)
             job["message"] = (
-                f"Done! {supported} supported, {review} need review out of {total}."
+                f"Done! {supported} supported, "
+                f"{review} need review out of {total}."
             )
             job["summary"] = {
                 "total": total,
@@ -228,8 +249,12 @@ def create_app():
         file = request.files["file"]
         if not file.filename:
             return jsonify({"error": "No file selected"}), 400
-        if not file.filename.endswith((".xlsx", ".xls", ".csv")):
-            return jsonify({"error": "Please upload an Excel (.xlsx) or CSV file"}), 400
+        if not file.filename.endswith(
+            (".xlsx", ".xls", ".csv")
+        ):
+            return jsonify(
+                {"error": "Upload an Excel or CSV file"}
+            ), 400
 
         job_id = str(uuid.uuid4())[:8]
         filepath = upload_dir / f"{job_id}_{file.filename}"

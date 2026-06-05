@@ -2,8 +2,8 @@
 """
 Launcher for the Doctor Address Verifier macOS app bundle.
 
-When running as a PyInstaller-frozen app, resource paths and working directories
-differ from a normal Python script. This launcher:
+When running as a PyInstaller-frozen app, resource paths and
+working directories differ from a normal script. This launcher:
   1. Detects whether we're in a PyInstaller bundle or running from source.
   2. Sets up paths so Flask can find templates, and uploads/results go to
      ~/Documents/DoctorAddressVerifier/.
@@ -63,17 +63,26 @@ def main():
 
     port = int(os.environ.get("FLASK_PORT", 5001))
 
-    # Open browser automatically (only when run standalone, not via Swift wrapper)
+    # Open browser (only standalone, not via Swift wrapper)
     if os.environ.get("NO_BROWSER") != "1":
-        threading.Thread(target=open_browser, args=(port,), daemon=True).start()
+        t = threading.Thread(
+            target=open_browser, args=(port,),
+            daemon=True,
+        )
+        t.start()
 
     # Import and run the Flask app
     from app_bundle import create_app
     app = create_app()
-    print(f"Doctor Address Verifier starting on http://127.0.0.1:{port}")
+    print(
+        f"Doctor Address Verifier starting on"
+        f" http://127.0.0.1:{port}"
+    )
     print(f"Data directory: {data_dir}")
-    print(f"Ollama: {os.environ.get('OLLAMA_HOST', 'default')}")
-    print(f"Web crawling: {'disabled' if os.environ.get('NO_CRAWLING') == '1' else 'enabled'}")
+    ollama_host = os.environ.get('OLLAMA_HOST', 'default')
+    print(f"Ollama: {ollama_host}")
+    no_crawl = os.environ.get('NO_CRAWLING') == '1'
+    print(f"Web crawling: {'disabled' if no_crawl else 'enabled'}")
     print("Press Ctrl+C to quit.")
     app.run(host="127.0.0.1", port=port, debug=False, use_reloader=False)
 

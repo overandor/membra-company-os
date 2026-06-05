@@ -33,7 +33,10 @@ HEADERS = {
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/125.0.0.0 Safari/537.36"
     ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept": (
+        "text/html,application/xhtml+xml,"
+        "application/xml;q=0.9,*/*;q=0.8"
+    ),
     "Accept-Language": "en-US,en;q=0.9",
 }
 
@@ -45,7 +48,10 @@ TIMEOUT = 12
 def _safe_get(url: str, timeout: int = TIMEOUT) -> Optional[requests.Response]:
     """Fetch a URL safely with error handling."""
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=timeout, allow_redirects=True)
+        resp = requests.get(
+            url, headers=HEADERS,
+            timeout=timeout, allow_redirects=True,
+        )
         if resp.status_code == 200:
             return resp
     except Exception:
@@ -60,7 +66,10 @@ def _extract_text(soup: BeautifulSoup) -> str:
     return soup.get_text(separator=" ", strip=True)
 
 
-def _find_address_in_text(text: str, city_hint: str = "", state_hint: str = "NY") -> str:
+def _find_address_in_text(
+    text: str, city_hint: str = "",
+    state_hint: str = "NY",
+) -> str:
     """
     Try to extract a US street address from a text block.
     Looks for patterns like: 123 Main St, City, ST 12345
@@ -89,7 +98,9 @@ def _find_address_in_text(text: str, city_hint: str = "", state_hint: str = "NY"
     return ""
 
 
-def _find_address_near_keyword(text: str, keywords: list, window: int = 300) -> str:
+def _find_address_near_keyword(
+    text: str, keywords: list, window: int = 300,
+) -> str:
     """Search for address patterns near specific keywords in text."""
     text_lower = text.lower()
     for kw in keywords:
@@ -138,7 +149,9 @@ def crawl_npi_profile(npi_number: str) -> dict:
 
     # Look for address near keywords
     addr = _find_address_near_keyword(
-        text, ["Practice Location", "Mailing Address", "Office Address", "Location"]
+        text,
+        ["Practice Location", "Mailing Address",
+         "Office Address", "Location"],
     )
     if addr:
         result["address_found"] = addr
@@ -180,7 +193,8 @@ def crawl_doximity(first_name: str, last_name: str, city: str = "") -> dict:
     resp = _safe_get(profile_url)
     if not resp:
         # Try without -md suffix
-        profile_url = f"https://www.doximity.com/pub/{first_clean}-{last_clean}"
+        dox = "https://www.doximity.com/pub"
+        profile_url = f"{dox}/{first_clean}-{last_clean}"
         resp = _safe_get(profile_url)
         if not resp:
             result["error"] = "Profile page not reachable"
@@ -192,7 +206,9 @@ def crawl_doximity(first_name: str, last_name: str, city: str = "") -> dict:
 
     # Doximity puts addresses near "Office" or "Practice" keywords
     addr = _find_address_near_keyword(
-        text, ["Office", "Practice Location", "Practice Address", "Hospital Affiliation"]
+        text,
+        ["Office", "Practice Location",
+         "Practice Address", "Hospital Affiliation"],
     )
     if not addr:
         addr = _find_address_in_text(text, city_hint=city)
@@ -207,7 +223,10 @@ def crawl_doximity(first_name: str, last_name: str, city: str = "") -> dict:
     return result
 
 
-def crawl_healthgrades(first_name: str, last_name: str, city: str = "", state: str = "NY") -> dict:
+def crawl_healthgrades(
+    first_name: str, last_name: str,
+    city: str = "", state: str = "NY",
+) -> dict:
     """
     Search Healthgrades for provider and extract practice address.
     Uses their search endpoint to find the provider page.
@@ -223,12 +242,15 @@ def crawl_healthgrades(first_name: str, last_name: str, city: str = "", state: s
 
     first_clean = first_name.split()[0].lower()
     last_clean = last_name.lower().replace(" ", "-")
-    search_url = (
-        f"https://www.healthgrades.com/usearch?"
-        f"what=dr-{first_clean}-{last_clean}"
-        f"&where={city.lower()}%2C+{state.lower()}" if city else
-        f"https://www.healthgrades.com/usearch?what=dr-{first_clean}-{last_clean}"
-    )
+    hg = "https://www.healthgrades.com/usearch"
+    slug = f"dr-{first_clean}-{last_clean}"
+    if city:
+        where = f"{city.lower()}%2C+{state.lower()}"
+        search_url = (
+            f"{hg}?what={slug}&where={where}"
+        )
+    else:
+        search_url = f"{hg}?what={slug}"
     result["url"] = search_url
 
     resp = _safe_get(search_url)
@@ -272,7 +294,10 @@ def crawl_healthgrades(first_name: str, last_name: str, city: str = "", state: s
     return result
 
 
-def crawl_webmd(first_name: str, last_name: str, city: str = "", state: str = "NY") -> dict:
+def crawl_webmd(
+    first_name: str, last_name: str,
+    city: str = "", state: str = "NY",
+) -> dict:
     """
     Search WebMD doctor directory for provider address.
     """
@@ -423,8 +448,12 @@ def crawl_google_verification(
         "error": "",
     }
 
-    query = f'"{first_name} {last_name}" doctor "{city}" "{address}"'
-    search_url = f"https://html.duckduckgo.com/html/?q={urllib.parse.quote(query)}"
+    query = (
+        f'"{first_name} {last_name}" doctor'
+        f' "{city}" "{address}"'
+    )
+    ddg = "https://html.duckduckgo.com/html/"
+    search_url = f"{ddg}?q={urllib.parse.quote(query)}"
     result["url"] = search_url
 
     resp = _safe_get(search_url, timeout=15)
@@ -446,7 +475,8 @@ def crawl_google_verification(
         result["raw_snippet"] = combined[:400]
         # Check if the address appears in search results
         addr_parts = address.upper().split()[:3]
-        if any(part in combined.upper() for part in addr_parts if len(part) > 2):
+        valid = [p for p in addr_parts if len(p) > 2]
+        if any(p in combined.upper() for p in valid):
             result["address_found"] = address
             result["success"] = True
         else:

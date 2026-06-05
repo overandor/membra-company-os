@@ -6,7 +6,6 @@ download results.
 
 import os
 import sys
-import json
 import uuid
 import threading
 import time
@@ -15,10 +14,12 @@ from pathlib import Path
 # Ensure the package directory is on the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-import pandas as pd
-from flask import Flask, render_template, request, jsonify, send_file
+import pandas as pd  # noqa: E402
+from flask import (  # noqa: E402
+    Flask, render_template, request, jsonify, send_file,
+)
 
-from verifier import verify_doctor, check_ollama_status
+from verifier import verify_doctor, check_ollama_status  # noqa: E402
 
 app = Flask(__name__)
 
@@ -188,7 +189,8 @@ def run_verification(job_id, filepath):
         job["status"] = "complete"
         job["output_file"] = str(output_path)
         job["message"] = (
-            f"Done! {supported} supported, {review} need review out of {total}."
+            f"Done! {supported} supported, "
+            f"{review} need review out of {total}."
         )
         job["summary"] = {
             "total": total,
@@ -226,7 +228,9 @@ def upload():
         return jsonify({"error": "No file selected"}), 400
 
     if not file.filename.endswith((".xlsx", ".xls", ".csv")):
-        return jsonify({"error": "Please upload an Excel (.xlsx) or CSV file"}), 400
+        return jsonify(
+            {"error": "Please upload an Excel or CSV file"}
+        ), 400
 
     job_id = str(uuid.uuid4())[:8]
     filepath = UPLOAD_DIR / f"{job_id}_{file.filename}"
@@ -243,7 +247,9 @@ def upload():
         "current_doctor": "",
     }
 
-    thread = threading.Thread(target=run_verification, args=(job_id, str(filepath)))
+    thread = threading.Thread(
+        target=run_verification, args=(job_id, str(filepath))
+    )
     thread.daemon = True
     thread.start()
 
@@ -306,6 +312,7 @@ def ollama_status():
 if __name__ == "__main__":
     port = int(os.environ.get("FLASK_PORT", 5001))
     print(f"Doctor Address Verifier starting on port {port}")
-    print(f"Ollama: {'disabled' if NO_OLLAMA else f'{OLLAMA_HOST} ({OLLAMA_MODEL})'}")
+    ollama_msg = 'disabled' if NO_OLLAMA else OLLAMA_HOST
+    print(f"Ollama: {ollama_msg}")
     print(f"Web crawling: {'enabled' if ENABLE_CRAWLING else 'disabled'}")
     app.run(host="0.0.0.0", port=port, debug=False)
