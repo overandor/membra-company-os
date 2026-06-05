@@ -1,7 +1,0 @@
-gradio
-aiohttp
-python-dotenv
-groq
-websockets
-fastapi
-uvicorn

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Address Verifier</title>
+    <style>
+        :root {
+            --bg: #141414;
+            --surface: #1e1e1e;
+            --border: #2e2e2e;
+            --text: #f3f4f6;
+            --text-secondary: #c7d2fe;
+            --text-muted: #9ca3af;
+            --primary: #7a84ff;
+            --success: #35c89a;
+            --warning: #f29a45;
+            --danger: #f53b3a;
+            --accent: #a78cff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle { color: var(--text-muted); margin-bottom: 2rem; }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card h2 {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .upload-zone:hover, .upload-zone.drag-over {
+            border-color: var(--primary);
+        }
+
+        .upload-zone input[type="file"] { display: none; }
+
+        .upload-zone .icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-zone p { color: var(--text-muted); }
+        .upload-zone .file-name { color: var(--success); font-weight: 600; }
+
+        .btn {
+            display: inline-block;
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) { opacity: 0.85; }
+        .btn-success:hover:not(:disabled) { opacity: 0.85; }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .status-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .status-text .current {
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .stat-card .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-card.supported .value { color: var(--success); }
+        .stat-card.review .value { color: var(--warning); }
+        .stat-card.total .value { color: var(--primary); }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-ollama {
+            background: rgba(122, 132, 255, 0.2);
+            color: var(--primary);
+        }
+
+        .badge-no-ollama {
+            background: rgba(245, 59, 58, 0.2);
+            color: var(--danger);
+        }
+
+        .config-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .hidden { display: none; }
+
+        #api-section { margin-top: 2rem; }
+
+        .code-block {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Doctor Address Verifier</h1>
+        <p class="subtitle">
+            NPPES + Web + Ollama-powered healthcare provider address verification
+        </p>
+
+        <!-- Config status -->
+        <div class="card">
+            <div class="config-row">
+                {% if no_ollama %}
+                <span class="badge badge-no-ollama">Ollama Disabled</span>
+                <span>Rule-based verification only (set NO_OLLAMA=0 to enable LLM)</span>
+                {% else %}
+                <span class="badge badge-ollama">Ollama Active</span>
+                <span>Model: {{ ollama_model }} &middot; LLM analysis enabled for ambiguous cases</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Upload -->
+        <div class="card" id="upload-card">
+            <h2>Upload Doctor Worklist</h2>
+            <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <input type="file" id="file-input" accept=".xlsx,.xls,.csv">
+                <div class="icon">&#128203;</div>
+                <p id="upload-label">Drop an Excel file here or click to browse</p>
+                <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-muted)">
+                    Required columns: Doctor Name, Address, City, State, Zip
+                </p>
+            </div>
+            <div style="margin-top: 1rem; text-align: right;">
+                <button class="btn btn-primary" id="verify-btn" disabled onclick="startVerification()">
+                    Verify Addresses
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="card hidden" id="progress-card">
+            <h2>Verification Progress</h2>
+            <div class="progress-bar">
+                <div class="fill" id="progress-fill" style="width: 0%"></div>
+            </div>
+            <p class="status-text" id="status-text">Starting...</p>
+        </div>
+
+        <!-- Results -->
+        <div class="card hidden" id="results-card">
+            <h2>Results</h2>
+            <div class="summary-grid" id="summary-grid"></div>
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <button class="btn btn-success" id="download-btn" onclick="downloadResults()">
+                    Download Verified Spreadsheet
+                </button>
+            </div>
+        </div>
+
+        <!-- API docs -->
+        <div id="api-section">
+            <div class="card">
+                <h2>API Endpoint</h2>
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">
+                    Verify a single doctor via POST:
+                </p>
+                <div class="code-block">curl -X POST http://localhost:5001/api/verify \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "SMITH, JOHN",
+    "address": "111 E 210TH ST",
+    "city": "BRONX",
+    "state": "NY",
+    "zip": "10467"
+  }'</div>
+            </div>
+        </div>
+
+        <footer>
+            Doctor Address Verifier &middot; Membra Company OS &middot;
+            NPPES Registry &middot; Ollama LLM Agent
+        </footer>
+    </div>
+
+    <script>
+        let currentJobId = null;
+        let pollInterval = null;
+        const fileInput = document.getElementById('file-input');
+        const verifyBtn = document.getElementById('verify-btn');
+        const dropZone = document.getElementById('drop-zone');
+
+        // File selection
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                document.getElementById('upload-label').innerHTML =
+                    '<span class="file-name">' + e.target.files[0].name + '</span>';
+                verifyBtn.disabled = false;
+            }
+        });
+
+        // Drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            fileInput.files = e.dataTransfer.files;
+            fileInput.dispatchEvent(new Event('change'));
+        });
+
+        async function startVerification() {
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Uploading...';
+
+            try {
+                const resp = await fetch('/upload', { method: 'POST', body: formData });
+                const data = await resp.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    verifyBtn.disabled = false;
+                    verifyBtn.textContent = 'Verify Addresses';
+                    return;
+                }
+
+                currentJobId = data.job_id;
+                document.getElementById('progress-card').classList.remove('hidden');
+                verifyBtn.textContent = 'Processing...';
+
+                pollInterval = setInterval(pollStatus, 1000);
+            } catch (err) {
+                alert('Upload failed: ' + err.message);
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = 'Verify Addresses';
+            }
+        }
+
+        async function pollStatus() {
+            if (!currentJobId) return;
+
+            try {
+                const resp = await fetch('/status/' + currentJobId);
+                const data = await resp.json();
+
+                const pct = data.total > 0 ? Math.round((data.current / data.total) * 100) : 0;
+                document.getElementById('progress-fill').style.width = pct + '%';
+
+                let statusHtml = data.message;
+                if (data.current_doctor) {
+                    statusHtml += ' — <span class="current">' + data.current_doctor + '</span>';
+                }
+                document.getElementById('status-text').innerHTML = statusHtml;
+
+                if (data.status === 'complete') {
+                    clearInterval(pollInterval);
+                    document.getElementById('progress-fill').style.width = '100%';
+                    showResults(data.summary);
+                } else if (data.status === 'error') {
+                    clearInterval(pollInterval);
+                    document.getElementById('status-text').innerHTML =
+                        '<span style="color: var(--danger)">' + data.message + '</span>';
+                    verifyBtn.disabled = false;
+                    verifyBtn.textContent = 'Retry';
+                }
+            } catch (err) {
+                console.error('Poll error:', err);
+            }
+        }
+
+        function showResults(summary) {
+            document.getElementById('results-card').classList.remove('hidden');
+            verifyBtn.textContent = 'Done';
+
+            if (summary) {
+                const grid = document.getElementById('summary-grid');
+                grid.innerHTML = `
+                    <div class="stat-card total">
+                        <div class="value">${summary.total}</div>
+                        <div class="label">Total Doctors</div>
+                    </div>
+                    <div class="stat-card supported">
+                        <div class="value">${summary.supported}</div>
+                        <div class="label">Supported</div>
+                    </div>
+                    <div class="stat-card review">
+                        <div class="value">${summary.review}</div>
+                        <div class="label">Need Review</div>
+                    </div>
+                    <div class="stat-card" style="--val-color: var(--success)">
+                        <div class="value" style="color: var(--success)">${summary.high_conf}</div>
+                        <div class="label">High Confidence</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" style="color: var(--warning)">${summary.medium_conf}</div>
+                        <div class="label">Medium Confidence</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" style="color: var(--danger)">${summary.low_conf}</div>
+                        <div class="label">Low Confidence</div>
+                    </div>
+                `;
+            }
+        }
+
+        function downloadResults() {
+            if (currentJobId) {
+                window.location.href = '/download/' + currentJobId;
+            }
+        }
+    </script>
+</body>
+</html>
