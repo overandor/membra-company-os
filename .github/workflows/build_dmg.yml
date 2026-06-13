@@ -1,0 +1,160 @@
+name: Build macOS DMG
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '02_AI_Agents/doctor-address-verifier/**'
+
+jobs:
+  build-dmg:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: 02_AI_Agents/doctor-address-verifier
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Verify tools
+        run: |
+          python3 --version
+          swift --version
+          uname -m
+
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      - name: Build Flask server binary
+        run: |
+          pyinstaller \
+            --name flask_server \
+            --onefile \
+            --console \
+            --add-data "templates:templates" \
+            --add-data "verifier.py:." \
+            --add-data "web_crawler.py:." \
+            --add-data "app_bundle.py:." \
+            --hidden-import flask \
+            --hidden-import jinja2 \
+            --hidden-import markupsafe \
+            --hidden-import werkzeug \
+            --hidden-import pandas \
+            --hidden-import openpyxl \
+            --hidden-import requests \
+            --hidden-import urllib3 \
+            --hidden-import certifi \
+            --hidden-import charset_normalizer \
+            --hidden-import idna \
+            --hidden-import bs4 \
+            --hidden-import lxml \
+            --hidden-import numpy \
+            --hidden-import pytz \
+            --hidden-import dateutil \
+            --hidden-import six \
+            --hidden-import app_bundle \
+            --hidden-import verifier \
+            --hidden-import web_crawler \
+            --exclude-module tkinter \
+            --exclude-module matplotlib \
+            --exclude-module scipy \
+            --exclude-module PIL \
+            --exclude-module IPython \
+            --exclude-module notebook \
+            --exclude-module pytest \
+            --noconfirm \
+            launcher.py
+          ls -lh dist/flask_server
+
+      - name: Download Ollama
+        run: |
+          OLLAMA_URL="https://github.com/ollama/ollama/releases/latest/download/ollama-darwin"
+          curl -L -o dist/ollama "$OLLAMA_URL"
+          chmod +x dist/ollama
+          ls -lh dist/ollama
+
+      - name: Build Swift wrapper
+        run: |
+          cd DoctorAddressVerifierApp
+          swift build -c release 2>&1
+          cp "$(swift build -c release --show-bin-path)/DoctorAddressVerifier" ../dist/
+          ls -lh ../dist/DoctorAddressVerifier
+
+      - name: Create .app bundle
+        run: |
+          APP="dist/DoctorAddressVerifier.app"
+          CONTENTS="${APP}/Contents"
+          MACOS="${CONTENTS}/MacOS"
+          RESOURCES="${CONTENTS}/Resources"
+
+          mkdir -p "${MACOS}" "${RESOURCES}"
+          cp dist/DoctorAddressVerifier "${MACOS}/"
+          cp dist/flask_server "${MACOS}/"
+          cp dist/ollama "${MACOS}/"
+
+          # Info.plist
+          cat > "${CONTENTS}/Info.plist" << 'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key>
+            <string>Doctor Address Verifier</string>
+            <key>CFBundleDisplayName</key>
+            <string>Doctor Address Verifier</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.membra.doctor-address-verifier</string>
+            <key>CFBundleVersion</key>
+            <string>2.0.0</string>
+            <key>CFBundleShortVersionString</key>
+            <string>2.0.0</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>CFBundleExecutable</key>
+            <string>DoctorAddressVerifier</string>
+            <key>LSMinimumSystemVersion</key>
+            <string>13.0</string>
+            <key>NSHighResolutionCapable</key>
+            <true/>
+            <key>NSAppTransportSecurity</key>
+            <dict>
+              <key>NSAllowsLocalNetworking</key>
+              <true/>
+            </dict>
+          </dict>
+          </plist>
+          PLIST
+
+          ls -la "${MACOS}/"
+
+      - name: Create DMG
+        run: |
+          DMG_NAME="DoctorAddressVerifier-2.0.0.dmg"
+          STAGING="dist/dmg_staging"
+          mkdir -p "${STAGING}"
+          cp -R "dist/DoctorAddressVerifier.app" "${STAGING}/"
+          ln -s /Applications "${STAGING}/Applications"
+
+          hdiutil create \
+            -volname "Doctor Address Verifier" \
+            -srcfolder "${STAGING}" \
+            -ov \
+            -format UDZO \
+            "dist/${DMG_NAME}"
+
+          ls -lh "dist/${DMG_NAME}"
+
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DoctorAddressVerifier-macOS
+          path: 02_AI_Agents/doctor-address-verifier/dist/DoctorAddressVerifier-2.0.0.dmg
+          retention-days: 30

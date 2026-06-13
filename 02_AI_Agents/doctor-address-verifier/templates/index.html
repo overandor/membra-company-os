@@ -182,12 +182,27 @@
             color: var(--danger);
         }
 
+        .badge-crawling {
+            background: rgba(53, 200, 154, 0.2);
+            color: var(--success);
+        }
+
+        .badge-no-crawling {
+            background: rgba(159, 163, 175, 0.2);
+            color: var(--text-muted);
+        }
+
         .config-row {
             display: flex;
             align-items: center;
             gap: 0.5rem;
             color: var(--text-muted);
             font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .config-row:last-child {
+            margin-bottom: 0;
         }
 
         .hidden { display: none; }
@@ -206,6 +221,31 @@
             white-space: pre;
         }
 
+        .ollama-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-dot.online { background: var(--success); }
+        .status-dot.offline { background: var(--danger); }
+        .status-dot.checking {
+            background: var(--warning);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
         footer {
             text-align: center;
             color: var(--text-muted);
@@ -218,7 +258,7 @@
     <div class="container">
         <h1>Doctor Address Verifier</h1>
         <p class="subtitle">
-            NPPES + Web + Ollama-powered healthcare provider address verification
+            NPPES + Live Web Crawling + Ollama LLM — healthcare provider address verification
         </p>
 
         <!-- Config status -->
@@ -229,7 +269,20 @@
                 <span>Rule-based verification only (set NO_OLLAMA=0 to enable LLM)</span>
                 {% else %}
                 <span class="badge badge-ollama">Ollama Active</span>
-                <span>Model: {{ ollama_model }} &middot; LLM analysis enabled for ambiguous cases</span>
+                <span>Model: {{ ollama_model }}</span>
+                <span class="ollama-status" id="ollama-status">
+                    <span class="status-dot checking" id="ollama-dot"></span>
+                    <span id="ollama-label">Checking...</span>
+                </span>
+                {% endif %}
+            </div>
+            <div class="config-row">
+                {% if enable_crawling %}
+                <span class="badge badge-crawling">Live Crawling</span>
+                <span>Scraping Doximity, Healthgrades, WebMD, hospital directories in real-time</span>
+                {% else %}
+                <span class="badge badge-no-crawling">Crawling Disabled</span>
+                <span>Using NPPES API + search links only (set NO_CRAWLING=0 to enable)</span>
                 {% endif %}
             </div>
         </div>
@@ -293,7 +346,7 @@
 
         <footer>
             Doctor Address Verifier &middot; Membra Company OS &middot;
-            NPPES Registry &middot; Ollama LLM Agent
+            NPPES Registry &middot; Live Web Crawling &middot; Ollama LLM Agent
         </footer>
     </div>
 
@@ -303,6 +356,36 @@
         const fileInput = document.getElementById('file-input');
         const verifyBtn = document.getElementById('verify-btn');
         const dropZone = document.getElementById('drop-zone');
+
+        // Check Ollama status on page load
+        async function checkOllamaStatus() {
+            try {
+                const resp = await fetch('/api/ollama-status');
+                const data = await resp.json();
+                const dot = document.getElementById('ollama-dot');
+                const label = document.getElementById('ollama-label');
+                if (dot && label) {
+                    if (data.running) {
+                        dot.className = 'status-dot online';
+                        label.textContent = `Online (${data.models.length} model${data.models.length !== 1 ? 's' : ''})`;
+                    } else {
+                        dot.className = 'status-dot offline';
+                        label.textContent = 'Offline — start Ollama to enable LLM analysis';
+                    }
+                }
+            } catch (e) {
+                const dot = document.getElementById('ollama-dot');
+                const label = document.getElementById('ollama-label');
+                if (dot && label) {
+                    dot.className = 'status-dot offline';
+                    label.textContent = 'Cannot reach Ollama';
+                }
+            }
+        }
+        // Check on load
+        checkOllamaStatus();
+        // Re-check every 30 seconds
+        setInterval(checkOllamaStatus, 30000);
 
         // File selection
         fileInput.addEventListener('change', (e) => {
