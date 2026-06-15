@@ -1,0 +1,66 @@
+name: RentMasseur Optimizer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '02_AI_Agents/rentmasseur_optimizer.py'
+      - '.github/workflows/rentmasseur-optimizer.yml'
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      skip_bio:
+        description: 'Skip bio update'
+        required: false
+        default: 'false'
+      skip_availability:
+        description: 'Skip availability'
+        required: false
+        default: 'false'
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@latest
+        with:
+          chrome-version: stable
+
+      - name: Setup ChromeDriver
+        uses: nanasess/setup-chromedriver@master
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install selenium python-dotenv requests
+
+      - name: Run optimizer
+        env:
+          RENTMASSEUR_USERNAME: ${{ secrets.RENTMASSEUR_USERNAME }}
+          RENTMASSEUR_PASSWORD: ${{ secrets.RENTMASSEUR_PASSWORD }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: "llama-3.3-70b-versatile"
+        working-directory: ./02_AI_Agents
+        run: |
+          python rentmasseur_optimizer.py \
+            --headless true \
+            ${{ github.event.inputs.skip_bio == 'true' && '--skip-bio' || '' }} \
+            ${{ github.event.inputs.skip_availability == 'true' && '--skip-availability' || '' }}
+
+      - name: Upload debug artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-screenshots-${{ github.run_id }}
+          path: 02_AI_Agents/debug/
+          retention-days: 3
