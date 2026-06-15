@@ -1,0 +1,53 @@
+{
+  "schema": "membra.work-equity/v2-conservative",
+  "generated": "2026-06-13",
+  "generated_by": "Claude (Anthropic)",
+  "supersedes_for_collateral": "networth_metrics.json (v1)",
+  "disclaimer": "Conservative model estimate prepared as input to a future third-party appraisal for possible collateralization. NOT a certified appraisal, audit, or financial advice. Code value != market value absent users/revenue and a willing counterparty.",
+  "intended_use": "internal management estimate + input to licensed appraisal for collateralization",
+  "premise": "going concern, pre-revenue software IP, orderly basis",
+  "standard_of_value": "conservative cost-and-market hybrid (income approach included, contributes ~0)",
+  "evidence_base": {
+    "implemented_funcs_classes": 8874,
+    "test_functions": 352,
+    "test_files": 85,
+    "python_files_compiling": "1043/1047",
+    "deployable_units": 28,
+    "ci_workflows": 10,
+    "readmes": 66,
+    "requirements_txt": 41,
+    "portfolio_sloc_est": 500000,
+    "dedup_factor": 0.60,
+    "unique_sloc_effective": 300000,
+    "author_tenure_months": 15.1,
+    "peer_cohort_size": 528,
+    "peer_standing": "only account observed shipping tested+deployable named products"
+  },
+  "methods_net_usd": {
+    "1_replacement_cocomo": {"value": 575000, "basis": "300k unique SLOC @ $6k/PM x0.10", "note": "over-stater; trimmed from central"},
+    "2_functional_bom": {"value": 208000, "basis": "28 deployables@8k + 10 platforms@12k + 60 exp@1.2k x0.5"},
+    "3_quality_adjusted": {"value": 136000, "basis": "tested+deployable as asset, remainder scrap, x0.6"},
+    "4_embodied_cost_floor": {"value": 154000, "basis": "15.1mo x $9k loaded + $18k AI tooling", "note": "most defensible"},
+    "5_income_approach": {"value": 25000, "basis": "no recurring revenue; option value only"}
+  },
+  "conclusion_usd": {
+    "concluded_net_realizable_central": 150000,
+    "supported_range": [90000, 300000],
+    "conservative_anchor_bulletproof": 107000,
+    "most_defensible_single_figure_embodied_cost": 154000,
+    "gross_replacement_ceiling_context_only": 5750000
+  },
+  "collateral_analysis": {
+    "appraised_basis": 120000,
+    "advance_rates": {"low": 0.10, "high": 0.25},
+    "borrowing_base_today_usd": [12000, 30000],
+    "with_revenue": "shifts to 1-3x ARR; $100k ARR -> $100k-$300k collateral",
+    "primary_lever": "recurring revenue, not additional code"
+  },
+  "path_to_collateralizable": [
+    "assign IP to a borrowable entity (Membra LLC/C-corp)",
+    "commission licensed third-party appraisal citing this methodology",
+    "attach revenue/usage evidence",
+    "consolidate variant sprawl to raise dedup factor"
+  ]
+}
