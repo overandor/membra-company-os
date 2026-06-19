@@ -1,0 +1,34 @@
+{
+  "subject": {
+    "login": "overandor",
+    "name": "Joseph Skrobynets",
+    "entity": null,
+    "account_created": "2025-03-13",
+    "as_of": "2026-06-15"
+  },
+  "portfolio": {
+    "public_repos": 176,
+    "followers": 4,
+    "following": 21,
+    "total_size_gb": 2.37,
+    "primary_authors": 1
+  },
+  "code": {
+    "portfolio_sloc": 500000,
+    "dedup_factor": 0.60,
+    "implemented_defs": 8874,
+    "test_functions": 352,
+    "test_files": 85,
+    "deployable_units": 28,
+    "platforms": 10,
+    "experiments": 60,
+    "ci_workflows": 10,
+    "compiling_ratio": 0.996
+  },
+  "commercial": {
+    "recurring_revenue_usd": 0,
+    "users": 0,
+    "ip_assigned_entity": false,
+    "secrets_remediated": true
+  }
+}
