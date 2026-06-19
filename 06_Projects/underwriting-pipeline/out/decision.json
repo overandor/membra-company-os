@@ -1,0 +1,98 @@
+{
+  "valuation": {
+    "methods_usd": {
+      "replacement": 574566,
+      "functional_bom": 208000,
+      "quality_adjusted": 170400,
+      "embodied_cost": 153710,
+      "income": 25000
+    },
+    "gross_replacement_ceiling_usd": 5745658,
+    "central_net_realizable_usd": 177370,
+    "supported_range_usd": [
+      25000,
+      208000
+    ],
+    "unique_kloc": 300,
+    "tenure_months": 15.1
+  },
+  "benchmark": {
+    "repo_rank_approx": 81685,
+    "repo_top_percent_all": 0.0622,
+    "repo_top_percent_repo_havers": 0.135,
+    "follower_top_percent_all": 3.154,
+    "claim": "top 0.062% of 131,273,884 GitHub users by public-repository output (~#81,685); built in 15 months"
+  },
+  "risk": {
+    "score": 0.843,
+    "grade": "E",
+    "factors": {
+      "no_recurring_revenue": 1.0,
+      "ip_not_entity_owned": 1.0,
+      "illiquid_market": 1.0,
+      "key_person_single_author": 1.0,
+      "low_test_coverage": 0.8,
+      "security_hygiene": 0.5,
+      "duplication_concentration": 0.4,
+      "weak_deployability": 0.3
+    }
+  },
+  "eligibility": {
+    "eligible_collateral_usd": 141896,
+    "advance_rate": 0.1,
+    "borrowing_base_usd": 14190
+  },
+  "decision": {
+    "outcome": "APPROVE \u2014 WITH CONDITIONS PRECEDENT",
+    "conditions_precedent": [
+      "Assign all IP to a borrowable entity (e.g., Membra LLC/C-corp).",
+      "Obtain a licensed third-party appraisal citing this methodology.",
+      "Complete security remediation: rotate/scrub any historical secrets from git history.",
+      "Provide revenue/usage evidence to unlock ARR-multiple advance terms.",
+      "Consolidate duplicated variant projects to raise the unique-SLOC (dedup) factor."
+    ],
+    "covenants": [
+      "No hardcoded secrets committed; CI secret-scan must stay green.",
+      "Maintain test + deploy CI on the pledged repositories.",
+      "Quarterly re-underwrite; borrowing base recalculated on revenue and code metrics."
+    ]
+  },
+  "scenario_conditions_met": {
+    "value": {
+      "methods_usd": {
+        "replacement": 574566,
+        "functional_bom": 208000,
+        "quality_adjusted": 170400,
+        "embodied_cost": 153710,
+        "income": 200000
+      },
+      "gross_replacement_ceiling_usd": 5745658,
+      "central_net_realizable_usd": 192800,
+      "supported_range_usd": [
+        153710,
+        208000
+      ],
+      "unique_kloc": 300,
+      "tenure_months": 15.1
+    },
+    "risk": {
+      "score": 0.487,
+      "grade": "C",
+      "factors": {
+        "no_recurring_revenue": 0.2,
+        "ip_not_entity_owned": 0.0,
+        "illiquid_market": 1.0,
+        "key_person_single_author": 1.0,
+        "low_test_coverage": 0.8,
+        "security_hygiene": 0.5,
+        "duplication_concentration": 0.4,
+        "weak_deployability": 0.3
+      }
+    },
+    "eligibility": {
+      "eligible_collateral_usd": 154240,
+      "advance_rate": 0.27,
+      "borrowing_base_usd": 41645
+    }
+  }
+}
