@@ -1,0 +1,10 @@
+{
+  "generated_by": "continuous_file_appraiser",
+  "files": [
+    {"path": "llm_os/inference.py", "complexity": 0.8, "hours": 6.0, "dollar_value": 720.0},
+    {"path": "app.py", "complexity": 0.6, "hours": 4.0, "dollar_value": 360.0},
+    {"path": "llm_signal_hunter.py", "complexity": 0.7, "hours": 9.0, "dollar_value": 945.0},
+    {"path": "gate_mm_unified_onefile.py", "complexity": 0.9, "hours": 40.0, "dollar_value": 5400.0},
+    {"path": "templates/index.html", "complexity": 0.3, "hours": 2.0, "dollar_value": 120.0}
+  ]
+}
