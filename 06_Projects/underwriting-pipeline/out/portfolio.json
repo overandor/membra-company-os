@@ -1,0 +1,1905 @@
+{
+  "n_repos": 200,
+  "portfolio_central_value_usd": 2383986,
+  "portfolio_eligible_collateral_usd": 1907219,
+  "portfolio_borrowing_base_usd": 190694,
+  "grade_distribution": {
+    "E": 200
+  },
+  "top_contributors": [
+    {
+      "repo": "membra-company-os",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 119748,
+      "borrowing_base_usd": 9580,
+      "fidelity": "precise(local-git)",
+      "proof": "7d068c8bb941"
+    },
+    {
+      "repo": "nest-js-chatbase-template",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 27885,
+      "borrowing_base_usd": 2231,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "7af05b9f3c58"
+    },
+    {
+      "repo": "gas-memory-collateral",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 21189,
+      "borrowing_base_usd": 1695,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "12851262e58f"
+    },
+    {
+      "repo": "language-fi",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 20794,
+      "borrowing_base_usd": 1664,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "c884febcfa64"
+    },
+    {
+      "repo": "flashloan-bench",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 20400,
+      "borrowing_base_usd": 1632,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "4a21c1556a4f"
+    },
+    {
+      "repo": "membra",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 20006,
+      "borrowing_base_usd": 1600,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "90777cc16ed5"
+    },
+    {
+      "repo": "overworker",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 19907,
+      "borrowing_base_usd": 1593,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "14b4a6b4f425"
+    },
+    {
+      "repo": "membra_db",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 19415,
+      "borrowing_base_usd": 1553,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "e6bd46c4e079"
+    },
+    {
+      "repo": "membra-companyos-v2",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 19316,
+      "borrowing_base_usd": 1545,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "75fdcb08c221"
+    },
+    {
+      "repo": "tokenize-camera",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 19218,
+      "borrowing_base_usd": 1537,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "bfa53f3eb16d"
+    }
+  ],
+  "all_rows": [
+    {
+      "repo": "membra-company-os",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 119748,
+      "borrowing_base_usd": 9580,
+      "fidelity": "precise(local-git)",
+      "proof": "7d068c8bb941"
+    },
+    {
+      "repo": "nest-js-chatbase-template",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 27885,
+      "borrowing_base_usd": 2231,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "7af05b9f3c58"
+    },
+    {
+      "repo": "gas-memory-collateral",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 21189,
+      "borrowing_base_usd": 1695,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "12851262e58f"
+    },
+    {
+      "repo": "language-fi",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 20794,
+      "borrowing_base_usd": 1664,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "c884febcfa64"
+    },
+    {
+      "repo": "flashloan-bench",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 20400,
+      "borrowing_base_usd": 1632,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "4a21c1556a4f"
+    },
+    {
+      "repo": "membra",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 20006,
+      "borrowing_base_usd": 1600,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "90777cc16ed5"
+    },
+    {
+      "repo": "overworker",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 19907,
+      "borrowing_base_usd": 1593,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "14b4a6b4f425"
+    },
+    {
+      "repo": "membra_db",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 19415,
+      "borrowing_base_usd": 1553,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "e6bd46c4e079"
+    },
+    {
+      "repo": "membra-companyos-v2",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 19316,
+      "borrowing_base_usd": 1545,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "75fdcb08c221"
+    },
+    {
+      "repo": "tokenize-camera",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 19218,
+      "borrowing_base_usd": 1537,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "bfa53f3eb16d"
+    },
+    {
+      "repo": "membra_kernel_postgres",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 19218,
+      "borrowing_base_usd": 1537,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "33eb156c03b0"
+    },
+    {
+      "repo": "downloads-archive",
+      "language": null,
+      "grade": "E",
+      "central_usd": 19067,
+      "borrowing_base_usd": 1525,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "664cf9273ed0"
+    },
+    {
+      "repo": "nitro-chain",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 19020,
+      "borrowing_base_usd": 1522,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "2170ba204976"
+    },
+    {
+      "repo": "overllm",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 18429,
+      "borrowing_base_usd": 1474,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "2e6b8fe19919"
+    },
+    {
+      "repo": "membra-core",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 17607,
+      "borrowing_base_usd": 1409,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "7044e91adf41"
+    },
+    {
+      "repo": "membra-prism",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 17345,
+      "borrowing_base_usd": 1388,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "c59f9a0c37db"
+    },
+    {
+      "repo": "membra-inference-extension",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 17345,
+      "borrowing_base_usd": 1388,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "5c8fb2836e06"
+    },
+    {
+      "repo": "ollama-compute-space",
+      "language": "Swift",
+      "grade": "E",
+      "central_usd": 15965,
+      "borrowing_base_usd": 1277,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "d0af27cb891a"
+    },
+    {
+      "repo": "19",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 15555,
+      "borrowing_base_usd": 1244,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "27d7e0e6fe32"
+    },
+    {
+      "repo": "catacomb",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 13276,
+      "borrowing_base_usd": 1062,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "bb20a45d5f15"
+    },
+    {
+      "repo": "membra-qr-gateway",
+      "language": "JavaScript",
+      "grade": "E",
+      "central_usd": 12758,
+      "borrowing_base_usd": 1021,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "c167a94f3fe6"
+    },
+    {
+      "repo": "ai-research-agent",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 12675,
+      "borrowing_base_usd": 1014,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "e0dd4b330104"
+    },
+    {
+      "repo": "membramoney-protocol",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 12207,
+      "borrowing_base_usd": 977,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "b42643bea0da"
+    },
+    {
+      "repo": "membra-agent-os",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11887,
+      "borrowing_base_usd": 951,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "5af35ae93123"
+    },
+    {
+      "repo": "v0-asterdex",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11562,
+      "borrowing_base_usd": 925,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "82abdf8f745b"
+    },
+    {
+      "repo": "GPT.research2",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11535,
+      "borrowing_base_usd": 923,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "375622471422"
+    },
+    {
+      "repo": "arb-execution-engine",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "b910408e6cbb"
+    },
+    {
+      "repo": "DockOS",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "761620b343db"
+    },
+    {
+      "repo": "cascade-ai",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "b57cfeccf9fe"
+    },
+    {
+      "repo": "Membra_vendor_adapters",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "93d1850efbdf"
+    },
+    {
+      "repo": "Membra_mobile",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "2e1231c064e7"
+    },
+    {
+      "repo": "llm-autonomous-agent",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "28a8ef9d3e90"
+    },
+    {
+      "repo": "sms",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "d99ab44f2d39"
+    },
+    {
+      "repo": "48",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "a83502d75496"
+    },
+    {
+      "repo": "beast-market-maker",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "f8f9a186f365"
+    },
+    {
+      "repo": "any",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "95d95b584a6d"
+    },
+    {
+      "repo": "30",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "975d39b1a581"
+    },
+    {
+      "repo": "1",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "c93598d9bb5a"
+    },
+    {
+      "repo": "membramoney-frontend",
+      "language": "JavaScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "a8601512fe6d"
+    },
+    {
+      "repo": "Membra_proofbook",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "fb1b7896a30f"
+    },
+    {
+      "repo": "compute-llm-inference",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "151ca87e4cd4"
+    },
+    {
+      "repo": "visual-trading-agent-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "1d46b700fe4a"
+    },
+    {
+      "repo": "swarm-os",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "89684affee3a"
+    },
+    {
+      "repo": "smart-contract-deployer",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "863940cb884d"
+    },
+    {
+      "repo": "46",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "786f8d83accc"
+    },
+    {
+      "repo": "llm-zk-training-sdk",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "ea27d10885b1"
+    },
+    {
+      "repo": "godforbit-trading-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "2a359eb26d22"
+    },
+    {
+      "repo": "openrouter-ai-trading-bot",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "dc6801693ed8"
+    },
+    {
+      "repo": "metamask-python-bridge",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "9063265d5bc7"
+    },
+    {
+      "repo": "language-surfaces",
+      "language": "JavaScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "9a6516786577"
+    },
+    {
+      "repo": "chat-pipeline",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "1a7c8c91d405"
+    },
+    {
+      "repo": "6",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "43113c7af21e"
+    },
+    {
+      "repo": "membra-relay",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "f4ccb8c459a8"
+    },
+    {
+      "repo": "second-profit-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "3f9bd5a53bb4"
+    },
+    {
+      "repo": "deepseek-ai-council",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "30e2010412fc"
+    },
+    {
+      "repo": "membramoney-anchor",
+      "language": "Rust",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "55d96f97e157"
+    },
+    {
+      "repo": "simple-gateio-trading-bot",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "3b66e266cd69"
+    },
+    {
+      "repo": "membra-l3",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "b7e5b98de1a9"
+    },
+    {
+      "repo": "GPT.research-",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "b355daba2ce8"
+    },
+    {
+      "repo": "DepthOS",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "672a9dcac70c"
+    },
+    {
+      "repo": "membra-hub",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "a1ddbd403e59"
+    },
+    {
+      "repo": "membra-runtime",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "c9446cedf5b8"
+    },
+    {
+      "repo": "llm-zk-cicd-research",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "ae329f17504a"
+    },
+    {
+      "repo": "retro-terminal-trading-bot",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "a53ca409ad0c"
+    },
+    {
+      "repo": "plexus",
+      "language": "Rust",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "bf8ac6748d72"
+    },
+    {
+      "repo": "production-agent-service",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "3f724ebea9c0"
+    },
+    {
+      "repo": "membra-os",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "ee946d870187"
+    },
+    {
+      "repo": "provenance-engine",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "8b37cfb635cf"
+    },
+    {
+      "repo": "champ-lm",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "10d84131129b"
+    },
+    {
+      "repo": "Membra_admin-",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "f8d11f5be5e1"
+    },
+    {
+      "repo": "23",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "6b83a0ab0386"
+    },
+    {
+      "repo": "universal-maker-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "b9ea0d7936cf"
+    },
+    {
+      "repo": "groq-supervisor-ai",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "2751d548fdc5"
+    },
+    {
+      "repo": "hypweliquid-llm-trader",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "c4cd77e53aea"
+    },
+    {
+      "repo": "prod-llm-os",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "c489ec2dc1ef"
+    },
+    {
+      "repo": "language-runtime",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "f0e833c5a64b"
+    },
+    {
+      "repo": "rent",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "44039ba4d3c6"
+    },
+    {
+      "repo": "membra-labs",
+      "language": "JavaScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "1ab06a8fbde1"
+    },
+    {
+      "repo": "hybrid-ai-supervisor-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "e2d5d2506399"
+    },
+    {
+      "repo": "5",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "3a3332e89504"
+    },
+    {
+      "repo": "7",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "00bc84565b54"
+    },
+    {
+      "repo": "language-protocol",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "23795fcc4ca0"
+    },
+    {
+      "repo": "43",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "a5842f92d08d"
+    },
+    {
+      "repo": "membramoney-backend",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "c634e4a98441"
+    },
+    {
+      "repo": "llm-os",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "44751b98c27b"
+    },
+    {
+      "repo": "js-llm-memory",
+      "language": "JavaScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "1a83e51e4dd6"
+    },
+    {
+      "repo": "47",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "1feab93abfcb"
+    },
+    {
+      "repo": "membra-l3-cpp",
+      "language": "Makefile",
+      "grade": "E",
+      "central_usd": 11361,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "d31bcf4c15eb"
+    },
+    {
+      "repo": "gateio-market-maker-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "acb620c4eaf8"
+    },
+    {
+      "repo": "22",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "b08578035e91"
+    },
+    {
+      "repo": "bitcoin-bearer-notes",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "edeec70555c6"
+    },
+    {
+      "repo": "compute-mesh",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "5e64e64c8651"
+    },
+    {
+      "repo": "vaultcore-trading-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "df36dd78e6a2"
+    },
+    {
+      "repo": "llm-mina-chain",
+      "language": "Rust",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "21c6b2631871"
+    },
+    {
+      "repo": "14",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "3fd2e945b1b5"
+    },
+    {
+      "repo": "membra-coordination",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "67afa84170b9"
+    },
+    {
+      "repo": "trading-governance-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "d4c12d39c645"
+    },
+    {
+      "repo": "local-ollama-trading-bot",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "0c7d0063d5f8"
+    },
+    {
+      "repo": "membramoney-programs",
+      "language": "Rust",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "605d9ff2cbf7"
+    },
+    {
+      "repo": "safe-git-watcher",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "bba275c9fbdc"
+    },
+    {
+      "repo": "Membra_kpi",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "8975062ee075"
+    },
+    {
+      "repo": "simple-market-maker-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "96988ffa4d67"
+    },
+    {
+      "repo": "bitnet",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "ffafb59251c4"
+    },
+    {
+      "repo": "v0-glassmorphic-rich-text-editor",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "cfe1412ee97c"
+    },
+    {
+      "repo": "algo-micro-cap-bot",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "ab5a13dd3172"
+    },
+    {
+      "repo": "collateral-portfolio",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "5eceec63ed39"
+    },
+    {
+      "repo": "llmsh",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "bf7c9ca7a18a"
+    },
+    {
+      "repo": "value-mesh",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "22fc48d1f1f3"
+    },
+    {
+      "repo": "15",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "7710a18ab39b"
+    },
+    {
+      "repo": "Membra_ads",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "e82854319abc"
+    },
+    {
+      "repo": "membramoney-e2e",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "2a45bba7a9eb"
+    },
+    {
+      "repo": "collateral-token",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "6827978ed1eb"
+    },
+    {
+      "repo": "16",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "ce9d75680d12"
+    },
+    {
+      "repo": "Membra_wallet",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "09d4aa1b3786"
+    },
+    {
+      "repo": "Brolic",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "466d7e74cb48"
+    },
+    {
+      "repo": "membra-model-hub",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "6108d862e061"
+    },
+    {
+      "repo": "Couchify",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "8d12c3760658"
+    },
+    {
+      "repo": "13",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "11d7e943bd6a"
+    },
+    {
+      "repo": "35",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "663ea979e3a9"
+    },
+    {
+      "repo": "ok",
+      "language": "TypeScript",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "5253a6d46eec"
+    },
+    {
+      "repo": "Membra_wear",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "bedbe44e9a4d"
+    },
+    {
+      "repo": "membra-sdk-factory",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "8acabb724980"
+    },
+    {
+      "repo": "freegsm-publish-os",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "79fdff70c36f"
+    },
+    {
+      "repo": "hf-email-assistant",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "2aebfd154810"
+    },
+    {
+      "repo": "dollarfs",
+      "language": "Rust",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "1061403576eb"
+    },
+    {
+      "repo": "49",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "3dd34d1c6581"
+    },
+    {
+      "repo": "aider-ai-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "9b9e290d56b5"
+    },
+    {
+      "repo": "supervisor-ai-247-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "994a341c079b"
+    },
+    {
+      "repo": "vanta-trading-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "8bf4a24c0e3d"
+    },
+    {
+      "repo": "online-workspace",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "c4be886d67c1"
+    },
+    {
+      "repo": "decloud",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "45f20f65c9ea"
+    },
+    {
+      "repo": "micro-cap-trading-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "747b89920acf"
+    },
+    {
+      "repo": "membra_hq",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "b39b7a4cd267"
+    },
+    {
+      "repo": "file-os-network",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "55bd0c6752f3"
+    },
+    {
+      "repo": "gate-multi-ticker-mm",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "6aee3049431e"
+    },
+    {
+      "repo": "hedge-beast-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "cdcdc643347a"
+    },
+    {
+      "repo": "micro-coin-market-maker",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "d1a5660e4114"
+    },
+    {
+      "repo": "Membra_api",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "26819ebcef61"
+    },
+    {
+      "repo": "18",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "de071ff74999"
+    },
+    {
+      "repo": "membra-companyos",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "61088976c35a"
+    },
+    {
+      "repo": "44",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "20dc873d5fd4"
+    },
+    {
+      "repo": "profit-executor-system",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "70f1c4324f9c"
+    },
+    {
+      "repo": "autogen-gate-mm",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 11367,
+      "borrowing_base_usd": 909,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "739412454137"
+    },
+    {
+      "repo": "docs",
+      "language": "MDX",
+      "grade": "E",
+      "central_usd": 9945,
+      "borrowing_base_usd": 796,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "329494f2c81d"
+    },
+    {
+      "repo": "mintlify-docs",
+      "language": "MDX",
+      "grade": "E",
+      "central_usd": 9808,
+      "borrowing_base_usd": 785,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "e7ac5282e080"
+    },
+    {
+      "repo": "2",
+      "language": "Solidity",
+      "grade": "E",
+      "central_usd": 9736,
+      "borrowing_base_usd": 779,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "a9f5a372a886"
+    },
+    {
+      "repo": "DoctorAddressVerifier",
+      "language": "Swift",
+      "grade": "E",
+      "central_usd": 9723,
+      "borrowing_base_usd": 778,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "a7bee53ecf13"
+    },
+    {
+      "repo": "sigma-gpt-runtime",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 9526,
+      "borrowing_base_usd": 762,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "3fc771c23e2a"
+    },
+    {
+      "repo": "sepf-accounting-layer",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 9526,
+      "borrowing_base_usd": 762,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "e218fd134119"
+    },
+    {
+      "repo": "rentmasseur-optimizer",
+      "language": "Python",
+      "grade": "E",
+      "central_usd": 9526,
+      "borrowing_base_usd": 762,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "c32f079b280c"
+    },
+    {
+      "repo": "36",
+      "language": "Jupyter Notebook",
+      "grade": "E",
+      "central_usd": 9171,
+      "borrowing_base_usd": 734,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "83e86c966680"
+    },
+    {
+      "repo": "-google-voice-orders",
+      "language": "Jupyter Notebook",
+      "grade": "E",
+      "central_usd": 9046,
+      "borrowing_base_usd": 724,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "deae85c0d595"
+    },
+    {
+      "repo": "language.fi",
+      "language": "HTML",
+      "grade": "E",
+      "central_usd": 8855,
+      "borrowing_base_usd": 708,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "ee2bca613451"
+    },
+    {
+      "repo": "37",
+      "language": "Jupyter Notebook",
+      "grade": "E",
+      "central_usd": 8704,
+      "borrowing_base_usd": 696,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "7275a79b3326"
+    },
+    {
+      "repo": "8",
+      "language": "Jupyter Notebook",
+      "grade": "E",
+      "central_usd": 8656,
+      "borrowing_base_usd": 692,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "a3bc9020e84a"
+    },
+    {
+      "repo": "40",
+      "language": "Jupyter Notebook",
+      "grade": "E",
+      "central_usd": 8650,
+      "borrowing_base_usd": 692,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "a2be5758cef4"
+    },
+    {
+      "repo": "new-repo",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "9e2ecb94f8fb"
+    },
+    {
+      "repo": "4",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "cbea7553661d"
+    },
+    {
+      "repo": "39",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "edadbf4ded82"
+    },
+    {
+      "repo": "aider-trex-space",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "0b29bdcf6b17"
+    },
+    {
+      "repo": "17",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "3969931b3207"
+    },
+    {
+      "repo": "28",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "0fe304abbb13"
+    },
+    {
+      "repo": "membramoney-docs",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "d293eccfe55b"
+    },
+    {
+      "repo": "cyberpunk-city-art-1778387939",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "0072099fa110"
+    },
+    {
+      "repo": "11",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "ad703dfff60b"
+    },
+    {
+      "repo": "research-to-api",
+      "language": "HTML",
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "d7c99a19e3d7"
+    },
+    {
+      "repo": "CodeRunnerApp",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "487428359a7b"
+    },
+    {
+      "repo": "3",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "ad68db933b6c"
+    },
+    {
+      "repo": "Membra_investor_room-",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "2da06283859a"
+    },
+    {
+      "repo": "Membra_demo_data",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "eb37f7572a46"
+    },
+    {
+      "repo": "trading-ai-space",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "94694778cbdd"
+    },
+    {
+      "repo": "vercel-render-deploy",
+      "language": "HTML",
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "729663d9196b"
+    },
+    {
+      "repo": "mountain-sunrise-art-1778388030",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "89f19a02c0a8"
+    },
+    {
+      "repo": "12",
+      "language": "Solidity",
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "c7ce8e9e8671"
+    },
+    {
+      "repo": "zen-garden-art-1778387597",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "9895f61c6eaa"
+    },
+    {
+      "repo": "underwater-reef-art-1778388008",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "986a78fe6fb2"
+    },
+    {
+      "repo": "29",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "ff1935fdcff3"
+    },
+    {
+      "repo": "flishy",
+      "language": "Jupyter Notebook",
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "12ba60166250"
+    },
+    {
+      "repo": "10",
+      "language": "Solidity",
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "9882dfb93478"
+    },
+    {
+      "repo": "33",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "9abe542b3328"
+    },
+    {
+      "repo": "34",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "53ce5c2d7be1"
+    },
+    {
+      "repo": "hf-file-system-browser",
+      "language": "HTML",
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "ae7c6182251e"
+    },
+    {
+      "repo": "24",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "02c75019b8b1"
+    },
+    {
+      "repo": "9",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "4bd3945c009d"
+    },
+    {
+      "repo": "llmsh-space",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "7cc824cd7740"
+    },
+    {
+      "repo": "45",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "134a7b018e12"
+    },
+    {
+      "repo": "profit-dashboard",
+      "language": "HTML",
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "18f93a77f853"
+    },
+    {
+      "repo": "20",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "4b11206a5987"
+    },
+    {
+      "repo": "token-printer-space",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "ae48ac1d958d"
+    },
+    {
+      "repo": "31",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "b9e1564de5b0"
+    },
+    {
+      "repo": "membramoney-infra",
+      "language": "Shell",
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "c1d90ab29b81"
+    },
+    {
+      "repo": "chat-art-test-1778387543",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "ee062785c1ba"
+    },
+    {
+      "repo": "cosmic-nebula-art-1778387577",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "67746a5c2224"
+    },
+    {
+      "repo": "32",
+      "language": "Jupyter Notebook",
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "db34c88d1f08"
+    },
+    {
+      "repo": "veis-cleanstat",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "405f03a30df7"
+    },
+    {
+      "repo": "hf-computational-challenge",
+      "language": "HTML",
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "4fbee0c162a3"
+    },
+    {
+      "repo": "Membra_contracts",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "4925ddce139a"
+    },
+    {
+      "repo": "sunset-beach-art-1778388046",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "4db48e8a2b28"
+    },
+    {
+      "repo": "magical-forest-art-1778387559",
+      "language": null,
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "c50453ac508d"
+    },
+    {
+      "repo": "food",
+      "language": "Jupyter Notebook",
+      "grade": "E",
+      "central_usd": 8633,
+      "borrowing_base_usd": 691,
+      "fidelity": "coarse(size-proxy)",
+      "proof": "023d46d0609f"
+    }
+  ],
+  "proofbook_head": "73941245413776b8539cf0e5190223840adf1e9ccd86a990cb548ce39fb6816b",
+  "proofbook_verified": true
+}
