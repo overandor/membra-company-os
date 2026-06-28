@@ -1,0 +1,31 @@
+[project]
+name = "jaqerbase"
+version = "0.1.0"
+description = "ArrowCAP: bonded answer-claims, controlled non-seeing, and oracle settlement for markets in information goods"
+requires-python = ">=3.10"
+dependencies = [
+  "cryptography>=41.0",
+  "solders>=0.20",
+  "solana>=0.34",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+]
+image = [
+  "Pillow>=10.0",
+]
+
+[project.scripts]
+arrowcap = "arrowcap.cli:main"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
