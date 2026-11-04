@@ -147,8 +147,8 @@ def verify(data_dir: str) -> list[dict]:
         tr = BoundedTrainer()
         tr.cooldown_s = -1  # replay mode: only bound checks are batch/caps
         tr.last_update_ts = -10**9
-        outcome_by_seq = {r["seq"]: r["payload"] for r in recs
-                          if r["kind"] == "outcome"}
+        outcome_by_seq = {r["payload"]["prediction_seq"]: r["payload"]
+                          for r in recs if r["kind"] == "outcome"}
         replayed = 0
         replay_dir = os.path.join(data_dir, "weights", "_replay")
         for u in ups:
