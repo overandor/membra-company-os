@@ -59,6 +59,7 @@ source object (file / answer)
 | `settlement.py` | Ed25519-signed settlement receipts (`scheme` field for crypto-agility), tamper detection, persisted signing keys (`0o600`). |
 | `chain.py` | Solana devnet adapter (`solders`/`solana-py`) that anchors a settlement commitment as an SPL Memo. Devnet-only by default; mainnet requires an explicit `allow_mainnet=True` opt-in and never auto-funds a mainnet keypair. |
 | `optimizer.py` | Bond pricing: a genetic algorithm (tournament selection, elitism, blend crossover, Gaussian mutation) evolves a `BondGenome` against real settlement history, and a tabular Q-learner (epsilon-greedy contextual bandit) adapts bond-fraction recommendations per risk bucket. Documented bootstrap default for cold start (no fabricated history). |
+| `dex.py` | The TextClaim exchange layer (Market A): seller-posted listings, SecretBox-encrypted delivery with settlement-gated DEK release, searchable browse surface, per-seller reputation from settled trades. Custody boundary documented in the module docstring. |
 | `cli.py` | The `arrowcap` command-line entry point wiring all of the above together. |
 
 ## The MVP: Hidden Test Claim Market
@@ -112,6 +113,58 @@ arrowcap $D optimize-bonds
 Every subcommand prints JSON to stdout; protocol violations and binding violations are
 surfaced as a non-zero exit code with a message on stderr (see `tests/test_cli.py`).
 
+## The DEX layer: TextClaim exchange (`dex.py`)
+
+`dex.py` implements Market A of the text-exchange design: a seller-posted,
+searchable order book for *unique* bonded text assets — the inverse of the
+claim market above, where the buyer posts the task.
+
+A listing commits to the asset three ways — `asset_commitment` (salted, over
+plaintext), `ciphertext_sha256` (over what is actually stored), and
+`terms_commitment` (license + resolution rules) — plus the antonymified
+surrogate, economics (ask / seller bond / buyer escrow), an oracle spec, and an
+expiry. The payload is NaCl `SecretBox` (XSalsa20-Poly1305) ciphertext; each
+listing gets its own DEK, wrapped under the operator's `dex_master.key` (0600).
+
+The state machine is the first law applied to delivery:
+
+```
+LISTED -> BONDED -> ESCROWED -> SETTLED | DELIVERED   (+ EXPIRED)
+```
+
+`dex-settle` decrypts *inside* the exchange boundary, runs the committed hidden
+pytest suite, and only on PASS transitions to `DELIVERED`, at which point
+`dex-deliver` releases the DEK to the verified buyer. On FAIL or a binding
+violation the bond is slashed, escrow refunded, and the DEK is never released —
+a buyer cannot receive plaintext for a claim that failed verification.
+
+```bash
+arrowcap $D dex-list --seller bob --title "add() impl" \
+  --asset-file answer.py --asking-cents 5000 --bond-cents 1000 \
+  --hidden-test-path /tmp/test_hidden.py --broad-class source
+arrowcap $D dex-browse [--state LISTED] [--broad-class source] [--max-price-cents N]
+arrowcap $D dex-bond  --listing-id <lst_>
+arrowcap $D dex-buy   --listing-id <lst_> --buyer alice
+arrowcap $D dex-settle --listing-id <lst_> --sign [--anchor-devnet]
+arrowcap $D dex-deliver --listing-id <lst_> --buyer alice --out-file got.py
+arrowcap $D dex-reputation --seller bob   # settled trades only; no self-report
+arrowcap $D dex-sweep                     # expire past-deadline listings
+```
+
+Public listing views (`dex-browse`, `dex-listing` without buyer auth) expose the
+surrogate and market metadata only — never ciphertext, DEK, or plaintext.
+
+**Custody boundary (labeled, not hidden):** the exchange operator holds
+`dex_master.key` and runs the oracle worker, so this MVP is *not* fully
+trustless at that boundary — the operator could decrypt stored ciphertext. A
+trust-minimized design needs threshold-controlled key release or independently
+verifiable oracle execution; `dex.py`'s docstring states this explicitly.
+
+**Ledger caveat:** bonds and escrow are the same real SQLite ACID ledger as the
+claim market — real holds, releases, and slashes of *local accounting balances*,
+not external collateral. `--anchor-devnet` posts a real Solana devnet memo
+(commitment anchor); it is not a value-bearing escrow program.
+
 ## Settlement rail and the "no mock" constraint
 
 Every layer is real, runnable code against real state — no simulated outcomes:
@@ -150,10 +203,11 @@ cd 06_Projects/jaqerbase
 python3 -m pytest tests/ -v
 ```
 
-105 tests pass; 2 live-devnet-RPC tests in `tests/test_chain.py` skip rather than fail
-when the sandbox's network policy blocks outbound access to `api.devnet.solana.com`
+106 tests pass; 1 live-devnet-RPC test in `tests/test_chain.py` skips rather than fails
+when outbound access to `api.devnet.solana.com` is unreachable
 (confirmed during development — this is an environment constraint, not a defect in the
-adapter). All other tests exercise real cryptography, a real SQLite-backed ledger, real
+adapter; `SKIPPED tests/test_chain.py:86: devnet RPC unreachable`). All other tests
+exercise real cryptography, a real SQLite-backed ledger, real
 subprocess oracle execution, and a real GA+RL optimizer trained on pipeline-derived
 history — nothing in the suite mocks the system under test.
 

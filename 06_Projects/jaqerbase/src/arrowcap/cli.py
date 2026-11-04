@@ -39,6 +39,18 @@ def _open(data_dir: str) -> tuple[Ledger, ClaimStore, EscrowEngine]:
     return ledger, store, engine
 
 
+def _open_dex(data_dir: str):
+    from .dex import DexEngine, DexStore, load_or_create_master_key
+
+    os.makedirs(data_dir, exist_ok=True)
+    db_path = os.path.join(data_dir, "ledger.db")
+    ledger = Ledger(db_path)
+    store = DexStore(db_path)
+    master_key = load_or_create_master_key(os.path.join(data_dir, "dex_master.key"))
+    engine = DexEngine(ledger, store, master_key)
+    return ledger, store, engine
+
+
 def cmd_post_claim(args: argparse.Namespace) -> None:
     ledger, store, engine = _open(args.data_dir)
     if args.fund_buyer_cents:
@@ -181,6 +193,132 @@ def cmd_status(args: argparse.Namespace) -> None:
         _print_json([vars(c) for c in claims])
 
 
+def cmd_dex_list(args: argparse.Namespace) -> None:
+    ledger, store, engine = _open_dex(args.data_dir)
+    if args.fund_seller_cents:
+        ledger.open_account(args.seller)
+        ledger.deposit(args.seller, args.fund_seller_cents, memo="cli funding")
+    with open(args.asset_file, "rb") as fh:
+        plaintext = fh.read()
+    terms = json.loads(args.terms_json) if args.terms_json else None
+    listing = engine.publish_listing(
+        args.seller, args.title, args.description, plaintext,
+        args.asking_cents, args.bond_cents, terms,
+        broad_class=args.broad_class,
+        hidden_test_path=args.hidden_test_path,
+        disclosure_level=args.disclosure_level,
+        ttl_seconds=args.ttl_seconds,
+    )
+    print("listed (public pricing surface — no plaintext, no keys):")
+    _print_json(listing.public_view())
+
+
+def cmd_dex_browse(args: argparse.Namespace) -> None:
+    ledger, store, engine = _open_dex(args.data_dir)
+    out = engine.browse(
+        broad_class=args.broad_class, max_risk=args.max_risk,
+        max_price_cents=args.max_price_cents,
+        include_non_buyable=args.all,
+    )
+    _print_json({"count": len(out), "listings": out})
+
+
+def cmd_dex_bond(args: argparse.Namespace) -> None:
+    ledger, store, engine = _open_dex(args.data_dir)
+    hold_id = engine.post_bond(args.listing_id)
+    _print_json({"listing_id": args.listing_id, "bond_hold_id": hold_id})
+
+
+def cmd_dex_buy(args: argparse.Namespace) -> None:
+    ledger, store, engine = _open_dex(args.data_dir)
+    if args.fund_buyer_cents:
+        ledger.open_account(args.buyer)
+        ledger.deposit(args.buyer, args.fund_buyer_cents, memo="cli funding")
+    hold_id = engine.buy(args.listing_id, args.buyer)
+    _print_json({"listing_id": args.listing_id, "buyer": args.buyer, "escrow_hold_id": hold_id})
+
+
+def cmd_dex_settle(args: argparse.Namespace) -> None:
+    ledger, store, engine = _open_dex(args.data_dir)
+    outcome = engine.settle(
+        args.listing_id, buyer_accept=args.buyer_accept,
+        oracle_timeout_seconds=args.oracle_timeout_seconds,
+    )
+    _print_json(outcome)
+
+    if args.sign:
+        from .settlement import load_or_create_signing_key, sign_settlement
+
+        listing = store.get_listing(args.listing_id)
+        key = load_or_create_signing_key(os.path.join(args.data_dir, "signing.key"))
+        outcome_for_receipt = {**outcome, "answer_id": args.listing_id, "claim_id": args.listing_id}
+        receipt = sign_settlement(outcome_for_receipt, listing.asset_commitment_sha256, key)
+        receipts_dir = os.path.join(args.data_dir, "receipts")
+        os.makedirs(receipts_dir, exist_ok=True)
+        receipt_path = os.path.join(receipts_dir, f"{args.listing_id}.json")
+        with open(receipt_path, "w") as fh:
+            json.dump(receipt.to_dict(), fh, indent=2)
+        print(f"\nsigned settlement receipt written to {receipt_path}:")
+        _print_json(receipt.to_dict())
+
+        if args.anchor_devnet:
+            from .chain import SolanaAnchor, load_or_create_keypair
+
+            kp = load_or_create_keypair(os.path.join(args.data_dir, "solana_devnet.key"))
+            anchor = SolanaAnchor()
+            try:
+                if anchor.get_balance_lamports(kp.pubkey()) < 5000:
+                    anchor.request_devnet_airdrop(kp.pubkey())
+                anchored = anchor.anchor_commitment(listing.asset_commitment_sha256, kp)
+                engine.mark_anchored(args.listing_id, anchored.signature)
+                print("\nanchored on Solana devnet:")
+                _print_json(vars(anchored))
+            except Exception as exc:
+                print(f"\ndevnet anchoring failed: {type(exc).__name__}: {exc}", file=sys.stderr)
+
+
+def cmd_dex_deliver(args: argparse.Namespace) -> None:
+    ledger, store, engine = _open_dex(args.data_dir)
+    import base64
+    import hashlib
+
+    from nacl.secret import SecretBox
+
+    delivery = engine.fetch_delivery(args.listing_id, args.buyer)
+    dek = base64.b64decode(delivery["dek_b64"])
+    ciphertext = base64.b64decode(delivery["ciphertext_b64"])
+    plaintext = SecretBox(dek).decrypt(ciphertext)
+    ok = hashlib.sha256(plaintext).hexdigest() == delivery["asset_commitment_sha256"]
+    result = {
+        "listing_id": args.listing_id,
+        "decrypted_bytes": len(plaintext),
+        "commitment_verified": ok,
+    }
+    if args.out_file:
+        with open(args.out_file, "wb") as fh:
+            fh.write(plaintext)
+        result["written_to"] = args.out_file
+    _print_json(result)
+    if not ok:
+        print("delivery failed commitment verification", file=sys.stderr)
+        raise SystemExit(1)
+
+
+def cmd_dex_reputation(args: argparse.Namespace) -> None:
+    ledger, store, engine = _open_dex(args.data_dir)
+    _print_json(engine.reputation(args.seller))
+
+
+def cmd_dex_expire(args: argparse.Namespace) -> None:
+    ledger, store, engine = _open_dex(args.data_dir)
+    _print_json({"swept": engine.sweep_expired()})
+
+
+def cmd_dex_listing(args: argparse.Namespace) -> None:
+    ledger, store, engine = _open_dex(args.data_dir)
+    _print_json(store.get_listing(args.listing_id).public_view())
+
+
 def cmd_optimize_bonds(args: argparse.Namespace) -> None:
     ledger, store, engine = _open(args.data_dir)
     optimizer = BondOptimizer(store)
@@ -263,6 +401,66 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--reward-cents", type=int)
     p.add_argument("--risk-score", type=float)
     p.set_defaults(func=cmd_optimize_bonds)
+
+    # ---- ArrowCAP Text Exchange (Market A: unique text asset order book) ----
+
+    p = sub.add_parser("dex-list", help="seller lists an encrypted text asset")
+    p.add_argument("--seller", required=True)
+    p.add_argument("--title", required=True)
+    p.add_argument("--description", required=True)
+    p.add_argument("--asset-file", required=True)
+    p.add_argument("--asking-cents", type=int, required=True)
+    p.add_argument("--bond-cents", type=int, required=True)
+    p.add_argument("--terms-json", help="license/resolution terms JSON (committed)")
+    p.add_argument("--broad-class", default="text")
+    p.add_argument("--hidden-test-path", help="deterministic oracle (pytest suite)")
+    p.add_argument("--disclosure-level", type=int, default=5)
+    p.add_argument("--ttl-seconds", type=float)
+    p.add_argument("--fund-seller-cents", type=int, default=0)
+    p.set_defaults(func=cmd_dex_list)
+
+    p = sub.add_parser("dex-browse", help="search the public pricing surface")
+    p.add_argument("--broad-class")
+    p.add_argument("--max-risk", type=float)
+    p.add_argument("--max-price-cents", type=int)
+    p.add_argument("--all", action="store_true", help="include non-buyable states")
+    p.set_defaults(func=cmd_dex_browse)
+
+    p = sub.add_parser("dex-bond", help="seller posts the listing bond")
+    p.add_argument("--listing-id", required=True)
+    p.set_defaults(func=cmd_dex_bond)
+
+    p = sub.add_parser("dex-buy", help="buyer funds escrow on a bonded listing")
+    p.add_argument("--listing-id", required=True)
+    p.add_argument("--buyer", required=True)
+    p.add_argument("--fund-buyer-cents", type=int, default=0)
+    p.set_defaults(func=cmd_dex_buy)
+
+    p = sub.add_parser("dex-settle", help="run the oracle and settle the trade")
+    p.add_argument("--listing-id", required=True)
+    p.add_argument("--buyer-accept", action="store_true",
+                   help="required when the listing's oracle is buyer_acceptance")
+    p.add_argument("--oracle-timeout-seconds", type=int, default=30)
+    p.add_argument("--sign", action="store_true")
+    p.add_argument("--anchor-devnet", action="store_true", help="implies --sign")
+    p.set_defaults(func=cmd_dex_settle)
+
+    p = sub.add_parser("dex-deliver", help="buyer fetches the DEK and decrypts")
+    p.add_argument("--listing-id", required=True)
+    p.add_argument("--buyer", required=True)
+    p.add_argument("--out-file")
+    p.set_defaults(func=cmd_dex_deliver)
+
+    p = sub.add_parser("dex-reputation", help="evidence-backed seller stats")
+    p.add_argument("--seller", required=True)
+    p.set_defaults(func=cmd_dex_reputation)
+
+    p = sub.add_parser("dex-expire", help="sweep listings past their expiry")
+    p.set_defaults(func=cmd_dex_expire)
+
+    p = sub.add_parser("dex-listing", help="inspect one listing's public view")
+    p.add_argument("--listing-id", required=True)
+    p.set_defaults(func=cmd_dex_listing)
 
     return parser
 

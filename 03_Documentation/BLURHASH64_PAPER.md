@@ -1,5 +1,10 @@
 # BlurHash64: Adjustable-Fidelity Glyph Encodings for Proof, Resemblance, Transport, and Non-Executable File Disclosure
 
+> **Superseded as the market-level framing.** This draft now describes only the
+> disclosure/encoding layer. The full protocol — bonded claims, oracle
+> settlement, verifiable non-seeing — is specified in
+> `ANTONYMIFIED_FILE_RECEIPTS.md` (same directory).
+
 ## Abstract
 
 This paper proposes BlurHash64, an adjustable-fidelity encoding framework for representing digital files across a continuum from vague, non-executable descriptions to exact, executable byte transport. Conventional cryptographic hashes provide compact irreversible commitments to file identity, while Base64 provides reversible text-safe transport of full binary content. Between these extremes lies an underdeveloped design space: representations that partially resemble, describe, prove, classify, or authorize a file without fully revealing or reconstructing it. BlurHash64 formalizes this middle region as a fidelity ladder. At low fidelity, a glyph may only indicate the existence, type, or broad structure of a file. At intermediate fidelity, it may carry metadata, semantic features, perceptual fingerprints, provenance receipts, or partial redacted fragments. At maximum fidelity, it may carry the complete file body through reversible encoding such as Base64. The framework introduces the notions of projection fidelity, execution threshold, receipt binding, lambda friction, and zero-copy transferability. Its goal is to support controlled disclosure of digital artifacts: a file may stay anchored at one canonical location while transferable glyphs circulate as proofs, sketches, rights, or transport envelopes. The paper argues that BlurHash64 can serve as a foundation for AI production ledgers, digital evidence packets, secure artifact review, privacy-preserving verification, and financeable software receipts.
